@@ -1,7 +1,11 @@
 import time
-
 from copy import deepcopy
+from functools import partial
+
 from utils import compute_cost, make_adj_list, read_input_file, print_comparison_table, compute_score
+from greedy import greedy
+from greedy2 import greedy2
+from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 
 
 def snapshot(caches, caches_sizes, endpoints, requests):
@@ -62,20 +66,45 @@ def main(args):
         "video_sizes": video_sizes,
         "endpoints": endpoints,
         "requests": requests,
-        "adj_list": adj_list
+        "adj_list": adj_list,
     }
 
-    results = {
-        "Base": {"cost": base_cost, 
-            "score": compute_score(empty_caches, endpoints, requests), 
-            "caches": deepcopy(empty_caches), 
-            "caches_sizes": deepcopy(empty_sizes)
-        }
-    }
+    results = {}
+    starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
+    results["Base"] = starts[""]
+
+    for label, algo in [("Greedy", greedy), ("Greedy2", greedy2)]:
+        run(label, algo, starts[""], list, data, base_cost, results)
+    starts["g"] = results["Greedy"]
+    starts["g2"] = results["Greedy2"]
+
+    video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
+
+    local_search_func   = partial(local_search, iteration=5, previous_moves=None, nbCaches=10, nbVideos=10, supp=True)
+    tabu_search_func = partial(random_tabu_search, nb_forbidden_moves=7, iteration=100, nbCaches=10, nbVideos=10)
+    sorted_tabu_search_func = partial(sorted_tabu_search, nb_forbidden_moves=7, iteration=100, nbCaches=10, nbVideos=10)
+
+    algos = [
+        ("LS", local_search_func, list),
+        ("TS", tabu_search_func, set),
+        ("TSS", sorted_tabu_search_func, set),
+    ]
+
+    for label, algo, container in algos:
+        for start_label in ["", "g", "g2"]:
+            run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
+
+
+    # ---------- Bilan ----------
+    print_comparison_table(results, metric="score", higher_is_better=True)
+    best_method = min(results, key=lambda x: results[x]["cost"])
+    print(f"\nBest method: {best_method} with cost {results[best_method]['cost']} and improvement of "
+          f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {results[best_method]['score']:.2f}")
+    return
+
 
     # ========================== TESTING ==========================
     #! ######## Test greedy algorithm
-    from greedy import greedy
     current_time = time.time()
     greedy(data, empty_caches, empty_sizes)
     time_taken = time.time() - current_time
@@ -87,7 +116,6 @@ def main(args):
     caches_sizes_after_greedy = deepcopy(empty_sizes)
     
     #! ######## Test greedy2 
-    from greedy2 import greedy2
     empty_caches = [[] for _ in range(N_cache)]  # la liste des videos stockés dans chaque cache
     empty_sizes = [S_cache] * N_cache  # la taille restante de chaque cache
     
@@ -108,14 +136,12 @@ def main(args):
     nbVideos=10
 
     #! ######## Test local search algorithm
-    from local_search import preprocess_data
     empty_caches = deepcopy(caches_after_greedy)
     empty_sizes = deepcopy(caches_sizes_after_greedy)
     video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
     video_sizes = video_sizes_sorted
     # print(f"Preprocessing: {time.time() - current_time:.4f}s")
 
-    from local_search import local_search
 
     current_time = time.time()
     local_search(data, empty_caches, empty_sizes, iteration=iteration, previous_moves=None, nbCaches=nbCaches, nbVideos=nbVideos, supp=True)
@@ -157,7 +183,6 @@ def main(args):
 
 
     #! ######## Test tabu search algorithm
-    from local_search import random_tabu_search
     iteration = 100
     nbCaches=10
     nbVideos=10
@@ -199,7 +224,6 @@ def main(args):
 
     #! ######## Test Sorted Tabu Search algorithm on empty caches
 
-    from local_search import sorted_tabu_search
     empty_caches= deepcopy(empty_caches)
     empty_sizes = [S_cache] * N_cache
 
@@ -254,7 +278,8 @@ def test_fct(data, caches, caches_sizes, fonction, fonction_name):
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
-        main(["instances/me_at_the_zoo.in"])  # Default input file for testing
-    else:
-        main(sys.argv[1:])
+    # if len(sys.argv) < 2:
+    #     main(["instances/me_at_the_zoo.in"])  # Default input file for testing
+    # else:
+        # main(sys.argv[1:])
+    main(sys.argv[1:]) or main(["instances/me_at_the_zoo.in"])  # Default input file for testing

@@ -4,7 +4,7 @@ from utils import calculate_video_latency, compute_cost
 
     # random_tabu_search(data, caches, caches_sizes, nb_forbiden_moves, iteration , nbCaches, nbVideos)
 
-def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nb_caches=None, nb_videos=None):
+def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nbCaches=None, nbVideos=None):
     N_vid = data["N_vid"]
     N_endpoint = data["N_endpoint"]
     N_requests = data["N_requests"]
@@ -13,10 +13,10 @@ def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
     endpoint_data = data["endpoints"]
     requests = data["requests"]
     adj_list = data["adj_list"]
-    if nb_caches is None or nb_caches > N_caches:
-        nb_caches = N_caches
-    if nb_videos is None or nb_videos > N_vid:
-        nb_videos = N_vid
+    if nbCaches is None or nbCaches > N_caches:
+        nbCaches = N_caches
+    if nbVideos is None or nbVideos > N_vid:
+        nbVideos = N_vid
     if nb_forbidden_moves <= 0:
         nb_forbidden_moves = 1
     forbidden_moves = [None] * nb_forbidden_moves
@@ -28,9 +28,9 @@ def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
         best_delta = float('inf')
         best_move = None
 
-        for cache_id in random.sample(range(N_caches), nb_caches):
+        for cache_id in random.sample(range(N_caches), nbCaches):
             cache = caches[cache_id]
-            for video_id in random.sample(range(N_vid), nb_videos):
+            for video_id in random.sample(range(N_vid), nbVideos):
                 current_vid_latency = calculate_video_latency(  adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests)     
 
                 if video_id in cache and (cache_id, video_id, 1) not in forbidden_moves:
@@ -84,7 +84,7 @@ def sort_vid(N_vid, N_requests, requests, videoSizes):
     weights.sort(key=lambda x: x[0], reverse=True)
     return [x[1] for x in weights]
 
-def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nb_caches=None, nb_videos=None):
+def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nbCaches=None, nbVideos=None):
     N_vid = data["N_vid"]
     N_endpoint = data["N_endpoint"]
     N_requests = data["N_requests"]
@@ -94,10 +94,10 @@ def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
     requests = data["requests"]
     adj_list = data["adj_list"]
     
-    if nb_caches is None or nb_caches > N_caches:
-        nb_caches = N_caches
-    if nb_videos is None or nb_videos > N_vid:
-        nb_videos = N_vid
+    if nbCaches is None or nbCaches > N_caches:
+        nbCaches = N_caches
+    if nbVideos is None or nbVideos > N_vid:
+        nbVideos = N_vid
     if nb_forbidden_moves <= 0:
         nb_forbidden_moves = 1
     sorted_vid= sort_vid(N_vid, N_requests, requests, video_sizes)
@@ -110,9 +110,9 @@ def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
         best_delta = float('inf')
         best_move = None
 
-        for cache_id in range((nb_caches)):
+        for cache_id in range((nbCaches)):
             cache = caches[cache_id]
-            for i in (range(nb_videos)):
+            for i in (range(nbVideos)):
                 video_id=sorted_vid[i]
                 current_vid_latency = calculate_video_latency(  adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests)     
 
