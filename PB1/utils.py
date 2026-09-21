@@ -17,6 +17,27 @@ def compute_cost(cache, endpoints, requests):
     # print(f"Total cost: {total_cost}")
     return total_cost
 
+def compute_score(cache, endpoints, requests):
+    """
+    The score is the average time saved per request, in microseconds. 
+    """
+    lst = []
+    for request in requests:
+        video_id, endpoint_id, num_requests = request
+        endpoint_latency, linked_caches = endpoints[endpoint_id]
+
+        min_latency = endpoint_latency
+        for cache_id, cache_latency in linked_caches:
+            if video_id in cache[cache_id]:
+                if cache_latency < min_latency:
+                    min_latency = cache_latency
+
+        time_saved = endpoint_latency - min_latency
+        lst.append(time_saved * num_requests * 1000)  # Convert to microseconds
+
+    total_requests = sum(num_requests for _, _, num_requests in requests)
+    average_time_saved = sum(lst) / total_requests if total_requests > 0 else 0
+    return average_time_saved
 
 def make_adj_list(N_vid, N_requests, requests):
     """
@@ -62,42 +83,45 @@ def read_input_file(input_file):
 
     return N_vid, N_endpoint, N_request, N_cache, cache_size, video_sizes, endpoints, requests
 
-
-def print_comparison_table(results):
+def print_comparison_table(results, metric="score", higher_is_better=True):
     """
-    Fonction générée par claude
-    results : dict {nom_méthode: cout}
+    results : dict {nom_méthode: {"cost": ..., "score": ..., ...}}
+    metric : la clé à comparer ("score" ou "cost")
+    higher_is_better : True si une valeur plus haute est meilleure (score),
+                        False si une valeur plus basse est meilleure (cost)
     Affiche un tableau ASCII où la case [i][j] = amélioration (%) 
     de la méthode j par rapport à la méthode i.
-    amélioration > 0 => j est meilleur (coût plus bas) que i
+    amélioration > 0 => j est meilleur que i
     """
     names = list(results.keys())
     n = len(names)
 
-    # largeur de colonne = max entre nom le plus long et 8 (pour "+123.45%")
     col_width = max(max(len(n_) for n_ in names), 9) + 2
 
     def cell(i, j):
         if i == j:
             return "-"
-        ci, cj = results[names[i]], results[names[j]]
-        if ci == 0:
+        vi = results[names[i]][metric]
+        vj = results[names[j]][metric]
+        if vi == 0:
             return "n/a"
-        improvement = (ci - cj) / ci * 100
+        if higher_is_better:
+            improvement = (vj - vi) / vi * 100
+        else:
+            improvement = (vi - vj) / vi * 100
         return f"{improvement:+.2f}%"
 
-    # ligne d'en-tête
     header = " " * col_width + "|" + "|".join(f"{n_:^{col_width}}" for n_ in names)
     sep = "-" * len(header)
 
     print(sep)
+    print(f"Comparaison sur '{metric}'")
     print(header)
     print(sep)
     for i, name_i in enumerate(names):
         row = f"{name_i:<{col_width}}|" + "|".join(f"{cell(i, j):^{col_width}}" for j in range(n))
         print(row)
     print(sep)
-
 
 def calculate_video_latency(adj_list,caches,vid_id,N__vid,N_endpoint,N_requests,N_caches,caches_capa,videoSizes,endpointData,requests):
     total_cost=0

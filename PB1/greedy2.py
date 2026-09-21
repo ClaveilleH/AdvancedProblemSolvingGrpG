@@ -43,14 +43,18 @@ def preprocess_requests(N_vid, N_endpoint, N_requests, N_caches, requests, endpo
     return video_list_sorted, videos_caches, caches_list
 
 
-            
-
-
-
-def greedy2(N_vid, N_endpoint, N_requests, N_caches, caches_sizes, videoSizes, endpointData, requests, caches):
+def greedy2(data, caches, caches_sizes):
     """
     Idée : on tr
     """
+    videoSizes = data["video_sizes"]
+    N_vid = data["N_vid"]
+    N_endpoint = data["N_endpoint"]
+    N_requests = data["N_requests"]
+    N_caches = data["N_cache"]
+    requests = data["requests"]
+    endpointData = data["endpoints"]
+    
     smallest_video_size = min(videoSizes)
     video_list_sorted, videos_caches, caches_list = preprocess_requests(N_vid, N_endpoint, N_requests, N_caches, requests, endpointData)
 

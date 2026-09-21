@@ -1,6 +1,12 @@
 #    greedy(N_vid, N_endpoint, N_request, N_cache, caches_sizes, video_sizes, endpoints, requests, caches)
-def greedy(N_vid, N_endpoint, N_requests, N_caches, caches_sizes, videoSizes, endpointData, requests, caches):
+def greedy(data, caches, caches_sizes):
     # tri des requêtes par nombre de requêtes décroissant
+    requests = data["requests"]
+    N_requests = data["N_requests"]
+    N_caches = data["N_cache"]
+    videoSizes = data["video_sizes"]
+    endpointData = data["endpoints"]
+
     sorted_requests = sorted(requests,key=lambda x: x[2],reverse=True)
     res=[set() for _ in range(N_caches)]
 

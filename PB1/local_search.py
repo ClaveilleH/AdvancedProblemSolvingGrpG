@@ -2,8 +2,17 @@ import random
 from utils import calculate_video_latency, compute_cost
 #! ATTENTION : supprimer l'utilisation de compute_cost dans local_search
 
+    # random_tabu_search(data, caches, caches_sizes, nb_forbiden_moves, iteration , nbCaches, nbVideos)
 
-def random_tabu_search(nb_forbidden_moves, adj_list, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, caches,   endpoint_data, requests, iteration=10, nb_caches=None, nb_videos=None):
+def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nb_caches=None, nb_videos=None):
+    N_vid = data["N_vid"]
+    N_endpoint = data["N_endpoint"]
+    N_requests = data["N_requests"]
+    N_caches = data["N_cache"]
+    video_sizes = data["video_sizes"]
+    endpoint_data = data["endpoints"]
+    requests = data["requests"]
+    adj_list = data["adj_list"]
     if nb_caches is None or nb_caches > N_caches:
         nb_caches = N_caches
     if nb_videos is None or nb_videos > N_vid:
@@ -75,7 +84,16 @@ def sort_vid(N_vid, N_requests, requests, videoSizes):
     weights.sort(key=lambda x: x[0], reverse=True)
     return [x[1] for x in weights]
 
-def sorted_tabu_search(nb_forbidden_moves, adj_list, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, caches,   endpoint_data, requests, iteration=10, nb_caches=None, nb_videos=None):
+def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nb_caches=None, nb_videos=None):
+    N_vid = data["N_vid"]
+    N_endpoint = data["N_endpoint"]
+    N_requests = data["N_requests"]
+    N_caches = data["N_cache"]
+    video_sizes = data["video_sizes"]
+    endpoint_data = data["endpoints"]
+    requests = data["requests"]
+    adj_list = data["adj_list"]
+    
     if nb_caches is None or nb_caches > N_caches:
         nb_caches = N_caches
     if nb_videos is None or nb_videos > N_vid:
@@ -139,58 +157,18 @@ def sorted_tabu_search(nb_forbidden_moves, adj_list, N_vid, N_endpoint, N_reques
 
     return best_caches    
 
+# ######################################## LOCAL SEARCH ########################################
 
+def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, nbCaches=None, nbVideos=None, supp = False):
+    N_vid = data["N_vid"]
+    N_endpoint = data["N_endpoint"]
+    N_requests = data["N_requests"]
+    N_caches = data["N_cache"]
+    videoSizes = data["video_sizes"]
+    endpointData = data["endpoints"]
+    requests = data["requests"]
+    adj_list = data["adj_list"]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def local_search(N_vid, N_endpoint, N_requests, N_caches, adj_list, videoSizes, caches_sizes, caches, endpointData, requests, iteration=10, previous_moves=None, nbCaches=None, nbVideos=None, supp = False):
     if iteration == 0:
         return caches, caches_sizes
     if nbCaches is None or nbCaches > N_caches:
@@ -254,7 +232,8 @@ def local_search(N_vid, N_endpoint, N_requests, N_caches, adj_list, videoSizes, 
     caches_sizes[best_neighbor[4][0]] -= videoSizes[best_neighbor[4][1]]
     
 #          local_search(N_vid, N_endpoint, N_request, N_cache, adj_list, video_sizes, caches_sizes, caches, endpoints, requests, iteration=10, previous_moves=None, nbCaches=50, nbVideos=100, supp=True)
-    return local_search(N_vid, N_endpoint, N_requests, N_caches, adj_list, videoSizes, caches_sizes, caches, endpointData, requests, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
+    # return local_search(N_vid, N_endpoint, N_requests, N_caches, adj_list, videoSizes, caches_sizes, caches, endpointData, requests, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
+    return local_search(data, caches, caches_sizes, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
                 
 
     # for videos 
