@@ -96,17 +96,11 @@ def main(args):
 
 
     # ---------- Bilan ----------
-    print_comparison_table(results, metric="score", higher_is_better=True)
+    # print_comparison_table(results, metric="score", higher_is_better=True)
+    print_gap_to_best(results, metric="score", higher_is_better=True)
     best_method = min(results, key=lambda x: results[x]["cost"])
     print(f"\nBest method: {best_method} with cost {results[best_method]['cost']} and improvement of "
           f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {results[best_method]['score']:.2f}")
-
-
-def test_fct(data, caches, caches_sizes, fonction, fonction_name):
-    current_time = time.time()
-    fonction(data, caches, caches_sizes)
-    time_taken = time.time() - current_time
-    pass
 
 if __name__ == "__main__":
     import sys

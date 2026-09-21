@@ -1,3 +1,16 @@
+def make_adj_list(N_vid, N_requests, requests):
+    """
+    return a list of list where res[i] coresponds to the list of index of 
+    the requests that asked for video i 
+    """
+    res = [[] for _ in range(N_vid)]
+
+    for j in range(N_requests):
+        vid_id, _, _ = requests[j]
+        res[vid_id].append(j)
+
+    return res
+
 
 def compute_cost(cache, endpoints, requests):
     total_cost = 0
@@ -15,6 +28,19 @@ def compute_cost(cache, endpoints, requests):
         total_cost += num_requests * min_latency
 
     # print(f"Total cost: {total_cost}")
+    return total_cost
+
+def calculate_video_latency(adj_list,caches,vid_id,N__vid,N_endpoint,N_requests,N_caches,caches_capa,videoSizes,endpointData,requests):
+    total_cost=0
+    for i in adj_list[vid_id]:
+        video_id, endpoint_id, num_requests = requests[i]
+        endpoint_latency, linked_caches = endpointData[endpoint_id]
+        min_latency = endpoint_latency
+        for cache_id, cache_latency in linked_caches:
+            if video_id in caches[cache_id] and cache_latency < min_latency:
+                    min_latency = cache_latency
+        total_cost += num_requests * min_latency
+        
     return total_cost
 
 def compute_score(cache, endpoints, requests):
@@ -38,19 +64,6 @@ def compute_score(cache, endpoints, requests):
     total_requests = sum(num_requests for _, _, num_requests in requests)
     average_time_saved = sum(lst) / total_requests if total_requests > 0 else 0
     return average_time_saved
-
-def make_adj_list(N_vid, N_requests, requests):
-    """
-    return a list of list where res[i] coresponds to the list of index of 
-    the requests that asked for video i 
-    """
-    res = [[] for _ in range(N_vid)]
-
-    for j in range(N_requests):
-        vid_id, _, _ = requests[j]
-        res[vid_id].append(j)
-
-    return res
 
 
 def read_input_file(input_file):
@@ -123,15 +136,20 @@ def print_comparison_table(results, metric="score", higher_is_better=True):
         print(row)
     print(sep)
 
-def calculate_video_latency(adj_list,caches,vid_id,N__vid,N_endpoint,N_requests,N_caches,caches_capa,videoSizes,endpointData,requests):
-    total_cost=0
-    for i in adj_list[vid_id]:
-        video_id, endpoint_id, num_requests = requests[i]
-        endpoint_latency, linked_caches = endpointData[endpoint_id]
-        min_latency = endpoint_latency
-        for cache_id, cache_latency in linked_caches:
-            if video_id in caches[cache_id] and cache_latency < min_latency:
-                    min_latency = cache_latency
-        total_cost += num_requests * min_latency
-        
-    return total_cost
+def print_gap_to_best(results, metric="score", higher_is_better=True):
+    """Affiche, pour chaque algo, sa valeur et son écart (en %) avec le meilleur."""
+    pick = max if higher_is_better else min
+    best_label = pick(results, key=lambda k: results[k][metric])
+    best = results[best_label][metric]
+
+    # tri du meilleur au moins bon
+    ordered = sorted(results.items(), key=lambda kv: kv[1][metric], reverse=higher_is_better)
+
+    width = max(len(label) for label in results)
+    print(f"\nÉcart avec le meilleur ({best_label}, {metric} = {best:.2f})")
+    print("-" * (width + 40))
+    for label, res in ordered:
+        value = res[metric]
+        gap = abs(best - value) / abs(best) * 100 if best else 0.0
+        tag = "  <- meilleur" if label == best_label else ""
+        print(f"{label:<{width}} | {metric}: {value:>14.2f} | écart: {-gap:>7.2f}%{tag}")
