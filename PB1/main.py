@@ -1,37 +1,23 @@
 import time
 from copy import deepcopy
 from functools import partial
+import os
 
-from utils import compute_cost, make_adj_list, read_input_file, print_comparison_table, compute_score
+from utils import *
 from greedy import greedy
 from greedy2 import greedy2
 from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
+from store import *
 
-
-def snapshot(caches, caches_sizes, endpoints, requests):
-    return {
-        "cost": compute_cost(caches, endpoints, requests),
-        "score": compute_score(caches, endpoints, requests),
-        "caches": deepcopy(caches),
-        "caches_sizes": deepcopy(caches_sizes),
-    }
-
-
-def run(label, algo, start, container, data, base_cost, results):
-    """Lance `algo` depuis l'état `start` et enregistre le résultat."""
-    caches = [container(c) for c in start["caches"]]   # list ou set selon l'algo
-    sizes = deepcopy(start["caches_sizes"])
-
-    t = time.time()
-    algo(data, caches, sizes)
-    dt = time.time() - t
-
-    res = snapshot(caches, sizes, data["endpoints"], data["requests"])
-    results[label] = res
-    gain = (base_cost - res["cost"]) / base_cost * 100
-    print(f"[{dt:.4f}s] {label} : {res['cost']} ({gain:.2f}%) | Score: {res['score']:.2f}")
-
-
+INSTANCES_DIR = "instances"
+RESULTS_DIR = "results"
+INSTANCES_FILES = [
+    "test.in",
+    "me_at_the_zoo.in",
+    "trending_today.in",
+    "videos_worth_spreading.in",
+    "kittens.in",
+]
 
 
 def main(args):
@@ -102,10 +88,39 @@ def main(args):
     print(f"\nBest method: {best_method} with cost {results[best_method]['cost']} and improvement of "
           f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {results[best_method]['score']:.2f}")
 
+    if not os.path.exists(RESULTS_DIR):
+        os.makedirs(RESULTS_DIR)
+    if '/' in input_file:
+        output_file = input_file.split('/')[-1]
+    else:
+        output_file = input_file
+        
+    output_file = output_file.split('.')[0] + '.out'
+    create_results_files(results[best_method]["caches"], f"{RESULTS_DIR}/{output_file}")
+
+
+def run(label, algo, start, container, data, base_cost, results):
+    """Lance `algo` depuis l'état `start` et enregistre le résultat."""
+    caches = [container(c) for c in start["caches"]]   # list ou set selon l'algo
+    sizes = deepcopy(start["caches_sizes"])
+
+    t = time.time()
+    algo(data, caches, sizes)
+    dt = time.time() - t
+
+    res = snapshot(caches, sizes, data["endpoints"], data["requests"])
+    results[label] = res
+    gain = (base_cost - res["cost"]) / base_cost * 100
+    print(f"[{dt:.4f}s] {label} : {res['cost']} ({gain:.2f}%) | Score: {res['score']:.2f}")
+
+    # save_results(results, data)
+
+
+
 if __name__ == "__main__":
     import sys
     # if len(sys.argv) < 2:
     #     main(["instances/me_at_the_zoo.in"])  # Default input file for testing
     # else:
         # main(sys.argv[1:])
-    main(sys.argv[1:]) or main(["instances/me_at_the_zoo.in"])  # Default input file for testing
+    main(sys.argv[1:]) or main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing

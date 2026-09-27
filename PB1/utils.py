@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 def make_adj_list(N_vid, N_requests, requests):
     """
     return a list of list where res[i] coresponds to the list of index of 
@@ -96,6 +98,15 @@ def read_input_file(input_file):
 
     return N_vid, N_endpoint, N_request, N_cache, cache_size, video_sizes, endpoints, requests
 
+def snapshot(caches, caches_sizes, endpoints, requests):
+    return {
+        "cost": compute_cost(caches, endpoints, requests),
+        "score": compute_score(caches, endpoints, requests),
+        "caches": deepcopy(caches),
+        "caches_sizes": deepcopy(caches_sizes),
+    }
+
+
 def print_comparison_table(results, metric="score", higher_is_better=True):
     """
     results : dict {nom_méthode: {"cost": ..., "score": ..., ...}}
@@ -153,3 +164,18 @@ def print_gap_to_best(results, metric="score", higher_is_better=True):
         gap = abs(best - value) / abs(best) * 100 if best else 0.0
         tag = "  <- meilleur" if label == best_label else ""
         print(f"{label:<{width}} | {metric}: {value:>14.2f} | écart: {-gap:>7.2f}%{tag}")
+
+def create_results_files(caches, filePath):
+    N = 0
+    for i, cache in enumerate(caches):
+        if cache:
+            N += 1
+
+    with open(filePath, "w") as fichier:
+        fichier.write(f"{N}\n")
+        for i, cache in enumerate(caches):
+            if cache:
+                fichier.write(f"{i} ")
+                for video_id in cache:
+                    fichier.write(f"{video_id} ")
+                fichier.write("\n")

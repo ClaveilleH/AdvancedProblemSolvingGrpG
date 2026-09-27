@@ -1,6 +1,9 @@
 import random 
+import os
 
-def WriteInstance():
+OUTPUT_DIR_PATH = "instances/generated"
+
+def WriteInstance(file_path):
     """
         Crée un fichier Txt contenant une instance 
     """
@@ -17,7 +20,7 @@ def WriteInstance():
     # Requests = [(3,0,1500),(0,1,1000),(4,0,500),(1,0,1000)]
     Requests = GenerateRequests(NbRequests,NbVideos,NbEndpoints)
 
-    with open("Mon_instance.txt","w") as fichier:
+    with open(file_path,"w") as fichier:
         fichier.write(f"{NbVideos} {NbEndpoints} {NbRequests} {NbCaches} {CapacityCache}\n")
         for size in SizeVideo:
             fichier.write(f"{size} ")
@@ -76,7 +79,9 @@ def GenerateRequests (NbRequests,NbVideos,NbEndpoints):
     return Requests
 
 def main():
-    WriteInstance()
+    if not os.path.exists(OUTPUT_DIR_PATH):
+        os.makedirs(OUTPUT_DIR_PATH)
+    WriteInstance(f"{OUTPUT_DIR_PATH}/mon_instance.txt")
 
 
 if __name__ == "__main__":  
