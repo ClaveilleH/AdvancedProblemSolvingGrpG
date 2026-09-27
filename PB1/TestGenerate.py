@@ -78,4 +78,6 @@ def GenerateRequests (NbRequests,NbVideos,NbEndpoints):
 def main():
     WriteInstance()
 
-main()
+
+if __name__ == "__main__":  
+    main()
