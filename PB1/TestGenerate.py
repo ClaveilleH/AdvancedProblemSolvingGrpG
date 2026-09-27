@@ -3,85 +3,88 @@ import os
 
 OUTPUT_DIR_PATH = "instances/generated"
 
-def WriteInstance(file_path):
+def write_instance(file_path):
     """
         Crée un fichier Txt contenant une instance 
     """
-    NbVideos = 5
-    NbEndpoints = 2
-    NbRequests = 4
-    NbCaches = 3
-    CapacityCache = 100 
+    nbVideos = 5
+    nbEndpoints = 2
+    nbRequests = 4
+    nbCaches = 3
+    capacityCache = 100
+
     # SizeVideo = [50,50,80,30,110]
-    SizeVideo = GenerateSizeVideo(NbVideos)
+    sizeVideo = generate_size_video(nbVideos)
     # Endpoints = [(1000,[(0,100),(2,200),(1,300)]),
     #              (500,[])]
-    Endpoints = GenerateEndpoints(NbEndpoints,NbCaches)
+    endpoints = generate_edpoints(nbEndpoints,nbCaches)
     # Requests = [(3,0,1500),(0,1,1000),(4,0,500),(1,0,1000)]
-    Requests = GenerateRequests(NbRequests,NbVideos,NbEndpoints)
+    requests = generate_requests(nbRequests,nbVideos,nbEndpoints)
 
     with open(file_path,"w") as fichier:
-        fichier.write(f"{NbVideos} {NbEndpoints} {NbRequests} {NbCaches} {CapacityCache}\n")
-        for size in SizeVideo:
+        fichier.write(f"{nbVideos} {nbEndpoints} {nbRequests} {nbCaches} {capacityCache}\n")
+        for size in sizeVideo:
             fichier.write(f"{size} ")
         fichier.write("\n")
-        for endpoint in Endpoints:
-            LatencyEndpoint = endpoint[0]
-            NbCachesEndpoint = len(endpoint[1])
-            fichier.write(f"{LatencyEndpoint} {NbCachesEndpoint}\n")
+        for endpoint in endpoints:
+            latencyEndpoint = endpoint[0]
+            nbCachesEndpoint = len(endpoint[1])
+            fichier.write(f"{latencyEndpoint} {nbCachesEndpoint}\n")
             for cache in endpoint[1]:
                 fichier.write(f"{cache[0]} {cache[1]}\n")
-        for request in Requests:
+        for request in requests:
             fichier.write(f"{request[0]} {request[1]} {request[2]}\n")
 
-def GenerateSizeVideo(NbVideo):
+def generate_size_video(nbVideo):
     """
         Genere une liste de taille pour les videos
     """
-    return [random.randint(0,100) for _ in range(NbVideo)]
+    return [random.randint(0,100) for _ in range(nbVideo)]
 
-def GenerateEndpoints(NbEndpoints,NbCaches):
+def generate_edpoints(nbEndpoints, nbCaches):
     """
         Genere pour chaque endpoint sa latence, et choisi sa liste de chaches associer et leurs latences
     """
-    Endpoints = []
-    for _ in range(NbEndpoints):
-        Endpoint = ()
+    endpoints = []
+    for _ in range(nbEndpoints):
+        endpoint = ()
         # On choisi aleatoirement une latence pour le endpoint
-        LantenceEndpoint = random.randint(500,1000)
-        Caches = []
+        lantenceEndpoint = random.randint(500,1000)
+        caches = []
         # On choisi aleatoirement le nombre de cache associer au endpoint
-        NbCachesEndpoint = random.randint(0,NbCaches) 
+        nbCachesEndpoint = random.randint(0,nbCaches) 
         # On creer une liste contenant les Id des caches associer au endpoint
-        ListCaches = random.sample(range(0,NbCaches), NbCachesEndpoint)
+        listCaches = random.sample(range(0,nbCaches), nbCachesEndpoint)
 
-        for indice in range(NbCachesEndpoint):
-            IdCache = ListCaches[indice]
+        for indice in range(nbCachesEndpoint):
+            idCache = listCaches[indice]
             # On creer le tupple contenant l'id du cache et sa latence choisi aleatoirement qui sera toujour inférieur à la latence du endpoint
-            Caches.append((IdCache,random.randint(1,LantenceEndpoint)))
-        Endpoint = (LantenceEndpoint, Caches)
-        Endpoints.append(Endpoint)
-    return Endpoints
+            caches.append((idCache,random.randint(1,lantenceEndpoint)))
+        endpoint = (lantenceEndpoint, caches)
+        endpoints.append(endpoint)
 
-def GenerateRequests (NbRequests,NbVideos,NbEndpoints):
+    return endpoints
+
+def generate_requests (nbRequests, nbVideos, nbEndpoints):
     """
         Genere une liste de requete
     """
-    Requests = []
-    for _ in range(NbRequests):
+    requests = []
+    for _ in range(nbRequests):
         # On choisi aleatoirement une video
-        IdVideo = random.randint(0,NbVideos-1)
+        idVideo = random.randint(0,nbVideos-1)
         # On choisi aleatoirement un endpoint
-        IdEndpoint = random.randint(0,NbEndpoints-1)
+        idEndpoint = random.randint(0,nbEndpoints-1)
         # on choisi aleatoirement un nombre de video a envoyer
-        NbVideoSend = random.randint(1,10000)
-        Requests.append((IdVideo,IdEndpoint,NbVideoSend))
-    return Requests
+        nbVideoSend = random.randint(1,10000)
+        requests.append((idVideo,idEndpoint,nbVideoSend))
+
+    return requests
 
 def main():
     if not os.path.exists(OUTPUT_DIR_PATH):
         os.makedirs(OUTPUT_DIR_PATH)
-    WriteInstance(f"{OUTPUT_DIR_PATH}/mon_instance.txt")
+    write_instance(f"{OUTPUT_DIR_PATH}/mon_instance.txt")
 
 
 if __name__ == "__main__":  
