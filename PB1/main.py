@@ -119,8 +119,7 @@ def run(label, algo, start, container, data, base_cost, results):
 
 if __name__ == "__main__":
     import sys
-    # if len(sys.argv) < 2:
-    #     main(["instances/me_at_the_zoo.in"])  # Default input file for testing
-    # else:
-        # main(sys.argv[1:])
-    main(sys.argv[1:]) or main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
+    if len(sys.argv) < 2:
+        main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
+    else:
+        main(sys.argv[1:])
