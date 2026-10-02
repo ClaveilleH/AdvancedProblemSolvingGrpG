@@ -93,3 +93,12 @@ Conclusion : le choix des groupes n'est pas le facteur limitant ; inutile d'y re
   parallèle n'est pas reproductible au point près (l'ordre d'arrivée des résultats dépend de la charge
   de la machine) : l'écart entre deux lancements identiques est d'environ ±150 sur kittens.
   Le gain de cet essai (+165 au total) vient de vws (+295) et reste dans cet ordre de grandeur.
+
+### Essai 8 (20:02) — une instance à la fois, 14 processus chacune (`claude_bench.py --seq`)
+- Idée : au lieu de lancer kittens et vws en même temps (7 processus chacune), les lancer l'une après
+  l'autre pour que chacune ait presque tous les cœurs. Même limite de temps par instance (1080 s),
+  mais la mesure complète dure 36 min au lieu de 18. Le juge est inchangé.
+- Mesure : zoo 516 557, trending 500 000, vws 616 646, kittens 1 026 100. **Total 2 659 303.**
+- Conclusion : gain modeste (+403). Sur kittens, deux fois plus de groupes essayés (11 150 contre ~5 000)
+  pour seulement +~100 à +200 : la recherche sature autour de 1 026 100 avec ce voisinage.
+  vws montait encore d'environ +1,4 point/s à la fin.

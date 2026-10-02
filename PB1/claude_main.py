@@ -19,6 +19,8 @@ INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
 # temps accordé à claude_best par instance (la consigne : moins de 20 min par exécution, lecture et écriture comprises)
 TIME_LIMIT = int(os.environ.get("CLAUDE_TIME", 1080))
+# nombre de processus de la recherche parallèle (par défaut : la moitié des cœurs, voir claude_solver)
+WORKERS = int(os.environ["CLAUDE_WORKERS"]) if "CLAUDE_WORKERS" in os.environ else None
 INSTANCES_FILES = [
     "test.in",
     "me_at_the_zoo.in",
@@ -80,7 +82,7 @@ def main(args):
     results["Base"] = claude_snapshot(data, empty_caches, empty_sizes)
     base_cost = results["Base"]["cost"]
 
-    run("ClaudeBest", partial(claude_best, time_limit=TIME_LIMIT, verbose=True), results["Base"], set, data, base_cost, results)
+    run("ClaudeBest", partial(claude_best, time_limit=TIME_LIMIT, workers=WORKERS, verbose=True), results["Base"], set, data, base_cost, results)
 
     print_gap_to_best(results, metric="score", higher_is_better=True)
     best_method = min(results, key=lambda x: results[x]["cost"])
