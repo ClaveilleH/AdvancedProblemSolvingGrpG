@@ -175,7 +175,5 @@ def create_results_files(caches, filePath):
         fichier.write(f"{N}\n")
         for i, cache in enumerate(caches):
             if cache:
-                fichier.write(f"{i} ")
-                for video_id in cache:
-                    fichier.write(f"{video_id} ")
-                fichier.write("\n")
+                # pas d'espace en fin de ligne, sinon le juge plante
+                fichier.write(" ".join(map(str, [i] + list(cache))) + "\n")
