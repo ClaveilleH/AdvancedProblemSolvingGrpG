@@ -506,10 +506,16 @@ def _pack_identical(state):
     for cache_id in range(state.N_cache):
         if not left:
             break
-        arr = np.array(left)
-        if cache_id < state.N_cache - 1:
-            arr = arr[:max(1, int(np.searchsorted(np.cumsum(sizes[arr]), 3 * capacity)) + 1)]
-        _, chosen = _knapsack(sizes[arr], sizes[arr], capacity)
+        everything = np.array(left)
+        cumulated = np.cumsum(sizes[everything])
+        factor = 3
+        while True:
+            # on élargit le choix tant que le cache n'est pas plein à ras bord
+            arr = everything[:int(np.searchsorted(cumulated, factor * capacity)) + 1]
+            filled, chosen = _knapsack(sizes[arr], sizes[arr], capacity)
+            if filled == capacity or len(arr) == len(everything):
+                break
+            factor *= 2
         taken = arr[chosen]
         state.member[cache_id, taken] = True
         taken_set = set(int(v) for v in taken)
@@ -546,8 +552,15 @@ def claude_best(data, caches, caches_sizes, time_limit=900, group_size=5, milp_t
     if verbose:
         print(f"---> knapsack : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
 
-    if _pack_identical(state) and verbose:
-        print(f"---> caches identiques, rangement exact : score {state.score()}", flush=True)
+    used = np.unique(state.index["re"])
+    sav = state.index["sav"]
+    identical = len(used) > 0 and not (sav[:, used].min(axis=0) != sav[:, used].max(axis=0)).any()
+    if identical:
+        _pack_identical(state)
+        if verbose:
+            print(f"---> caches identiques, rangement exact : score {state.score()}", flush=True)
+        state.write_back(caches, caches_sizes)
+        return caches
 
     index = state.index
     n_pairs = len(np.unique(index["rv"])) * state.N_cache
