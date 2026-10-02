@@ -18,6 +18,7 @@ INSTANCES_FILES = [
     "videos_worth_spreading.in",
     "kittens.in",
 ]
+USED_METHODS = ["Greedy", "Greedy2", "LS", "TS", "TSS"]
 
 
 def main(args):
@@ -97,6 +98,8 @@ def main(args):
         
     output_file = output_file.split('.')[0] + '.out'
     create_results_files(results[best_method]["caches"], f"{RESULTS_DIR}/{output_file}")
+    # return results
+    return results[best_method]
 
 
 def run(label, algo, start, container, data, base_cost, results):
@@ -121,5 +124,14 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
         main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
+    elif sys.argv[1] == "all":
+        results = {}
+        for input_file in [f"{INSTANCES_DIR}/{f}" for f in INSTANCES_FILES]:
+            print(f"\n=== Running on {input_file} ===")
+            res = main([input_file])
+            results[input_file] = res
+        print("\n=== Summary of all instances ===")
+        for input_file, res in results.items():
+            print(f"{input_file}: cost={res['cost']}, score={res['score']:.2f}")
     else:
         main(sys.argv[1:])
