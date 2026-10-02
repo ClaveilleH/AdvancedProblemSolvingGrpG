@@ -102,3 +102,117 @@ Conclusion : le choix des groupes n'est pas le facteur limitant ; inutile d'y re
 - Conclusion : gain modeste (+403). Sur kittens, deux fois plus de groupes essayés (11 150 contre ~5 000)
   pour seulement +~100 à +200 : la recherche sature autour de 1 026 100 avec ce voisinage.
   vws montait encore d'environ +1,4 point/s à la fin.
+
+> 21:00 — consigne de l'utilisateur : continuer au-delà des 3 h, jusqu'à ce qu'il dise d'arrêter.
+
+### Essai 9 (20:46) — grossir les groupes quand la recherche sature (vws) : ÉCHEC dans cette version
+- Constat (tests de 100 s depuis la solution de l'essai 8) : les deux instances saturent avec les
+  réglages actuels (vws +10, kittens +6). Sur vws, des groupes de 16 caches (fenêtre 3) donnent +66 ;
+  sur kittens les gros groupes ne donnent rien ((k8,w4) +6, (k12,w2) +1).
+- Idée : sur les instances peu denses, multiplier la taille des groupes par 1,5 (jusqu'à 16) quand moins
+  de 25 % des 60 derniers groupes améliorent le score.
+- Résultat (vws seule, 14 processus) : **616 543**, moins bien que l'essai 8 (616 646).
+- Cause : avec 14 processus et des groupes de 16, il n'y a pas assez de caches libres (100 en tout) ;
+  le code retombait alors sur des groupes d'un seul cache (102 825 groupes lancés, 841 gardés), ce qui
+  faisait aussi grimper la taille trop vite (8 → 12 → 16 en 5 s). Corrigé à l'essai 10 : on attend
+  qu'un groupe se libère au lieu de lancer un groupe d'un seul cache.
+
+### Essai 10 (21:04) — essai 9 corrigé (attendre un groupe libre au lieu d'un groupe d'un seul cache) : PAS MIEUX
+- Résultat (vws seule, 14 processus) : **616 617**, contre 616 646 à l'essai 8 : identique au bruit près.
+  La taille des groupes n'est montée qu'à 8, et 3,5 fois moins de groupes ont été résolus (2 097 contre
+  7 247) pour le même score. Code non gardé (retour à la version de l'essai 8).
+- Enseignement : sur vws, le score final (~616 600) ne dépend ni du nombre de groupes résolus ni de leur
+  taille ; c'est le plafond de ce voisinage en 18 min.
+
+### Analyses sur kittens (21:05–21:10), sans changement de code
+- Solution de l'essai 8 : 7 469 vidéos placées sur 10 000, 9 170 copies (89 % des vidéos placées n'ont
+  qu'une copie), 18 vidéos par cache, caches pleins (0,7 Mo libre en moyenne). 73 % des requêtes
+  (pondérées) sont servies, à 89 % de leur gain maximal.
+- Borne sup facile (une copie sert tout le monde au mieux, capacité globale) : 1 199 494 — trop lâche
+  pour dire quelle marge il reste.
+- Cibler les paires de caches par la valeur estimée d'un échange de deux vidéos : inutile (l'estimation
+  ignore les tailles, elle est positive pour 84 % des paires ; 150 paires ciblées : 2 succès, +1,6 point ;
+  150 paires au hasard : 5 succès, +1,2 point). Les paires de caches sont quasiment toutes déjà optimales.
+
+### Essai 11 (21:13–22:13) — glouton en gain / taille^alpha
+- Constat (glouton + sac à dos seuls) : diviser par taille^alpha avec alpha < 1 donne un meilleur départ.
+  kittens : alpha 1,2 → 1 024 087 ; 1,0 → 1 024 895 ; 0,9 → 1 025 354 ; 0,8 → 1 025 442 ;
+  0,7 → **1 025 562** ; 0,6 → 1 025 224 ; 0,5 → 1 024 484 ; 0,4 → 1 023 462.
+  vws : 1,0 → 610 498 ; 0,8 → 610 792 ; 0,7 → 611 128 ; 0,6 → 611 323 ; 0,5 → 611 375.
+- Après 400 s de pipeline complet (7 processus) : kittens 1 025 941 (alpha 0,7) contre 1 025 481 (alpha 1) ;
+  vws 615 287 contre 615 288 : l'avantage tient sur kittens, disparaît sur vws.
+- Mesure complète `--seq` avec alpha = 0,7 partout : vws 616 382, kittens 1 026 234. **Total 2 659 173**,
+  sous l'essai 8 (2 659 303) : +134 sur kittens, −264 sur vws. Les deux écarts sont de l'ordre du bruit.
+- Suite : essai 12, alpha = 0,7 seulement sur les instances denses.
+
+### Piste écartée (21:37) — détruire et reconstruire une zone (kittens)
+- Vider 50 ou 150 caches au hasard dans la solution de l'essai 8, reconstruire par glouton (alpha 0,7)
+  puis sac à dos sur tout : toujours moins bien qu'avant (−65 à −115 points pour 50 caches, −276 à −410
+  pour 150), en 1 min à 1 min 30 par tentative. Abandonné.
+
+### Essai 12 (22:13) — alpha = 0,7 seulement sur les instances denses : NON MESURÉ
+- Mesure lancée puis interrompue à 22:14 à la demande de l'utilisateur (arrêt de l'exploration).
+  Le code n'est pas gardé : la branche contient la version de l'essai 8, la meilleure mesurée en entier.
+
+---
+
+## Résumé final (arrêt à 22:14, après 3 h 53 ; budget initial de 3 h prolongé par l'utilisateur à 21:00)
+
+### Score
+| Instance | Baseline | Final (essai 8) | Gain |
+|---|---:|---:|---:|
+| me_at_the_zoo | 512 115 | 516 557 | +4 442 |
+| trending_today | 499 966 | 500 000 | +34 |
+| videos_worth_spreading | 610 574 | 616 646 | +6 072 |
+| kittens | 1 024 517 | 1 026 100 | +1 583 |
+| **Total** | **2 647 172** | **2 659 303** | **+12 131** |
+
+Scores donnés par le juge, avec `python claude_bench.py --seq` (36 min au total, 18 min par instance).
+Pour comparaison, le premier du classement 2017 (`results_doc/hashcode_2017.csv`) est à 2 651 999.
+
+Sur les deux grosses instances, deux lancements identiques diffèrent d'environ ±150 points (recherche
+parallèle dont le déroulement dépend de la charge de la machine). Avec `python claude_bench.py`
+(les 4 instances en même temps, 7 processus chacune, 18 min) le total mesuré est 2 658 900.
+
+### Meilleure méthode (`claude_best` dans `claude_solver.py`)
+1. Glouton sur les couples (cache, vidéo) par gain / taille.
+2. Sac à dos exact cache par cache jusqu'à convergence, accéléré par élimination des vidéos dont le
+   sort est certain (bornes de la relaxation continue).
+3. Puis selon l'instance :
+   - caches tous identiques (trending_today) : rangement exact, toutes les requêtes servies ;
+   - petite instance (me_at_the_zoo) : programme linéaire en nombres entiers sur tout le problème,
+     optimum prouvé par le solveur ;
+   - sinon (vws, kittens) : recherche à voisinage large. On vide un groupe de 4 ou 5 caches voisins et
+     on le re-remplit de façon optimale par MILP (HiGHS via scipy), sur les vidéos les plus denses
+     (fenêtre 4). Plusieurs groupes sont résolus en parallèle ; chaque résultat est réévalué sur l'état
+     courant et gardé seulement s'il améliore le score.
+
+### Ce qui a rapporté, par ordre d'importance
+- LNS par MILP sur des groupes de caches (essais 1, 3) : l'essentiel du gain sur vws.
+- MILP complet sur la petite instance (essai 1) : +4 442.
+- Parallélisation de la LNS (essais 4, 8) : environ +2 500 puis +400.
+- Sac à dos exact au lieu de la fenêtre 4 (essai 3) : +380 sur kittens avant LNS.
+- Rangement exact pour trending_today (essai 2) : +34, maximum atteint.
+
+### Pistes explorées non concluantes (à ne pas refaire telles quelles)
+- MILP sur toute l'instance vws : 590 577 en 900 s.
+- Re-remplir un groupe de caches par sacs à dos successifs au lieu d'un MILP : 0 gain sur kittens.
+- Choix des groupes (ressemblance des latences, caches « désirés », échanges estimés), mouvements à
+  score égal, tailles de groupe et de fenêtre : aucun effet au-delà du bruit (essai 5, analyses kittens).
+- Grossir les groupes quand la recherche sature (essais 9 et 10) : pas mieux sur vws.
+- Construction par prix des caches / relaxation lagrangienne (essai 6) : nettement pire.
+- Détruire et reconstruire 50 à 150 caches sur kittens : toujours moins bien.
+
+### Pistes restantes
+- **Glouton en gain / taille^0,7 sur kittens** (essais 11 et 12) : la piste la plus prometteuse.
+  kittens a donné 1 026 234 (contre 1 026 100) dans une mesure complète, et +460 à 400 s. À confirmer
+  par une mesure complète avec alpha = 0,7 sur kittens seulement et 1,0 sur vws ; attention au bruit de
+  ±150, il faudrait plusieurs lancements par réglage.
+- Les deux grosses instances saturent avec ce voisinage (vws ~616 600, kittens ~1 026 100 à 1 026 200) :
+  plus de temps ou plus de cœurs ne rapportent presque plus rien. Pour aller plus loin il faut un autre
+  type de mouvement, par exemple un voisinage centré sur les vidéos (re-décider dans quels caches va un
+  ensemble de vidéos) ou une relaxation linéaire globale suivie d'un arrondi.
+- Aucune borne supérieure serrée n'a été calculée : on ne sait pas quelle marge il reste sur kittens et
+  vws (la seule borne calculée sur kittens, 1 199 494, est trop lâche pour conclure).
+- Rendre la recherche parallèle reproductible (ordre d'application fixe) pour comparer les réglages
+  sans bruit.

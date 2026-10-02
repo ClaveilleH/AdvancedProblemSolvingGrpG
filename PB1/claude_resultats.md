@@ -1,5 +1,8 @@
 # Hash Code 2017 (Streaming Videos) — résultats et approche du solveur `claude_*`
 
+> Ce document décrit la première version (glouton + sac à dos, total 2 647 172). La suite de
+> l'exploration et la méthode actuelle (`claude_best`, total 2 659 303) sont dans `NOTES.md`.
+
 Fichiers concernés : `claude_solver.py` (les algos) et `claude_main.py` (le lanceur).
 
 ## 1. Résultats
