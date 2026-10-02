@@ -13,10 +13,12 @@ from copy import deepcopy
 from functools import partial
 
 from utils import read_input_file, make_adj_list, create_results_files, print_gap_to_best
-from claude_solver import claude_greedy, claude_knapsack, claude_score, claude_cost
+from claude_solver import claude_greedy, claude_knapsack, claude_best, claude_score, claude_cost
 
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
+# temps accordé à claude_best par instance (la consigne : moins de 20 min par exécution, lecture et écriture comprises)
+TIME_LIMIT = int(os.environ.get("CLAUDE_TIME", 900))
 INSTANCES_FILES = [
     "test.in",
     "me_at_the_zoo.in",
@@ -78,8 +80,7 @@ def main(args):
     results["Base"] = claude_snapshot(data, empty_caches, empty_sizes)
     base_cost = results["Base"]["cost"]
 
-    run("ClaudeGreedy", claude_greedy, results["Base"], set, data, base_cost, results)
-    run("ClaudeKnapsack (g)", partial(claude_knapsack, verbose=True), results["ClaudeGreedy"], set, data, base_cost, results)
+    run("ClaudeBest", partial(claude_best, time_limit=TIME_LIMIT, verbose=True), results["Base"], set, data, base_cost, results)
 
     print_gap_to_best(results, metric="score", higher_is_better=True)
     best_method = min(results, key=lambda x: results[x]["cost"])

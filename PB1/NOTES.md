@@ -20,3 +20,13 @@ Glouton gain/taille + sac à dos cache par cache (`window=4`), ~20 s au total.
 | **Total** | **2 647 172** |
 
 ## Journal des essais
+
+### Essai 1 (18:27) — MILP par groupes de caches (LNS) + MILP complet sur petite instance
+- Idée : vider un groupe de caches voisins et le re-remplir de façon optimale avec un programme
+  linéaire en nombres entiers (HiGHS via `scipy.optimize.milp`), en boucle. Sur une petite instance,
+  tout résoudre d'un coup.
+- Mesure courte (`CLAUDE_TIME=150`) : zoo 516 557 (optimum prouvé par le solveur, 3 s),
+  vws 610 989 (+415, encore en progression), kittens inchangé, trending inchangé. **Total 2 652 029.**
+- Conclusion : très efficace sur zoo et vws. Sur kittens, des groupes de 5 caches sans fenêtre de
+  candidats sont trop gros (30 s par groupe sans gain) ; sur trending le MILP est inutilisable
+  (tous les caches reliés à tous les endpoints). À régler dans les essais suivants.

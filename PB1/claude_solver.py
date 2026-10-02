@@ -317,3 +317,248 @@ def claude_solve(data, caches, caches_sizes, max_passes=50, time_limit=None, win
     _knapsack_passes(state, max_passes, time_limit, window, seed, verbose)
     state.write_back(caches, caches_sizes)
     return caches
+
+
+# ######################################## MILP (sous-ensemble de caches) ########################################
+
+def _snapshot_state(state):
+    return state.member.copy(), state.remaining.copy(), state.cur.copy()
+
+
+def _restore_state(state, saved):
+    state.member[:], state.remaining[:], state.cur[:] = saved
+
+
+def _reoptimize_milp(state, free_caches, time_limit=60, rel_gap=0.0, window=None):
+    """
+    Vide les caches de free_caches et les re-remplit ensemble de façon optimale (programme linéaire
+    en nombres entiers, solveur HiGHS de scipy), les autres caches étant fixés.
+    x[c,v] = 1 si la vidéo v est dans le cache c ; y[r,c] = part de la requête r servie par c.
+    Retourne le temps gagné en plus (0 si le solveur ne fait pas mieux : on remet l'ancien contenu).
+    """
+    from scipy.optimize import milp, LinearConstraint, Bounds
+    from scipy.sparse import coo_matrix
+
+    index = state.index
+    sizes, sav, rv, re, rn = index["sizes"], index["sav"], index["rv"], index["re"], index["rn"]
+    free_caches = np.asarray(free_caches)
+    before = state.saved()
+    saved = _snapshot_state(state)
+
+    touched = np.flatnonzero(state.member[free_caches].any(axis=0))
+    state.member[free_caches] = False
+    for video_id in touched:
+        state.refresh_video(video_id)
+
+    # variables y : (requête, cache libre) avec un gain positif par rapport aux caches fixés
+    delta = sav[free_caches][:, re] - state.cur  # (k, R)
+    np.maximum(delta, 0, out=delta)
+    if window is not None:
+        # comme dans le sac à dos : par cache, seulement les vidéos les plus denses + l'ancien contenu
+        size_div = np.maximum(sizes, 1e-9)
+        for k in range(len(free_caches)):
+            gains = np.bincount(rv, weights=delta[k] * rn, minlength=state.N_vid)
+            order = np.argsort(-(gains / size_div), kind="stable")
+            order = order[gains[order] > 0]
+            allowed = np.zeros(state.N_vid, dtype=bool)
+            allowed[order[np.cumsum(sizes[order]) <= window * state.S_cache]] = True
+            allowed[saved[0][free_caches[k]]] = True
+            delta[k, ~allowed[rv]] = 0
+    yk, yr = np.nonzero(delta > 0)
+    if len(yk) == 0:
+        _restore_state(state, saved)
+        return 0
+    ycoef = (delta[yk, yr] * rn[yr]).astype(np.float64)
+    ny = len(yk)
+
+    # variables x : couples (cache libre, vidéo) utiles
+    pair_key = yk.astype(np.int64) * state.N_vid + rv[yr]
+    pairs, y_to_x = np.unique(pair_key, return_inverse=True)
+    nx = len(pairs)
+    xk, xv = pairs // state.N_vid, pairs % state.N_vid
+
+    rows, cols, vals, ub = [], [], [], []
+    # y <= x
+    r0 = np.arange(ny)
+    rows += [r0, r0]; cols += [nx + r0, y_to_x]; vals += [np.ones(ny), -np.ones(ny)]
+    ub.append(np.zeros(ny))
+    n_rows = ny
+    # somme des y d'une requête <= 1
+    req_ids, req_row = np.unique(yr, return_inverse=True)
+    rows.append(n_rows + req_row); cols.append(nx + r0); vals.append(np.ones(ny))
+    ub.append(np.ones(len(req_ids)))
+    n_rows += len(req_ids)
+    # capacité
+    rows.append(n_rows + xk); cols.append(np.arange(nx)); vals.append(sizes[xv].astype(np.float64))
+    ub.append(np.full(len(free_caches), float(state.S_cache)))
+    n_rows += len(free_caches)
+
+    A = coo_matrix((np.concatenate(vals), (np.concatenate(rows), np.concatenate(cols))), shape=(n_rows, nx + ny)).tocsr()
+    ub = np.concatenate(ub)
+    cost = np.concatenate([np.zeros(nx), -ycoef])
+    integrality = np.concatenate([np.ones(nx), np.zeros(ny)])
+    res = milp(cost, constraints=LinearConstraint(A, -np.inf, ub), integrality=integrality, bounds=Bounds(0, 1),
+               options={"time_limit": time_limit, "mip_rel_gap": rel_gap})
+    state.milp_optimal = res.status == 0
+    if res.x is None:
+        _restore_state(state, saved)
+        return 0
+
+    chosen = res.x[:nx] > 0.5
+    state.member[free_caches[xk[chosen]], xv[chosen]] = True
+    state.remaining[free_caches] = state.S_cache - state.member[free_caches] @ sizes
+    if (state.remaining[free_caches] < 0).any():
+        _restore_state(state, saved)
+        return 0
+    for video_id in np.unique(xv[chosen]):
+        state.refresh_video(video_id)
+    after = state.saved()
+    if after <= before:
+        _restore_state(state, saved)
+        return 0
+    return after - before
+
+
+def claude_milp(data, caches, caches_sizes, free_caches=None, time_limit=60, rel_gap=0.0):
+    """Re-remplit de façon optimale les caches de free_caches (tous par défaut) : à réserver aux petites instances."""
+    state = _State(data, caches)
+    if free_caches is None:
+        free_caches = list(range(state.N_cache))
+    _reoptimize_milp(state, free_caches, time_limit, rel_gap)
+    state.write_back(caches, caches_sizes)
+    return caches
+
+
+# ######################################## LNS ########################################
+
+def _lns(state, time_limit, group_size=5, milp_time=30, window=None, seed=0, verbose=False):
+    """
+    Recherche à voisinage large : on tire un petit groupe de caches "voisins" (qui partagent des endpoints),
+    on le re-remplit de façon optimale avec _reoptimize_milp, et on recommence jusqu'à time_limit secondes.
+    Le score ne peut que monter.
+    """
+    rng = np.random.default_rng(seed)
+    start = time.time()
+    linked = (state.index["sav"] > 0).astype(np.float64)
+    related = linked @ linked.T  # nombre d'endpoints en commun
+    np.fill_diagonal(related, 0)
+    n_calls = 0
+    last_print = start
+    while time.time() - start < time_limit:
+        first = int(rng.integers(state.N_cache))
+        weights = related[first]
+        k = min(group_size, state.N_cache) - 1
+        if k > 0 and (weights > 0).sum() >= k:
+            others = rng.choice(state.N_cache, size=k, replace=False, p=weights / weights.sum())
+            group = [first] + [int(c) for c in others]
+        else:
+            group = [first]
+        budget = min(milp_time, time_limit - (time.time() - start))
+        if budget <= 0.5:
+            break
+        _reoptimize_milp(state, group, budget, 0.0, window)
+        n_calls += 1
+        if verbose and time.time() - last_print > 30:
+            last_print = time.time()
+            print(f"---> lns {n_calls} groupes : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
+    if verbose:
+        print(f"---> lns fin, {n_calls} groupes : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
+
+
+def claude_lns(data, caches, caches_sizes, time_limit=60, group_size=5, milp_time=30, window=None, seed=0, verbose=False):
+    """Recherche à voisinage large (groupes de caches re-remplis exactement) pendant time_limit secondes."""
+    state = _State(data, caches)
+    _lns(state, time_limit, group_size, milp_time, window, seed, verbose)
+    state.write_back(caches, caches_sizes)
+    return caches
+
+
+# ######################################## CACHES IDENTIQUES ########################################
+
+def _pack_identical(state):
+    """
+    Cas particulier (trending_today) : tous les caches sont équivalents pour tous les endpoints.
+    Mettre une vidéo dans un cache ou un autre rapporte pareil, et une seule copie suffit : le problème
+    devient un rangement des vidéos utiles dans les caches. On remplit les caches un par un, chacun
+    exactement à ras bord si possible (sac à dos avec valeur = taille, grosses vidéos d'abord).
+    Ne garde le résultat que s'il est meilleur. Retourne True si appliqué.
+    """
+    index = state.index
+    sizes, sav, rv, re, rn = index["sizes"], index["sav"], index["rv"], index["re"], index["rn"]
+    used_endpoints = np.unique(re)
+    if state.N_cache == 0 or len(used_endpoints) == 0:
+        return False
+    if (sav[:, used_endpoints].min(axis=0) != sav[:, used_endpoints].max(axis=0)).any():
+        return False
+
+    before = state.saved()
+    saved = _snapshot_state(state)
+    capacity = state.S_cache
+
+    value = np.bincount(rv, weights=sav[0, re] * rn, minlength=state.N_vid)
+    items = np.flatnonzero((value > 0) & (sizes <= capacity))
+    # si tout ne rentre pas, on ne garde que les vidéos les plus denses
+    items = items[np.argsort(-(value[items] / np.maximum(sizes[items], 1e-9)), kind="stable")]
+    items = items[np.cumsum(sizes[items]) <= capacity * state.N_cache]
+    left = list(items[np.argsort(-sizes[items], kind="stable")])  # grosses vidéos d'abord
+
+    state.member[:] = False
+    for cache_id in range(state.N_cache):
+        if not left:
+            break
+        arr = np.array(left)
+        if cache_id < state.N_cache - 1:
+            arr = arr[:max(1, int(np.searchsorted(np.cumsum(sizes[arr]), 3 * capacity)) + 1)]
+        _, chosen = _knapsack(sizes[arr], sizes[arr], capacity)
+        taken = arr[chosen]
+        state.member[cache_id, taken] = True
+        taken_set = set(int(v) for v in taken)
+        left = [v for v in left if int(v) not in taken_set]
+
+    state.remaining[:] = capacity - state.member @ sizes
+    state.cur[:] = 0
+    for video_id in np.flatnonzero(state.member.any(axis=0)):
+        state.refresh_video(video_id)
+    if state.saved() <= before:
+        _restore_state(state, saved)
+        return False
+    return True
+
+
+# ######################################## PIPELINE ########################################
+
+SMALL_MILP_PAIRS = 5000  # en dessous, on résout toute l'instance d'un coup
+
+
+def claude_best(data, caches, caches_sizes, time_limit=900, group_size=5, milp_time=30, lns_window=None, seed=0, verbose=False):
+    """
+    Meilleure méthode : glouton, sac à dos par cache, puis selon l'instance
+    - caches tous identiques : rangement exact (_pack_identical) ;
+    - petite instance : résolution exacte de tout le problème ;
+    - sinon : recherche à voisinage large jusqu'à time_limit secondes (temps total de la fonction).
+    """
+    start = time.time()
+    state = _State(data, caches)
+    _greedy(state)
+    if verbose:
+        print(f"---> greedy : score {state.score()}", flush=True)
+    _knapsack_passes(state, 50, time_limit, 4, seed, False)
+    if verbose:
+        print(f"---> knapsack : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
+
+    if _pack_identical(state) and verbose:
+        print(f"---> caches identiques, rangement exact : score {state.score()}", flush=True)
+
+    index = state.index
+    n_pairs = len(np.unique(index["rv"])) * state.N_cache
+    done = False
+    if n_pairs <= SMALL_MILP_PAIRS:
+        state.milp_optimal = False
+        _reoptimize_milp(state, list(range(state.N_cache)), max(1, min(120, time_limit - (time.time() - start))))
+        done = state.milp_optimal
+        if verbose:
+            print(f"---> milp complet (optimal prouvé : {done}) : score {state.score()}", flush=True)
+    if not done:
+        _lns(state, time_limit - (time.time() - start), group_size, milp_time, lns_window, seed, verbose)
+    state.write_back(caches, caches_sizes)
+    return caches
