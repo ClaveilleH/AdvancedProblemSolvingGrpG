@@ -17,6 +17,7 @@ Algos :
 - claude_knapsack : pour chaque cache, on fixe les autres et on re-remplit le cache de façon optimale (sac à dos exact), en boucle
 - claude_solve    : claude_greedy puis claude_knapsack
 """
+import os
 import random
 import time
 
@@ -239,6 +240,44 @@ def _knapsack(item_sizes, item_gains, capacity):
     return int(dp[capacity]), chosen
 
 
+def _knapsack_reduced(item_sizes, item_gains, capacity, lower_bound):
+    """
+    Sac à dos 0/1 exact sur beaucoup d'objets : on élimine d'abord ceux dont le sort est certain.
+    Objets triés par densité, s = premier objet qui ne rentre plus (objet "de rupture"). La relaxation
+    continue donne une borne sup de la valeur si on force un objet dedans (ou dehors) ; si cette borne est
+    sous lower_bound (valeur d'une solution connue), l'objet est fixé dehors (ou dedans). Le sac à dos
+    par programmation dynamique ne porte plus que sur les objets restants.
+    Retourne (valeur, indices pris) ; la valeur peut être < lower_bound si rien de mieux n'existe.
+    """
+    n = len(item_sizes)
+    sizes_f = item_sizes.astype(np.float64)
+    gains_f = item_gains.astype(np.float64)
+    density = gains_f / np.maximum(sizes_f, 1e-9)
+    order = np.argsort(-density, kind="stable")
+    cum_w = np.cumsum(sizes_f[order])
+    s = int(np.searchsorted(cum_w, capacity, side="right"))  # objets order[:s] rentrent tous
+    if s >= n:
+        return int(item_gains.sum()), list(range(n))
+    w_before = cum_w[s - 1] if s > 0 else 0.0
+    p_before = gains_f[order[:s]].sum()
+    d_break = density[order[s]]
+    residual = capacity - w_before
+
+    rank = np.empty(n, dtype=np.int64)
+    rank[order] = np.arange(n)
+    inside = rank < s
+    # borne si on force l'objet dedans (pour ceux hors du préfixe) ou dehors (pour ceux du préfixe)
+    bound = np.where(inside,
+                     p_before - gains_f + (residual + sizes_f) * d_break,
+                     p_before + gains_f + (residual - sizes_f) * d_break)
+    decided = bound < lower_bound - 1e-6
+    fixed_in = np.flatnonzero(decided & inside)
+    core = np.flatnonzero(~decided)
+    core_capacity = capacity - int(item_sizes[fixed_in].sum())
+    value, chosen = _knapsack(item_sizes[core], item_gains[core], core_capacity)
+    return value + int(item_gains[fixed_in].sum()), list(fixed_in) + [int(core[i]) for i in chosen]
+
+
 def _reoptimize_cache(state, cache_id, window):
     """
     Vide le cache cache_id et le re-remplit de façon optimale, les autres caches étant fixés.
@@ -262,8 +301,10 @@ def _reoptimize_cache(state, cache_id, window):
         order = candidates[np.argsort(-(gains[candidates] / np.maximum(sizes[candidates], 1e-9)), kind="stable")]
         selected = order[np.cumsum(sizes[order]) <= window * capacity]
         candidates = np.union1d(selected, old[gains[old] > 0])
-
-    new_value, chosen = _knapsack(sizes[candidates], gains[candidates], capacity)
+        new_value, chosen = _knapsack(sizes[candidates], gains[candidates], capacity)
+    else:
+        # exact sur toutes les vidéos, après élimination par bornes (l'ancien contenu sert de borne inf)
+        new_value, chosen = _knapsack_reduced(sizes[candidates], gains[candidates], capacity, max(old_value, 0))
     if new_value > old_value:
         new = candidates[chosen]
     else:
@@ -431,7 +472,29 @@ def claude_milp(data, caches, caches_sizes, free_caches=None, time_limit=60, rel
 
 # ######################################## LNS ########################################
 
-def _lns(state, time_limit, group_size=5, milp_time=30, window=None, seed=0, verbose=False):
+def _reoptimize_group_knapsack(state, group):
+    """
+    Variante rapide de _reoptimize_milp : on vide tous les caches du groupe, puis on les re-remplit
+    l'un après l'autre par sac à dos exact (dans l'ordre donné). Annulé si le résultat n'est pas meilleur.
+    """
+    before = state.saved()
+    saved = _snapshot_state(state)
+    group = np.asarray(group)
+    touched = np.flatnonzero(state.member[group].any(axis=0))
+    state.member[group] = False
+    state.remaining[group] = state.S_cache
+    for video_id in touched:
+        state.refresh_video(video_id)
+    for cache_id in group:
+        _reoptimize_cache(state, int(cache_id), None)
+    after = state.saved()
+    if after <= before:
+        _restore_state(state, saved)
+        return 0
+    return after - before
+
+
+def _lns(state, time_limit, group_size=5, milp_time=30, window=None, seed=0, verbose=False, mode="milp"):
     """
     Recherche à voisinage large : on tire un petit groupe de caches "voisins" (qui partagent des endpoints),
     on le re-remplit de façon optimale avec _reoptimize_milp, et on recommence jusqu'à time_limit secondes.
@@ -456,13 +519,119 @@ def _lns(state, time_limit, group_size=5, milp_time=30, window=None, seed=0, ver
         budget = min(milp_time, time_limit - (time.time() - start))
         if budget <= 0.5:
             break
-        _reoptimize_milp(state, group, budget, 0.0, window)
+        if mode == "milp":
+            _reoptimize_milp(state, group, budget, 0.0, window)
+        else:
+            _reoptimize_group_knapsack(state, group)
         n_calls += 1
         if verbose and time.time() - last_print > 30:
             last_print = time.time()
             print(f"---> lns {n_calls} groupes : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
     if verbose:
         print(f"---> lns fin, {n_calls} groupes : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
+
+
+# ---------- version parallèle ----------
+
+_WORKER = {}
+
+
+def _worker_solve(group, member_bits, cur, milp_time, window):
+    """Dans un processus fils : re-remplit `group` à partir de l'état reçu, renvoie le nouveau contenu ou None."""
+    state = _WORKER["state"]
+    state.member = np.unpackbits(member_bits, axis=1, count=state.N_vid).astype(bool)
+    state.cur = cur.astype(np.int64)
+    state.remaining = state.S_cache - state.member @ state.index["sizes"]
+    if _reoptimize_milp(state, group, milp_time, 0.0, window) <= 0:
+        return group, None
+    return group, np.packbits(state.member[group], axis=1)
+
+
+def _apply_group(state, group, rows_bits):
+    """Applique un contenu calculé sur un état peut-être périmé ; annulé s'il n'améliore pas l'état actuel."""
+    before = state.saved()
+    saved = _snapshot_state(state)
+    rows = np.unpackbits(rows_bits, axis=1, count=state.N_vid).astype(bool)
+    changed = np.flatnonzero((state.member[group] != rows).any(axis=0))
+    state.member[group] = rows
+    state.remaining[group] = state.S_cache - rows @ state.index["sizes"]
+    for video_id in changed:
+        state.refresh_video(video_id)
+    if state.saved() <= before:
+        _restore_state(state, saved)
+        return False
+    return True
+
+
+def _lns_parallel(state, time_limit, group_size=3, milp_time=30, window=None, seed=0, verbose=False, workers=None):
+    """
+    Comme _lns, mais plusieurs groupes (disjoints) sont résolus en même temps dans des processus séparés.
+    Un résultat peut avoir été calculé sur un état déjà modifié par un autre groupe : il est donc réévalué
+    sur l'état courant et n'est gardé que s'il améliore vraiment le score.
+    """
+    import multiprocessing
+    from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
+
+    if workers is None:
+        workers = max(1, (os.cpu_count() - 2) // 2)
+    rng = np.random.default_rng(seed)
+    start = time.time()
+    linked = (state.index["sav"] > 0).astype(np.float64)
+    related = linked @ linked.T
+    np.fill_diagonal(related, 0)
+
+    _WORKER["state"] = state  # hérité par fork : l'index n'est pas recopié
+    pool = ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("fork"))
+    busy = np.zeros(state.N_cache, dtype=bool)
+    pending = set()
+    n_done = n_kept = 0
+    last_print = start
+
+    def submit():
+        free = np.flatnonzero(~busy)
+        if len(free) == 0:
+            return False
+        first = int(rng.choice(free))
+        weights = related[first] * ~busy
+        weights[first] = 0
+        k = min(group_size, state.N_cache) - 1
+        group = [first]
+        if k > 0 and (weights > 0).sum() >= k:
+            group += [int(c) for c in rng.choice(state.N_cache, size=k, replace=False, p=weights / weights.sum())]
+        busy[group] = True
+        budget = min(milp_time, time_limit - (time.time() - start))
+        pending.add(pool.submit(_worker_solve, group, np.packbits(state.member, axis=1), state.cur.astype(np.int32), budget, window))
+        return True
+
+    try:
+        while True:
+            while len(pending) < workers and time.time() - start < time_limit - 1 and submit():
+                pass
+            if not pending:
+                break
+            finished, _ = wait(pending, timeout=1, return_when=FIRST_COMPLETED)
+            for future in finished:
+                pending.discard(future)
+                group, rows_bits = future.result()
+                busy[group] = False
+                n_done += 1
+                if rows_bits is not None and _apply_group(state, group, rows_bits):
+                    n_kept += 1
+            if time.time() - start >= time_limit:
+                break
+            if verbose and time.time() - last_print > 30:
+                last_print = time.time()
+                print(f"---> lns {n_done} groupes ({n_kept} gardés) : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
+    finally:
+        for future in pending:
+            future.cancel()
+        processes = list((getattr(pool, "_processes", None) or {}).values())
+        pool.shutdown(wait=False, cancel_futures=True)
+        for process in processes:  # les MILP en cours ne servent plus à rien
+            process.terminate()
+        _WORKER.clear()
+    if verbose:
+        print(f"---> lns fin, {n_done} groupes ({n_kept} gardés) : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
 
 
 def claude_lns(data, caches, caches_sizes, time_limit=60, group_size=5, milp_time=30, window=None, seed=0, verbose=False):
@@ -536,7 +705,7 @@ def _pack_identical(state):
 SMALL_MILP_PAIRS = 5000  # en dessous, on résout toute l'instance d'un coup
 
 
-def claude_best(data, caches, caches_sizes, time_limit=900, group_size=5, milp_time=30, lns_window=None, seed=0, verbose=False):
+def claude_best(data, caches, caches_sizes, time_limit=900, group_size=3, milp_time=30, lns_window="auto", seed=0, verbose=False):
     """
     Meilleure méthode : glouton, sac à dos par cache, puis selon l'instance
     - caches tous identiques : rangement exact (_pack_identical) ;
@@ -548,7 +717,7 @@ def claude_best(data, caches, caches_sizes, time_limit=900, group_size=5, milp_t
     _greedy(state)
     if verbose:
         print(f"---> greedy : score {state.score()}", flush=True)
-    _knapsack_passes(state, 50, time_limit, 4, seed, False)
+    _knapsack_passes(state, 200, time_limit / 4, None, seed, False)
     if verbose:
         print(f"---> knapsack : score {state.score()} [{time.time() - start:.0f}s]", flush=True)
 
@@ -572,6 +741,10 @@ def claude_best(data, caches, caches_sizes, time_limit=900, group_size=5, milp_t
         if verbose:
             print(f"---> milp complet (optimal prouvé : {done}) : score {state.score()}", flush=True)
     if not done:
+        if lns_window == "auto":
+            # instance dense (chaque cache voit beaucoup de requêtes) : on limite les candidats du MILP
+            links_per_cache = (index["sav"][:, index["re"]] > 0).sum() / max(1, state.N_cache)
+            lns_window = 8 if links_per_cache > 50000 else None
         _lns(state, time_limit - (time.time() - start), group_size, milp_time, lns_window, seed, verbose)
     state.write_back(caches, caches_sizes)
     return caches

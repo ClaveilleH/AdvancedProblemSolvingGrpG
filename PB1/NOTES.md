@@ -30,3 +30,27 @@ Glouton gain/taille + sac à dos cache par cache (`window=4`), ~20 s au total.
 - Conclusion : très efficace sur zoo et vws. Sur kittens, des groupes de 5 caches sans fenêtre de
   candidats sont trop gros (30 s par groupe sans gain) ; sur trending le MILP est inutilisable
   (tous les caches reliés à tous les endpoints). À régler dans les essais suivants.
+
+### Essai 2 (18:33) — rangement exact quand tous les caches sont identiques
+- Constat : sur `trending_today`, chaque endpoint est relié aux 100 caches avec la même latence, et la
+  somme des tailles des vidéos vaut exactement la capacité totale. Une seule copie de chaque vidéo suffit.
+- Idée : remplir les caches un par un exactement à ras bord (sac à dos avec valeur = taille, grosses
+  vidéos d'abord, choix élargi tant que le cache n'est pas plein).
+- Résultat : trending_today **500 000** (maximum théorique, toutes les requêtes servies), en 9 s.
+- Premier jet raté (499 864) : 4 vidéos restaient dehors car certains caches n'étaient pas pleins ;
+  corrigé en élargissant le choix des candidats.
+
+### Essai 3 (18:47) — sac à dos exact par cache + LNS réglée (séquentielle)
+- Constat : le sac à dos limité à `window=4` bridait kittens (plus la fenêtre est large, meilleur est
+  le score : 8 → 1 024 521, 64 → 1 024 749, tout → 1 024 884 mais 400 s sans converger).
+- Idée : sac à dos exact sur toutes les vidéos, rendu rapide en éliminant d'abord les vidéos dont le
+  sort est certain (bornes de la relaxation continue, `_knapsack_reduced`). Convergence sur kittens en
+  36 s au lieu de > 400 s, score 1 024 895.
+- LNS : groupes de 3 caches, fenêtre de candidats 8 sur les instances denses.
+- Mesure complète (900 s/instance) : zoo 516 557, trending 500 000, vws 614 213, kittens 1 025 401.
+  **Total 2 656 171.**
+- Pistes testées et écartées dans cet essai :
+  - MILP sur toute l'instance vws : 590 577 après 900 s, bien pire que la LNS.
+  - Re-remplir un groupe de caches par sacs à dos successifs (sans MILP) : 0 gain sur kittens,
+    +150 sur vws en 150 s contre +990 pour le MILP.
+  - Le temps part presque entièrement dans le solveur (HiGHS), pas dans la construction du modèle.
