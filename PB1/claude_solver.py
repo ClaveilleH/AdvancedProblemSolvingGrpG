@@ -742,12 +742,11 @@ def claude_best(data, caches, caches_sizes, time_limit=900, group_size="auto", m
             print(f"---> milp complet (optimal prouvé : {done}) : score {state.score()}", flush=True)
     if not done:
         if lns_window == "auto":
-            # instance dense (chaque cache voit beaucoup de requêtes) : on limite les candidats du MILP
-            links_per_cache = (index["sav"][:, index["re"]] > 0).sum() / max(1, state.N_cache)
-            dense = links_per_cache > 50000
             lns_window = 4
-            if group_size == "auto":
-                group_size = 4 if dense else 5
+        if group_size == "auto":
+            # instance dense (chaque cache voit beaucoup de requêtes) : groupes un peu plus petits
+            links_per_cache = (index["sav"][:, index["re"]] > 0).sum() / max(1, state.N_cache)
+            group_size = 4 if links_per_cache > 50000 else 5
         _lns_parallel(state, time_limit - (time.time() - start), group_size, milp_time, lns_window, seed, verbose, workers)
     state.write_back(caches, caches_sizes)
     return caches

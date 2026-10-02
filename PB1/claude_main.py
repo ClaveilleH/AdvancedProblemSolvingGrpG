@@ -18,7 +18,7 @@ from claude_solver import claude_greedy, claude_knapsack, claude_best, claude_sc
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
 # temps accordé à claude_best par instance (la consigne : moins de 20 min par exécution, lecture et écriture comprises)
-TIME_LIMIT = int(os.environ.get("CLAUDE_TIME", 900))
+TIME_LIMIT = int(os.environ.get("CLAUDE_TIME", 1080))
 INSTANCES_FILES = [
     "test.in",
     "me_at_the_zoo.in",
