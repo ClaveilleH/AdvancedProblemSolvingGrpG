@@ -705,7 +705,7 @@ def _pack_identical(state):
 SMALL_MILP_PAIRS = 5000  # en dessous, on résout toute l'instance d'un coup
 
 
-def claude_best(data, caches, caches_sizes, time_limit=900, group_size=3, milp_time=30, lns_window="auto", seed=0, verbose=False):
+def claude_best(data, caches, caches_sizes, time_limit=900, group_size="auto", milp_time=30, lns_window="auto", seed=0, verbose=False, workers=None):
     """
     Meilleure méthode : glouton, sac à dos par cache, puis selon l'instance
     - caches tous identiques : rangement exact (_pack_identical) ;
@@ -744,7 +744,10 @@ def claude_best(data, caches, caches_sizes, time_limit=900, group_size=3, milp_t
         if lns_window == "auto":
             # instance dense (chaque cache voit beaucoup de requêtes) : on limite les candidats du MILP
             links_per_cache = (index["sav"][:, index["re"]] > 0).sum() / max(1, state.N_cache)
-            lns_window = 8 if links_per_cache > 50000 else None
-        _lns(state, time_limit - (time.time() - start), group_size, milp_time, lns_window, seed, verbose)
+            dense = links_per_cache > 50000
+            lns_window = 4
+            if group_size == "auto":
+                group_size = 4 if dense else 5
+        _lns_parallel(state, time_limit - (time.time() - start), group_size, milp_time, lns_window, seed, verbose, workers)
     state.write_back(caches, caches_sizes)
     return caches

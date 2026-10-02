@@ -54,3 +54,13 @@ Glouton gain/taille + sac à dos cache par cache (`window=4`), ~20 s au total.
   - Re-remplir un groupe de caches par sacs à dos successifs (sans MILP) : 0 gain sur kittens,
     +150 sur vws en 150 s contre +990 pour le MILP.
   - Le temps part presque entièrement dans le solveur (HiGHS), pas dans la construction du modèle.
+
+### Essai 4 (19:07) — LNS parallèle (plusieurs groupes résolus en même temps)
+- Idée : le temps est passé dans le solveur, donc résoudre plusieurs groupes disjoints à la fois dans
+  des processus séparés (7 par instance sur cette machine à 16 cœurs). Un résultat calculé sur un état
+  entre-temps modifié est réévalué sur l'état courant et gardé seulement s'il améliore le score.
+- Réglages retenus après tests de 90 s : fenêtre 4, groupes de 4 caches (kittens) ou 5 (vws).
+  Testés aussi : kittens (k2,w16) 1 025 159, (k3,w8) 1 025 242, (k4,w4) 1 025 276 ;
+  vws (k8,w8) 611 521, (k5,w8) 612 532, (k5,w4) 612 561.
+- Mesure complète : zoo 516 557, trending 500 000, vws 616 142, kittens 1 026 036. **Total 2 658 735.**
+- Les deux courbes montent encore à la fin (kittens ~ +40/min, vws ~ +10/min) : vws sature, kittens non.
