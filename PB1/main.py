@@ -56,14 +56,12 @@ def main(args):
         "adj_list": adj_list,
     }
 
-    results = {}
-    starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
+    results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
+    
+    print("===============================================================")
     results["Base"] = starts[""]
-
-    for label, algo in [("Greedy", greedy), ("Greedy2", greedy2)]:
-        run(label, algo, starts[""], list, data, base_cost, results)
-    starts["g"] = results["Greedy"]
-    starts["g2"] = results["Greedy2"]
+    # results = {}
+    # starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
 
     video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
 
@@ -77,10 +75,16 @@ def main(args):
         ("TSS", sorted_tabu_search_func, set),
     ]
 
-    for label, algo, container in algos:
-        for start_label in ["", "g", "g2"]:
-            run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
+    # for label, algo, container in algos:
+    #     for start_label in ["", "g", "g2"]:
+    #         run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
 
+    # on fait tourner les algos de recherche locale sur la meilleure solution trouvée par les algos gloutons
+    best_greedy = max(["Greedy", "Greedy2"], key=lambda x: results[x]["score"])
+    if best_greedy == "Greedy": best_greedy = "g"
+    else: best_greedy = "g2"
+    for label, algo, container in algos:
+        run(f"{label} ({best_greedy})", algo, starts[best_greedy], container, data, base_cost, results)
 
     # ---------- Bilan ----------
     # print_comparison_table(results, metric="score", higher_is_better=True)
@@ -97,9 +101,28 @@ def main(args):
         output_file = input_file
         
     output_file = output_file.split('.')[0] + '.out'
-    create_results_files(results[best_method]["caches"], f"{RESULTS_DIR}/{output_file}")
+    # create_results_files(results[best_method]["caches"], f"{RESULTS_DIR}/{output_file}")
     # return results
     return results[best_method]
+
+def best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost):
+    """
+    Execute tout les méthodes gloutonnes et retourne la meilleure solution.
+    """
+    algos = [("Greedy", greedy), ("Greedy2", greedy2)]
+    starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
+    results = {}
+
+    for label, algo in algos:
+        run(label, algo, starts[""], list, data, base_cost, results)
+        starts[label[0].lower()] = results[label]
+
+    print_gap_to_best(results, metric="score", higher_is_better=True)
+    
+    best_greedy = max(["Greedy", "Greedy2"], key=lambda x: results[x]["score"])
+    return results, starts, best_greedy
+
+    
 
 
 def run(label, algo, start, container, data, base_cost, results):
