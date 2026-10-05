@@ -92,7 +92,7 @@ def main(args):
     print_gap_to_best(results, metric="score", higher_is_better=True)
     best_method = min(results, key=lambda x: results[x]["cost"])
     print(f"\nBest method: {best_method} with cost {results[best_method]['cost']} and improvement of "
-          f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {results[best_method]['score']:.0f}")
+          f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {int(results[best_method]['score'])}")
 
     if not os.path.exists(RESULTS_DIR):
         os.makedirs(RESULTS_DIR)
@@ -140,7 +140,7 @@ def run(label, algo, start, container, data, base_cost, results):
     res = snapshot(caches, sizes, data["endpoints"], data["requests"])
     results[label] = res
     gain = (base_cost - res["cost"]) / base_cost * 100
-    print(f"[{dt:.4f}s] {label} : {res['cost']} ({gain:.2f}%) | Score: {res['score']:.2f}")
+    print(f"[{dt:.4f}s] {label} : {res['cost']} ({gain:.2f}%) | Score: {int(res['score'])}")
 
     # save_results(results, data)
 
@@ -159,7 +159,7 @@ if __name__ == "__main__":
             results[input_file] = res
         print("\n=== Summary of all instances ===")
         for input_file, res in results.items():
-            print(f"{input_file}: cost={res['cost']}, score={res['score']:.2f}")
+            print(f"{input_file}: cost={res['cost']}, score={int(res['score'])}")
     else:
         print(f"\n=== Running on {sys.argv[1]} ===")
         results = main(sys.argv[1:])
