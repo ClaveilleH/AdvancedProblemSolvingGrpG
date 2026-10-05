@@ -82,7 +82,7 @@ def main(args):
         for label, algo, container in algos:
             run(f"{label} ({best_greedy})", algo, starts[best_greedy], container, data, base_cost, results)
     else:
-        print(starts.keys())
+        # print(starts.keys())
         for start_label in starts.keys():
             for label, algo, container in algos:
                 run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
@@ -92,7 +92,7 @@ def main(args):
     print_gap_to_best(results, metric="score", higher_is_better=True)
     best_method = min(results, key=lambda x: results[x]["cost"])
     print(f"\nBest method: {best_method} with cost {results[best_method]['cost']} and improvement of "
-          f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {results[best_method]['score']:.2f}")
+          f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {results[best_method]['score']:.0f}")
 
     if not os.path.exists(RESULTS_DIR):
         os.makedirs(RESULTS_DIR)
