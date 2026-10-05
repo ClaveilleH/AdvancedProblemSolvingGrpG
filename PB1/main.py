@@ -6,6 +6,7 @@ import os
 from utils import *
 from greedy import greedy
 from greedy2 import greedy2
+from greedy3 import greedy3
 from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 from store import *
 
@@ -20,7 +21,7 @@ INSTANCES_FILES = [
     "videos_worth_spreading.in",
     "kittens.in",
 ]
-USED_METHODS = ["Greedy", "Greedy2", "LS", "TS", "TSS"]
+USED_METHODS = ["Greedy", "Greedy2", "Greedy3", "LS", "TS", "TSS"]
 
 
 def main(args):
@@ -109,7 +110,7 @@ def best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_co
     """
     Execute tout les méthodes gloutonnes et retourne la meilleure solution.
     """
-    algos = [("Greedy", greedy), ("Greedy2", greedy2)]
+    algos = [("Greedy", greedy), ("Greedy2", greedy2), ("Greedy3", greedy3)]
 
 
     starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
@@ -120,7 +121,7 @@ def best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_co
         starts[label.lower()] = results[label]
 
     print_gap_to_best(results, metric="score", higher_is_better=True)
-    best_greedy = max(["Greedy", "Greedy2"], key=lambda x: results[x]["score"])
+    best_greedy = max(["Greedy", "Greedy2","Greedy3"], key=lambda x: results[x]["score"])
 
     return results, starts, best_greedy
 
