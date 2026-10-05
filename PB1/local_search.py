@@ -33,14 +33,21 @@ def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
             for video_id in random.sample(range(N_vid), nbVideos):
                 current_vid_latency = calculate_video_latency(  adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests)     
 
-                if video_id in cache and (cache_id, video_id, 1) not in forbidden_moves:
+                if video_id in cache and (cache_id, video_id, 0) not in forbidden_moves:
+                    #supp
                     cache.remove(video_id)
                     new_video_latency = calculate_video_latency(     adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests  )
                     current_delta = new_video_latency - current_vid_latency
                     move = (cache_id, video_id, 0)
                     cache.add(video_id) 
+                  
 
-                elif (video_id not in cache   and caches_sizes[cache_id] >= video_sizes[video_id]      and (cache_id, video_id, 0) not in forbidden_moves):
+                    
+
+                
+
+                elif (video_id not in cache   and caches_sizes[cache_id] >= video_sizes[video_id]      and (cache_id, video_id, 1) not in forbidden_moves):
+                    #add
                     cache.add(video_id)
                     new_video_latency = calculate_video_latency( adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests   )
                     current_delta = new_video_latency - current_vid_latency
@@ -71,7 +78,8 @@ def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
         if current_total_delta < best_total_delta:
             best_total_delta = current_total_delta
             best_caches = [c.copy() for c in caches]
-
+    # on mets best_caches dans caches pour que la fonction retourne le meilleur résultat trouvé
+    caches = best_caches
     return best_caches                
 
 
@@ -116,14 +124,14 @@ def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
                 video_id=sorted_vid[i]
                 current_vid_latency = calculate_video_latency(  adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests)     
 
-                if video_id in cache and (cache_id, video_id, 1) not in forbidden_moves:
+                if video_id in cache and (cache_id, video_id, 0) not in forbidden_moves:
                     cache.remove(video_id)
                     new_video_latency = calculate_video_latency(     adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests  )
                     current_delta = new_video_latency - current_vid_latency
                     move = (cache_id, video_id, 0)
                     cache.add(video_id) 
 
-                elif (video_id not in cache   and caches_sizes[cache_id] >= video_sizes[video_id]      and (cache_id, video_id, 0) not in forbidden_moves):
+                elif (video_id not in cache   and caches_sizes[cache_id] >= video_sizes[video_id]      and (cache_id, video_id, 1) not in forbidden_moves):
                     cache.add(video_id)
                     new_video_latency = calculate_video_latency( adj_list, caches, video_id, N_vid, N_endpoint, N_requests, N_caches, caches_sizes, video_sizes, endpoint_data, requests   )
                     current_delta = new_video_latency - current_vid_latency
@@ -154,7 +162,7 @@ def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
         if current_total_delta < best_total_delta:
             best_total_delta = current_total_delta
             best_caches = [c.copy() for c in caches]
-
+    caches= best_caches
     return best_caches    
 
 # ######################################## LOCAL SEARCH ########################################

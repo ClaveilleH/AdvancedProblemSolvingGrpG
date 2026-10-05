@@ -9,8 +9,8 @@ from greedy2 import greedy2
 from greedy3 import greedy3
 from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 from store import *
-
-BEST_OF_GREEDY = False
+from knapsack import multi_knapsack
+BEST_OF_GREEDY = True
 
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
@@ -62,6 +62,11 @@ def main(args):
     results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
     
     print("===============================================================")
+
+    run("Multi-Knapsack", multi_knapsack, starts[""], list, data, base_cost, results)
+    
+    
+    print("===============================================================")
     results["Base"] = starts[""]
     video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
 
@@ -76,11 +81,11 @@ def main(args):
     ]
 
     # on fait tourner les algos de recherche locale sur la meilleure solution trouvée par les algos gloutons
-    if best_greedy == "Greedy": best_greedy = "g"
-    else: best_greedy = "g2"
+    # if best_greedy == "Greedy": best_greedy = "g"
+    # else: best_greedy = "g2"
     if BEST_OF_GREEDY:
         for label, algo, container in algos:
-            run(f"{label} ({best_greedy})", algo, starts[best_greedy], container, data, base_cost, results)
+            run(f"{label} ({best_greedy})", algo, starts[best_greedy.lower()], container, data, base_cost, results)
     else:
         print(starts.keys())
         for start_label in starts.keys():
