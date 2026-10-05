@@ -102,19 +102,28 @@ def main() -> None:
     parser.add_argument("-s", "--save", metavar="NOM",
                         help="enregistre les images : NOM_input.png et/ou NOM_output.png "
                              "(NOM peut contenir un dossier, ex. resultats/kittens)")
-    parser.add_argument("-w", "--which", choices=["input", "output", "both"], default="both",
-                        help="quelles images enregistrer avec -s (défaut : both)")
+    parser.add_argument("-w", "--which", choices=["input", "output", "both"], default=None,
+                        help="quelles images afficher/enregistrer (défaut : output si -o est fourni, sinon input)")
     args = parser.parse_args()
 
-    want_input = args.which in ("input", "both")
-    want_output = args.which in ("output", "both")
+    if args.which is not None:
+        want_input = args.which in ("input", "both")
+        want_output = args.which in ("output", "both")
+    elif args.output:
+        want_input = False
+        want_output = True
+    else:
+        want_input = True
+        want_output = False
+
     if args.save and want_output and not want_input and not args.output:
         parser.error("--which output nécessite un fichier de sortie (-o)")
 
     prob = read_input(args.input)
-    print(f"Entrée : {prob.n_videos} vidéos, {prob.n_endpoints} endpoints, "
-          f"{prob.n_request_descs} descriptions de requêtes, "
-          f"{prob.n_caches} caches de {prob.cache_capacity} Mo")
+    if not args.output:
+        print(f"Entrée : {prob.n_videos} vidéos, {prob.n_endpoints} endpoints, "
+              f"{prob.n_request_descs} descriptions de requêtes, "
+              f"{prob.n_caches} caches de {prob.cache_capacity} Mo")
 
     stats = None
     if args.output:
@@ -134,10 +143,8 @@ def main() -> None:
         if args.save and os.path.dirname(args.save):
             os.makedirs(os.path.dirname(args.save), exist_ok=True)
 
-        # Sans -s, on garde l'ancien comportement : tout est affiché (pas d'enregistrement).
-        # Avec -s, --which limite les figures créées à celles demandées.
-        make_input = want_input or not args.save
-        make_output = (want_output or not args.save) and stats is not None
+        make_input = want_input
+        make_output = want_output and stats is not None
 
         if make_input:
             path = f"{args.save}_input.png" if args.save and want_input else None
