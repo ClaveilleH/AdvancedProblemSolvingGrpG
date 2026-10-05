@@ -17,7 +17,7 @@ class Problem:
     n_caches: int
     cache_capacity: int      # en Mo
     video_sizes: list        # video_sizes[v] = taille en Mo
-    endpoints: list          # liste d'Endpoint
+    endpoints: list          # liste d'Endoint
     requests: list           # liste de (id_video, id_endpoint, nb_requetes)
 
 
