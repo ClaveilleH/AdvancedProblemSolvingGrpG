@@ -163,6 +163,8 @@ def print_gap_to_best(results, metric="score", higher_is_better=True):
         value = res[metric]
         gap = abs(best - value) / abs(best) * 100 if best else 0.0
         tag = "  <- meilleur" if label == best_label else ""
+        if '(' in label:
+            label = label.replace("greedy", "g")
         print(f"{label:<{width}} | {metric}: {value:>14.2f} | écart: {-gap:>7.2f}%{tag}")
 
 def create_results_files(caches, filePath):

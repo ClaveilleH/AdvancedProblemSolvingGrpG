@@ -9,6 +9,8 @@ from greedy2 import greedy2
 from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 from store import *
 
+BEST_OF_GREEDY = False
+
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
 INSTANCES_FILES = [
@@ -60,9 +62,6 @@ def main(args):
     
     print("===============================================================")
     results["Base"] = starts[""]
-    # results = {}
-    # starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
-
     video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
 
     local_search_func   = partial(local_search, iteration=5, previous_moves=None, nbCaches=10, nbVideos=10, supp=True)
@@ -75,16 +74,17 @@ def main(args):
         ("TSS", sorted_tabu_search_func, set),
     ]
 
-    # for label, algo, container in algos:
-    #     for start_label in ["", "g", "g2"]:
-    #         run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
-
     # on fait tourner les algos de recherche locale sur la meilleure solution trouvée par les algos gloutons
-    best_greedy = max(["Greedy", "Greedy2"], key=lambda x: results[x]["score"])
     if best_greedy == "Greedy": best_greedy = "g"
     else: best_greedy = "g2"
-    for label, algo, container in algos:
-        run(f"{label} ({best_greedy})", algo, starts[best_greedy], container, data, base_cost, results)
+    if BEST_OF_GREEDY:
+        for label, algo, container in algos:
+            run(f"{label} ({best_greedy})", algo, starts[best_greedy], container, data, base_cost, results)
+    else:
+        print(starts.keys())
+        for start_label in starts.keys():
+            for label, algo, container in algos:
+                run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
 
     # ---------- Bilan ----------
     # print_comparison_table(results, metric="score", higher_is_better=True)
@@ -110,19 +110,21 @@ def best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_co
     Execute tout les méthodes gloutonnes et retourne la meilleure solution.
     """
     algos = [("Greedy", greedy), ("Greedy2", greedy2)]
+
+
     starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
     results = {}
 
     for label, algo in algos:
         run(label, algo, starts[""], list, data, base_cost, results)
-        starts[label[0].lower()] = results[label]
+        starts[label.lower()] = results[label]
 
     print_gap_to_best(results, metric="score", higher_is_better=True)
-    
     best_greedy = max(["Greedy", "Greedy2"], key=lambda x: results[x]["score"])
+
     return results, starts, best_greedy
 
-    
+
 
 
 def run(label, algo, start, container, data, base_cost, results):
