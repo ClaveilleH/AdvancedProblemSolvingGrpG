@@ -148,7 +148,8 @@ def run(label, algo, start, container, data, base_cost, results):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
-        main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
+        results = main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
+        create_results_files(results["caches"], f"{RESULTS_DIR}/{INSTANCES_FILES[0].split('.')[0]}.out")
     elif sys.argv[1] == "all":
         results = {}
         for input_file in [f"{INSTANCES_DIR}/{f}" for f in INSTANCES_FILES]:
@@ -159,4 +160,6 @@ if __name__ == "__main__":
         for input_file, res in results.items():
             print(f"{input_file}: cost={res['cost']}, score={res['score']:.2f}")
     else:
-        main(sys.argv[1:])
+        print(f"\n=== Running on {sys.argv[1]} ===")
+        results = main(sys.argv[1:])
+        create_results_files(results["caches"], f"{RESULTS_DIR}/{sys.argv[1].split('/')[-1].split('.')[0]}.out")
