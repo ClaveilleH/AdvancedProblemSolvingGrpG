@@ -65,6 +65,7 @@ def compute_score(cache, endpoints, requests):
 
     total_requests = sum(num_requests for _, _, num_requests in requests)
     average_time_saved = sum(lst) / total_requests if total_requests > 0 else 0
+    average_time_saved = int(average_time_saved)  # Convert to integer
     return average_time_saved
 
 
@@ -94,6 +95,9 @@ def read_input_file(input_file):
             requests.append((video_id, endpoint_id, num_requests))
     except FileNotFoundError:
             print(f"Error: File '{input_file}' not found.")
+            return
+    except ValueError as ve:
+            print(f"Error: Invalid data format in '{input_file}'. {ve}")
             return
 
     return N_vid, N_endpoint, N_request, N_cache, cache_size, video_sizes, endpoints, requests
@@ -165,7 +169,7 @@ def print_gap_to_best(results, metric="score", higher_is_better=True):
         tag = "  <- meilleur" if label == best_label else ""
         if '(' in label:
             label = label.replace("greedy", "g")
-        print(f"{label:<{width}} | {metric}: {value:>14.2f} | écart: {-gap:>7.2f}%{tag}")
+        print(f"{label:<{width}} | {metric}: {value:>14.0f} | écart: {-gap:>7.2f}%{tag}")
 
 def create_results_files(caches, filePath):
     N = 0
