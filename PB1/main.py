@@ -73,7 +73,7 @@ def main(args):
 
     
     input_file = args[0]
-    N_vid, N_endpoint, N_request, N_cache, S_cache, video_sizes, endpoints, requests = read_input_file(input_file)
+    N_vid, N_endpoint, N_request, N_cache, S_cache, video_sizes, endpoints, caches_endpoints, requests = read_input_file(input_file)
     empty_caches = [[] for _ in range(N_cache)]  # la liste des videos stockés dans chaque cache
     empty_sizes = [S_cache] * N_cache  # la taille restante de chaque cache
 
@@ -97,6 +97,7 @@ def main(args):
         "S_cache": S_cache, "cache_size": S_cache,
         "video_sizes": video_sizes,
         "endpoints": endpoints,
+        "caches_endpoints": caches_endpoints,
         "requests": requests,
         "adj_list": adj_list,
     }
