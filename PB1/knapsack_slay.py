@@ -1,60 +1,13 @@
 from math import gcd
 from functools import reduce
+LIMIT = 1000
 
-
-def read_input_file(input_file):
-    """
-    :input_file: str, chemin vers le fichier d'entrée
-    --------- Returns ---------
-    N_vid: int, nombre de vidéos
-    N_endpoint: int, nombre d'endpoints
-    N_request: int, nombre de requêtes
-    N_cache: int, nombre de caches
-    cache_size: int, taille de chaque cache
-    video_sizes: list of int, tailles des vidéos
-    endpoints: list of tuples, chaque tuple contient (latency, linked_caches)
-                où linked_caches est une liste de tuples (cache_id, latency)
-    requests: list of tuples, chaque tuple contient (video_id, endpoint_id, num_requests)
-    caches_endpoints: list of lists, chaque sous-liste contient les endpoints liés à un cache spécifique
-
-    """
-    try:
-        f = open(input_file, 'r')
-        # data = f.read().strip().splitlines()
-    
-
-        N_vid, N_endpoint, N_request, N_cache, cache_size = map(int, f.readline().split())
-        # print(f"Number of videos: {N_vid}, Number of endpoints: {N_endpoint}, Number of requests: {N_request}, Number of caches: {N_cache}, Cache size: {cache_size}")
-        video_sizes = list(map(int, f.readline().split()))
-        endpoints = []
-        caches_endpoints = [[] for _ in range(N_cache)]  # Initialize the list for caches and their linked endpoints
-        for end_id in range(N_endpoint):
-            latency, NlinkedCaches = map(int, f.readline().split())
-            linked_caches = []
-            for cache_id in range(NlinkedCaches):
-                cache_info = list(map(int, f.readline().split()))
-                linked_caches.append((cache_info[0], cache_info[1]))  # (cache_id, latency)
-                caches_endpoints[cache_info[0]].append((end_id, cache_info[1]))
-            endpoints.append((latency, linked_caches))
-
-        last_line_index = 2 + N_endpoint * (1 + N_cache)
-
-        requests = []
-        for req_id in range(N_request):
-            video_id, endpoint_id, num_requests = map(int, f.readline().split())
-            requests.append((video_id, endpoint_id, num_requests))
-    except FileNotFoundError:
-            print(f"Error: File '{input_file}' not found.")
-            return
-    except ValueError as ve:
-            print(f"Error: Invalid data format in '{input_file}'. {ve}")
-            return
-
-    return N_vid, N_endpoint, N_request, N_cache, cache_size, video_sizes, endpoints, caches_endpoints, requests
 
 
 
 def knapsack_value(values, weights, W):
+    if sum(values)> LIMIT:
+        return 0,set()
     INF = float('inf')
     n= len(values)
     if n == 0 or W == 0:
@@ -84,6 +37,8 @@ def knapsack_value(values, weights, W):
     return score,bag 
 
 def knapsack_weight(values, weights, W):
+    if W > LIMIT:
+        return  0,set()
     n = len(values)
     if n == 0 or W == 0:
         return 0, set()
@@ -127,7 +82,8 @@ def multiknapsack_bg(data,caches,caches_sizes):
     weight,gcd_weight = preprocess_weight_genius(data)
     values,gcd_values= preprocess_values_genius(data)
     adj_list = data["adj_list"]
-    for cache_id in range(data["N_cache"]):
+    order_treatment=sorted(range(data["N_cache"]), key=lambda x: sum(values[x]), reverse=True)
+    for cache_id in order_treatment:
         capacity = caches_sizes[cache_id] // gcd_weight
         if sum(values[cache_id])>capacity:
             score, bag = knapsack_weight(values[cache_id], weight, capacity)
