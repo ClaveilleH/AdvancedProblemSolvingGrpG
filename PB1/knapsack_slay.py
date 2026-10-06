@@ -2,18 +2,6 @@ from math import gcd
 from functools import reduce
 
 
-def make_adj_list(N_vid, N_requests, requests):
-    """
-    return a list of list where res[i] coresponds to the list of index of 
-    the requests that asked for video i 
-    """
-    res = [[] for _ in range(N_vid)]
-
-    for j in range(N_requests):
-        vid_id, _, _ = requests[j]
-        res[vid_id].append(j)
-
-    return res
 
 
 def knapsack_value(values, weights, W):
@@ -83,7 +71,32 @@ def multiknapsack(data,caches,caches_sizes):
             score, bag = knapsack_value(values[cache_id], weight, capacity)
             caches[cache_id] = bag
 
-    
+def multiknapsack_bg(data,caches,caches_sizes):
+
+    endpoints = data["endpoints"]
+    requests = data["requests"]
+    weight,gcd_weight = preprocess_weight_genius(data)
+    values,gcd_values= preprocess_values_genius(data)
+    adj_list = data["adj_list"]
+    for cache_id in range(data["N_cache"]):
+        capacity = caches_sizes[cache_id] // gcd_weight
+        if sum(values[cache_id])>capacity:
+            score, bag = knapsack_weight(values[cache_id], weight, capacity)
+            caches[cache_id] = bag
+        else:
+            score, bag = knapsack_value(values[cache_id], weight, capacity)
+            caches[cache_id] = bag
+
+        for vid_id in bag:
+            for  request_id in adj_list[vid_id]:
+                    _, endpoint_id, num_requests = requests[request_id]
+                    endpoint_latency, linked_caches = endpoints[endpoint_id]
+                    for cache_id2,cache_latency in linked_caches:
+                        values[cache_id2][vid_id]-=(endpoint_latency-cache_latency)*num_requests//gcd_values[cache_id2]
+
+
+
+        
         
 def useless_object(weights,values,capacity):
     n = len(values)
@@ -105,6 +118,7 @@ def preprocess_weight_genius(data):
 
 
 def preprocess_values_genius(data):
+        gcd_values=[]
         values=[[0]*data["N_vid"] for _ in range(data["N_cache"])]
         for request in data["requests"]:
             vid_id, endpoint_id, num_request= request
@@ -117,8 +131,9 @@ def preprocess_values_genius(data):
             gcd_value=reduce(gcd, values[cache_id],0) or 1
             if gcd_value>1:
                 values[cache_id]=[v//gcd_value for v in values[cache_id]]
+            gcd_values.append(gcd_value)
 
-        return values
+        return values,gcd_values
 
 
 
