@@ -6,8 +6,7 @@ LIMIT = 1000
 
 
 def knapsack_value(values, weights, W):
-    if sum(values)> LIMIT:
-        return 0,set()
+    
     INF = float('inf')
     n= len(values)
     if n == 0 or W == 0:
@@ -37,8 +36,7 @@ def knapsack_value(values, weights, W):
     return score,bag 
 
 def knapsack_weight(values, weights, W):
-    if W > LIMIT:
-        return  0,set()
+   
     n = len(values)
     if n == 0 or W == 0:
         return 0, set()
@@ -61,12 +59,27 @@ def knapsack_weight(values, weights, W):
 
     return score, bag
 
+def knapsack_goulton(values, weights, W):
+    order = sorted(range(len(values)), key=lambda i: values[i] / weights[i], reverse=True)
+    bag = set()
+    total_weight = 0
+    total_value = 0
+    for i in order:
+        if total_weight + weights[i] <= W:
+            bag.add(i)
+            total_weight += weights[i]
+            total_value += values[i]
+    return total_value, bag
+
 def multiknapsack(data,caches,caches_sizes):
     weight, gcd_weight = preprocess_weight_genius(data)
     values,gcd_values = preprocess_values_genius(data)
     for cache_id in range(data["N_cache"]):
         capacity = caches_sizes[cache_id] // gcd_weight
-        if sum(values[cache_id])>capacity:
+        sumvalue=sum(values[cache_id])
+        if sumvalue>LIMIT and capacity>LIMIT:
+            return 0,set()
+        elif sumvalue>capacity:
 
             score, bag = knapsack_weight(values[cache_id], weight, capacity)
             caches[cache_id] = bag
