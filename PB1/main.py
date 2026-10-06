@@ -10,7 +10,13 @@ from greedy3 import greedy3
 from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 from store import *
 from knapsack import multi_knapsack
+
+PRINT = True
+
 BEST_OF_GREEDY = True
+BOG_AND_KNAPSACK = False
+
+TEST_LOCAL_SEARCH = False
 
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
@@ -20,6 +26,38 @@ INSTANCES_FILES = [
     "trending_today.in",
     "videos_worth_spreading.in",
     "kittens.in",
+]
+INSTANCES_FILES = [
+    "test.in",
+    "custom_dejavu42.in",
+    "custom_universallambda42.in",
+    "custom_universallambda42_asymmetric.in",
+    "instance1.in",
+    "instance2.in",
+    "4990_246_84901_50.in",
+    "6970_311_100000_69.in",
+    "10000_500_100000_100.in",
+    "3860_246_84901_66.in",
+    "regional_instance.in",
+    "zipF_instance.in",
+    "big.in",
+    "supra.in",
+    "INSATANC2D.in",
+    "INSTANCED.in",
+    "2_2_2_1.in",
+    "4_2_4_2.in",
+    "6_2_6_2.in",
+    "8_2_8_2.in",
+    "20_2_20_2.in",
+    "realistic_large_clustered.in",
+    "realistic_large_random.in",
+    "dense.in",
+    "dense2.in",
+    "medium_mixed_lambda.in",
+    "medium_skew_dense_dejavu.in",
+    "medium_skew_sparse_lambda.in",
+    "medium_flat_dense_dejavu.in",
+    "medium_flat_sparse_lambda.in"
 ]
 USED_METHODS = ["Greedy", "Greedy2", "Greedy3", "LS", "TS", "TSS"]
 
@@ -39,12 +77,14 @@ def main(args):
 
     current_time = time.time()
     base_cost = compute_cost(empty_caches, endpoints, requests)
-    print(f"[{time.time() - current_time:.4f}s] Base cost (no videos in caches): {base_cost}")
+    if PRINT:
+        print(f"[{time.time() - current_time:.4f}s] Base cost (no videos in caches): {base_cost}")
 
     current_time = time.time()
     global adj_list
     adj_list = make_adj_list(N_vid, N_request, requests)
-    print(f"[{time.time() - current_time:.4f}s] Adjacency list created")
+    if PRINT:
+        print(f"[{time.time() - current_time:.4f}s] Adjacency list created")
 
     data = {
         "N_vid": N_vid,
@@ -61,12 +101,13 @@ def main(args):
 
     results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
     
-    print("===============================================================")
+    if PRINT:
+        print("===============================================================")
 
     run("Multi-Knapsack", multi_knapsack, starts[""], list, data, base_cost, results)
     
-    
-    print("===============================================================")
+    if PRINT:
+        print("===============================================================")
     results["Base"] = starts[""]
     video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
 
@@ -79,6 +120,8 @@ def main(args):
         ("TS", tabu_search_func, set),
         ("TSS", sorted_tabu_search_func, set),
     ]
+    if not TEST_LOCAL_SEARCH:
+        algos = []
 
     # on fait tourner les algos de recherche locale sur la meilleure solution trouvée par les algos gloutons
     # if best_greedy == "Greedy": best_greedy = "g"
@@ -92,12 +135,14 @@ def main(args):
             for label, algo, container in algos:
                 run(f"{label} ({start_label})", algo, starts[start_label], container, data, base_cost, results)
 
+    best_method = max(results, key=lambda x: results[x]["score"])
     # ---------- Bilan ----------
     # print_comparison_table(results, metric="score", higher_is_better=True)
-    print_gap_to_best(results, metric="score", higher_is_better=True)
-    best_method = min(results, key=lambda x: results[x]["cost"])
-    print(f"\nBest method: {best_method} with cost {results[best_method]['cost']} and improvement of "
-          f"{base_cost - results[best_method]['cost']} ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {int(results[best_method]['score'])}")
+    if PRINT:
+        print_gap_to_best(results, metric="score", higher_is_better=True)
+    # best_method = min(results, key=lambda x: results[x]["cost"])
+    print(f"\nFile : {input_file.split('/')[-1]}")
+    print(f"Best method: {best_method} with ({(base_cost - results[best_method]['cost']) / base_cost * 100:.2f}%) | Score: {int(results[best_method]['score'])}")
 
     if not os.path.exists(RESULTS_DIR):
         os.makedirs(RESULTS_DIR)
@@ -109,6 +154,7 @@ def main(args):
     output_file = output_file.split('.')[0] + '.out'
     # create_results_files(results[best_method]["caches"], f"{RESULTS_DIR}/{output_file}")
     # return results
+    results[best_method]["method"] = best_method
     return results[best_method]
 
 def best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost):
@@ -125,7 +171,8 @@ def best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_co
         run(label, algo, starts[""], list, data, base_cost, results)
         starts[label.lower()] = results[label]
 
-    print_gap_to_best(results, metric="score", higher_is_better=True)
+    if PRINT:
+        print_gap_to_best(results, metric="score", higher_is_better=True)
     best_greedy = max(["Greedy", "Greedy2","Greedy3"], key=lambda x: results[x]["score"])
 
     return results, starts, best_greedy
@@ -145,11 +192,36 @@ def run(label, algo, start, container, data, base_cost, results):
     res = snapshot(caches, sizes, data["endpoints"], data["requests"])
     results[label] = res
     gain = (base_cost - res["cost"]) / base_cost * 100
-    print(f"[{dt:.4f}s] {label} : {res['cost']} ({gain:.2f}%) | Score: {int(res['score'])}")
+    if PRINT:
+        print(f"[{dt:.4f}s] {label} : {res['cost']} ({gain:.2f}%) | Score: {int(res['score'])}")
 
     # save_results(results, data)
 
 
+def exec_all():
+    all_results = {}
+    tested_instances = []
+    with open("results_summary.txt", "r") as f:
+        for line in f:
+            if line.strip() == "":
+                continue
+            instance_name = line.split(":")[0].strip()
+            tested_instances.append(instance_name)
+    f = open("results_summary.txt", "a")
+    for input_file in [f"{INSTANCES_DIR}/{f}" for f in INSTANCES_FILES]:
+        if input_file in tested_instances:
+            print(f"Skipping {input_file} (already tested)")
+            continue
+        print(f"\n=== Running on {input_file} ===")
+        res = main([input_file])
+        all_results[input_file] = res
+        f.write(f"{input_file}: method={res['method']}, score={int(res['score'])}\n")
+        f.flush()
+        create_results_files(res["caches"], f"{RESULTS_DIR}/{input_file.split('/')[-1].split('.')[0]}.out")
+    print("\n=== Summary of all instances ===")
+    for input_file, res in all_results.items():
+        print(f"{input_file}: cost={res['cost']}, score={int(res['score'])}")
+    f.close()
 
 if __name__ == "__main__":
     import sys
@@ -157,14 +229,8 @@ if __name__ == "__main__":
         results = main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
         create_results_files(results["caches"], f"{RESULTS_DIR}/{INSTANCES_FILES[0].split('.')[0]}.out")
     elif sys.argv[1] == "all":
-        results = {}
-        for input_file in [f"{INSTANCES_DIR}/{f}" for f in INSTANCES_FILES]:
-            print(f"\n=== Running on {input_file} ===")
-            res = main([input_file])
-            results[input_file] = res
-        print("\n=== Summary of all instances ===")
-        for input_file, res in results.items():
-            print(f"{input_file}: cost={res['cost']}, score={int(res['score'])}")
+        PRINT = False
+        exec_all()
     else:
         print(f"\n=== Running on {sys.argv[1]} ===")
         results = main(sys.argv[1:])
