@@ -70,7 +70,7 @@ def multiknapsack(data,caches,caches_sizes):
             print("knapsack value")
             score, bag = knapsack_value(values[cache_id], weight, capacity)
             caches[cache_id] = bag
-
+"""
 def multiknapsack_bg(data,caches,caches_sizes):
 
     endpoints = data["endpoints"]
@@ -91,10 +91,10 @@ def multiknapsack_bg(data,caches,caches_sizes):
             for  request_id in adj_list[vid_id]:
                     _, endpoint_id, num_requests = requests[request_id]
                     endpoint_latency, linked_caches = endpoints[endpoint_id]
-                    for cache_id2,cache_latency in linked_caches:
+                    for cache_id2,cache_latency2 in linked_caches:
                         values[cache_id2][vid_id]-=(endpoint_latency-cache_latency)*num_requests//gcd_values[cache_id2]
 
-
+"""
 
         
         
