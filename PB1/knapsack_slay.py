@@ -67,12 +67,10 @@ def multiknapsack(data,caches,caches_sizes):
     for cache_id in range(data["N_cache"]):
         capacity = caches_sizes[cache_id] // gcd_weight
         if sum(values[cache_id])>capacity:
-            print("knapsack weight")
 
             score, bag = knapsack_weight(values[cache_id], weight, capacity)
             caches[cache_id] = bag
         else:
-            print("knapsack value")
             score, bag = knapsack_value(values[cache_id], weight, capacity)
             caches[cache_id] = bag
 
@@ -82,8 +80,10 @@ def multiknapsack_bg(data,caches,caches_sizes):
     weight,gcd_weight = preprocess_weight_genius(data)
     values,gcd_values= preprocess_values_genius(data)
     adj_list = data["adj_list"]
-    order_treatment=sorted(range(data["N_cache"]), key=lambda x: sum(values[x]), reverse=True)
-    for cache_id in order_treatment:
+    remaining=set(range(data["N_cache"]))
+    while remaining:
+        cache_id=max(remaining,key=lambda c: sum(values[c])*gcd_values[c])
+        remaining.discard(cache_id)
         capacity = caches_sizes[cache_id] // gcd_weight
         if sum(values[cache_id])>capacity:
             score, bag = knapsack_weight(values[cache_id], weight, capacity)
