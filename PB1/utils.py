@@ -101,7 +101,7 @@ def read_input_file(input_file):
             for cache_id in range(NlinkedCaches):
                 cache_info = list(map(int, f.readline().split()))
                 linked_caches.append((cache_info[0], cache_info[1]))  # (cache_id, latency)
-                caches_endpoints[cache_info[0]].append(end_id)
+                caches_endpoints[cache_info[0]].append((end_id, cache_info[1]))
             endpoints.append((latency, linked_caches))
 
         last_line_index = 2 + N_endpoint * (1 + N_cache)
