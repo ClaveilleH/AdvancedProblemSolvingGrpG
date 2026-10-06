@@ -9,7 +9,7 @@ from greedy2 import greedy2
 from greedy3 import greedy3
 from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 from store import *
-from knapsack import multi_knapsack
+from knapsack_slay import multiknapsack_bg as multi_knapsack
 BEST_OF_GREEDY = True
 
 INSTANCES_DIR = "instances"

@@ -1,4 +1,4 @@
-LIMIT = 10000000
+LIMIT = 10000
 
 def knapsack_crespelle(values, weights, W):
     INF = float('inf')
@@ -62,6 +62,8 @@ def multi_knapsack(data,caches,caches_sizes):
     if Vmax>LIMIT:
         print(f"greater value bigger than limit : {LIMIT} the exact algo is too long ")
         return multi_knapsack_nul(data,caches,caches_sizes)
+    else:
+        print ("go for the exact algo")
     for cache_id in range(data["N_cache"]):
         capacity=caches_sizes[cache_id]
         scores,bag=knapsack_crespelle(values[cache_id],weights,capacity)
@@ -73,8 +75,8 @@ def multi_knapsack_nul(data,caches,caches_sizes):
     weights=data["video_sizes"]
     values,Vmax=preprocess_values_nul(data)
     if Vmax>LIMIT:
-        print(f"greater value bigger than limit : {LIMIT} the exact algo is too long ")
-        return multi_knapsack_nul(data,caches,caches_sizes)
+        print(f"greater value bigger than limit : {LIMIT} the looser algo is too long ")
+        return 
     for cache_id in range(data["N_cache"]):
         capacity=caches_sizes[cache_id]
         scores,bag=knapsack_crespelle(values[cache_id],weights,capacity)
