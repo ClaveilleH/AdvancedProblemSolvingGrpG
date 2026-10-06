@@ -13,8 +13,9 @@ from knapsack import multi_knapsack
 
 PRINT = True
 
+KNAPSACK = False
+
 BEST_OF_GREEDY = True
-BOG_AND_KNAPSACK = False
 
 TEST_LOCAL_SEARCH = False
 
@@ -104,7 +105,8 @@ def main(args):
     if PRINT:
         print("===============================================================")
 
-    run("Multi-Knapsack", multi_knapsack, starts[""], list, data, base_cost, results)
+    if KNAPSACK:
+        run("Multi-Knapsack", multi_knapsack, starts[""], list, data, base_cost, results)
     
     if PRINT:
         print("===============================================================")
