@@ -6,9 +6,6 @@ from functools import reduce
 LIMIT = 10000
 INF = float('inf')
 
-
-
-
 def knapsack_value(values, weights, maxCapacity):
     """
     Sac à dos exact par programmation dynamique indexée sur la valeur.

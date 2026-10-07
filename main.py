@@ -82,7 +82,6 @@ def main(args):
         print(f"[{time.time() - current_time:.4f}s] Base cost (no videos in caches): {base_cost}")
 
     current_time = time.time()
-    global adj_list
     adj_list = make_adj_list(N_vid, N_request, requests)
     if PRINT:
         print(f"[{time.time() - current_time:.4f}s] Adjacency list created")
@@ -112,7 +111,9 @@ def main(args):
     if PRINT:
         print("===============================================================")
     results["Base"] = starts[""]
-    video_sizes_sorted, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
+    # identifiants des vidéos triés de la plus demandée à la moins demandée, pour la recherche locale
+    _, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
+    data["videos_by_popularity"] = [video[0] for video in videos_info]
 
     local_search_func   = partial(local_search, iteration=5, previous_moves=None, nbCaches=10, nbVideos=10, supp=True)
     tabu_search_func = partial(random_tabu_search, nb_forbidden_moves=7, iteration=100, nbCaches=10, nbVideos=10)

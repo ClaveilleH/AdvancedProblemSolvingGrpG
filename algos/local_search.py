@@ -186,6 +186,8 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
     if iteration == 0:
         return caches, caches_sizes
 
+
+
     # print(f"previous_moves={previous_moves}")
 
     # print(f"Testing local search iteration {iteration} with {nbCaches}/{N_caches} caches and {nbVideos}/{N_vid} videos")
@@ -195,7 +197,8 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
     # ajouts
     for cache_id in range(nbCaches):
         cache = caches[cache_id]
-        for video in range(nbVideos):
+        # on ne teste que les nbVideos vidéos les plus demandées
+        for video in data["videos_by_popularity"][:nbVideos]:
             # print(f"Checking video {videoId} for cache {cache_id}")
             if video in cache:
                 continue
@@ -230,15 +233,17 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
     best_neighbor = neighbors[0] if neighbors else (float('inf'), caches, caches_sizes, None)
     # print(f"Best neighbor: {best_neighbor} with cost {best_neighbor[1]}")
     #on applique le mouvement du meilleur voisin
+    # move = (action, cache_id, video)
     if best_neighbor[4][0] == 1:
         caches[best_neighbor[4][1]].append(best_neighbor[4][2])
+        caches_sizes[best_neighbor[4][1]] -= videoSizes[best_neighbor[4][2]]
     else:
         # print(f"Supression")
         caches[best_neighbor[4][1]].remove(best_neighbor[4][2])
+        caches_sizes[best_neighbor[4][1]] += videoSizes[best_neighbor[4][2]]
     # caches[best_neighbor[4][1]].append(best_neighbor[4][2])
 
-    caches_sizes[best_neighbor[4][0]] -= videoSizes[best_neighbor[4][1]]
-    
+
 #          local_search(N_vid, N_endpoint, N_request, N_cache, adj_list, video_sizes, caches_sizes, caches, endpoints, requests, iteration=10, previous_moves=None, nbCaches=50, nbVideos=100, supp=True)
     # return local_search(N_vid, N_endpoint, N_requests, N_caches, adj_list, videoSizes, caches_sizes, caches, endpointData, requests, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
     return local_search(data, caches, caches_sizes, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
