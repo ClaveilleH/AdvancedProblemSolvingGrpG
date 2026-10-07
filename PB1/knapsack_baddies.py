@@ -92,7 +92,7 @@ def multiknapsack_bg(data,caches,caches_sizes):
     adj_list = data["adj_list"]
     remaining=set(range(data["N_cache"]))
     while remaining:
-        cache_id=max(remaining,key=lambda c: sum(values[c]))
+        cache_id=max(remaining,key=lambda c: sum(values[c])/sum(weight)     )
         remaining.discard(cache_id)
        
         capacity = caches_sizes[cache_id] 
