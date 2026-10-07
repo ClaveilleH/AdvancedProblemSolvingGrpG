@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 
-from greedy import greedy
+from algos.greedy import greedy
 from utils import compute_score, create_results_files
 
 OUTPUT_DIR_PATH = "instances/generated"

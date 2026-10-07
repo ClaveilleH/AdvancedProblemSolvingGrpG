@@ -2,7 +2,7 @@
 
 from statistics import mean
 
-from mesure_metrics import Problem
+from metrics.mesure_metrics import Problem
 
 
 class OutputStats:

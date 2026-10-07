@@ -1,6 +1,0 @@
-instances/test.in: method=Greedy, score=562500
-instances/custom_dejavu42.in: method=Multi-Knapsack, score=46059
-instances/custom_universallambda42.in: method=Multi-Knapsack, score=1196506
-instances/custom_universallambda42_asymmetric.in: method=Greedy, score=0instances/instance1.in: method=Multi-Knapsack, score=1381707
-instances/instance2.in: method=Multi-Knapsack, score=1855463
-instances/4990_246_84901_50.in: method=Multi-Knapsack, score=1675555

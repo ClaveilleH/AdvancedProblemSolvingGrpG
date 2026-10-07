@@ -4,12 +4,11 @@ from functools import partial
 import os
 
 from utils import *
-from greedy import greedy
-from greedy2 import greedy2
-from greedy3 import greedy3
-from local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
-from store import *
-from knapsack_slay import multiknapsack_bg as multi_knapsack
+from algos.greedy import greedy
+from algos.greedy2 import greedy2
+from algos.greedy3 import greedy3
+from algos.local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
+from algos.knapsack_slay import multiknapsack_bg as multi_knapsack
 #from knapsack import multi_knapsack 
 
 PRINT = True
@@ -18,7 +17,7 @@ KNAPSACK = True
 
 BEST_OF_GREEDY = True
 
-TEST_LOCAL_SEARCH = False
+TEST_LOCAL_SEARCH = True
 
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
@@ -205,13 +204,13 @@ def run(label, algo, start, container, data, base_cost, results):
 def exec_all():
     all_results = {}
     tested_instances = []
-    with open("results_summary.txt", "r") as f:
+    with open(f"{RESULTS_DIR}/results_summary.txt", "r") as f:
         for line in f:
             if line.strip() == "":
                 continue
             instance_name = line.split(":")[0].strip()
             tested_instances.append(instance_name)
-    f = open("results_summary.txt", "a")
+    f = open(f"{RESULTS_DIR}/results_summary.txt", "a")
     for input_file in [f"{INSTANCES_DIR}/{f}" for f in INSTANCES_FILES]:
         if input_file in tested_instances:
             print(f"Skipping {input_file} (already tested)")
@@ -234,6 +233,15 @@ if __name__ == "__main__":
         create_results_files(results["caches"], f"{RESULTS_DIR}/{INSTANCES_FILES[0].split('.')[0]}.out")
     elif sys.argv[1] == "all":
         PRINT = False
+        exec_all()
+    elif sys.argv[1] == "google":
+        PRINT = False
+        INSTANCES_FILES = [
+            "kittens.in",
+            "me_at_the_zoo.in",
+            "trending_today.in",
+            "videos_worth_spreading.in",
+        ]
         exec_all()
     else:
         print(f"\n=== Running on {sys.argv[1]} ===")

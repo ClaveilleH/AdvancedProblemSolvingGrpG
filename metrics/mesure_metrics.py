@@ -121,7 +121,7 @@ def main() -> None:
         placement = read_output(args.output, prob)
         print(f"Sortie : {len(placement)} caches utilisés sur {prob.n_caches}")
 
-        from plot_metrics import OutputStats
+        from metrics.plot_metrics import OutputStats
         stats = OutputStats(prob, placement)
         print()
         print(stats.report())
@@ -129,7 +129,7 @@ def main() -> None:
     if args.plots or args.save:
         import os
         import matplotlib.pyplot as plt
-        from show_metrics import plot_input_stats, plot_output_stats
+        from metrics.show_metrics import plot_input_stats, plot_output_stats
 
         if args.save and os.path.dirname(args.save):
             os.makedirs(os.path.dirname(args.save), exist_ok=True)
