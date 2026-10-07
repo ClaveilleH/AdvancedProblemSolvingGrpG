@@ -1,6 +1,4 @@
-__pycache__/
 __pycache__
-*/__pycache__
-*.pyc
-*.pyo
-*.pyd
+results/*
+instances/generated/*
+judge/judgeresults_summary.txt
