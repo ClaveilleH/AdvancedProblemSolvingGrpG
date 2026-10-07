@@ -1,6 +1,6 @@
 from math import gcd
 from functools import reduce
-LIMIT = 1000
+LIMIT = 10000
 
 
 
@@ -60,6 +60,8 @@ def knapsack_weight(values, weights, W):
     return score, bag
 
 def knapsack_goulton(values, weights, W):
+    if len(values)>LIMIT:
+        return 0,set()
     order = sorted(range(len(values)), key=lambda i: values[i] / weights[i], reverse=True)
     bag = set()
     total_weight = 0
@@ -77,8 +79,10 @@ def multiknapsack(data,caches,caches_sizes):
     for cache_id in range(data["N_cache"]):
         capacity = caches_sizes[cache_id] // gcd_weight
         sumvalue=sum(values[cache_id])
+        
         if sumvalue>LIMIT and capacity>LIMIT:
             return 0,set()
+        
         elif sumvalue>capacity:
 
             score, bag = knapsack_weight(values[cache_id], weight, capacity)
@@ -98,13 +102,22 @@ def multiknapsack_bg(data,caches,caches_sizes):
         cache_id=max(remaining,key=lambda c: sum(values[c])*gcd_values[c])
         remaining.discard(cache_id)
         capacity = caches_sizes[cache_id] // gcd_weight
-        if sum(values[cache_id])>capacity:
-            score, bag = knapsack_weight(values[cache_id], weight, capacity)
-            caches[cache_id] = bag
+        objects=[i for i in range(data["N_vid"]) if values[cache_id][i]>0 and weight[i]<=capacity]
+        sub_values=[values[cache_id][i] for i in objects]
+        sub_weight=[weight[i] for i in objects]
+        sumsubvalues=sum(sub_values)
+        if sumsubvalues>LIMIT and capacity>LIMIT:
+            score,bag=knapsack_goulton(sub_values,sub_weight,capacity)
+            
+        elif sumsubvalues > capacity:
+            score, bag = knapsack_weight(sub_values, sub_weight, capacity)
+           
         else:
-            score, bag = knapsack_value(values[cache_id], weight, capacity)
-            caches[cache_id] = bag
+            score, bag = knapsack_value(sub_values, sub_weight, capacity)
 
+        bag={objects[i] for i in bag}
+        caches[cache_id]=bag
+           
         for vid_id in bag:
             for request_id in adj_list[vid_id]:
                 _, endpoint_id, num_requests = requests[request_id]
