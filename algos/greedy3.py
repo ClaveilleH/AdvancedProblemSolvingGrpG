@@ -1,5 +1,13 @@
 def preprocess(data):
-    endpoint_video=[[] for _ in range(data["N_endpoint"])]
+    """
+    Preprocess the data to create two lists:
+    - endpoint_video: a list where each index corresponds to an endpoint and contains a list of video IDs 
+    requested by that endpoint.
+    - cacheData: a list where each index corresponds to a cache and contains a list of tuples 
+    (endpoint_id, gain) sorted by gain in descending order.
+    """
+
+    endpoint_video = [[] for _ in range(data["N_endpoint"])]
     for request in data["requests"]:
         vid_id, endpoint_id, num_requests = request
         endpoint_video[endpoint_id].append(vid_id)

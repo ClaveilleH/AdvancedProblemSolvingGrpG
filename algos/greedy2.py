@@ -10,21 +10,20 @@ def preprocess_requests(N_vid, N_endpoint, N_requests, N_caches, requests, endpo
         videos_list.add(video_id)
         video_request_count[video_id] += num_requests
         video_endpoint[video_id].append(endpoint_id)
-
-    # print(f"Nombre de videos non utilisées : {N_vid - len(videos_list)}")
     
 
-    # videos_caches = [{} for _ in range(N_vid)]
     videos_caches = [[] for _ in range(N_vid)]
     caches_list = set()
     #lister les caches pour chaque video
     for video_id in list(videos_list):
+        
         caches_accessible = []
         for endpoint_id in video_endpoint[video_id]:
             _, linked_caches = endpointData[endpoint_id]
             for cache_id, _ in linked_caches:
                 caches_accessible.append(cache_id)
-        dico = {}
+        
+        dico = {} # dictionnaire pour compter le nombre de fois qu'une video est demandée par un cache
         for cache_id in caches_accessible:
             caches_list.add(cache_id)
             if cache_id not in dico:
@@ -35,9 +34,6 @@ def preprocess_requests(N_vid, N_endpoint, N_requests, N_caches, requests, endpo
         videos_caches[video_id] = list(dico.items())
         videos_caches[video_id].sort(key=lambda x: x[1], reverse=True)  # Sort by number of requests descending
 
-    # print(videos_caches[1])
-    # print(f"Nombre de caches non utilisés : {N_caches - len(caches_list)}")
-
     video_list_sorted = sorted(list(videos_list), key=lambda x: video_request_count[x], reverse=True)
     print(f"---> {N_vid - len(video_list_sorted)} videos unused, {N_caches - len(caches_list)} caches unlinked")
     return video_list_sorted, videos_caches, caches_list
@@ -45,7 +41,12 @@ def preprocess_requests(N_vid, N_endpoint, N_requests, N_caches, requests, endpo
 
 def greedy2(data, caches, caches_sizes):
     """
-    Idée : on tr
+    Idée : on trie les videos par nombre de requêtes, 
+    puis pour chaque video on la place dans le cache qui la demande le plus de fois, si possible.
+    -----
+    :data: dictionnaire contenant toutes les données du problème
+    :caches: liste des caches, chaque cache est une liste de videos
+    :caches_sizes: liste des tailles restantes pour chaque cache
     """
     videoSizes = data["video_sizes"]
     N_vid = data["N_vid"]
