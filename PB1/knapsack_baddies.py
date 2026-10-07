@@ -1,6 +1,6 @@
 from math import gcd
 from functools import reduce
-LIMIT = 10000
+LIMIT = 100000000
 
 
 
