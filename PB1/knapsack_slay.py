@@ -60,7 +60,8 @@ def knapsack_weight(values, weights, W):
     return score, bag
 
 def knapsack_goulton(values, weights, W):
-  
+    if len(values)>LIMIT:
+        return 0,set()
     order = sorted(range(len(values)), key=lambda i: values[i] / weights[i], reverse=True)
     bag = set()
     total_weight = 0
@@ -152,6 +153,13 @@ def useless_object(weights,values,capacity):
 
     
 
+def preprocess_weight_genius(data):
+    weights=data["video_sizes"]
+    gcd_weight=reduce(gcd, weights,0) or 1 
+    if gcd_weight>1:
+        weights=[w//gcd_weight for w in weights]
+
+    return weights,gcd_weight
 
 
 def preprocess_values_genius(data):
@@ -164,9 +172,12 @@ def preprocess_values_genius(data):
                 gain = latency - cache_latency
                 if gain>0:
                     values[cache_id][vid_id]+=(gain*num_request)
-      
+        for cache_id in range(data["N_cache"]):
+            gcd_value=reduce(gcd, values[cache_id],0) or 1
+            if gcd_value>1:
+                values[cache_id]=[v//gcd_value for v in values[cache_id]]
+            gcd_values.append(gcd_value)
 
-        return values
-
+        return values,gcd_values
 
 
