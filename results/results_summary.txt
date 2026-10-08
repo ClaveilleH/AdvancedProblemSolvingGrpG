@@ -1,0 +1,31 @@
+instances/test.in: method=Greedy, score=562500
+instances/custom_dejavu42.in: method=Multi-Knapsack, score=59673
+instances/custom_universallambda42.in: method=Multi-Knapsack, score=1202345
+instances/custom_universallambda42_asymmetric.in: method=Multi-Knapsack, score=971867
+instances/instance1.in: method=Multi-Knapsack, score=1381707
+instances/instance2.in: method=Multi-Knapsack, score=1855463
+instances/4990_246_84901_50.in: method=Multi-Knapsack, score=1675555
+instances/6970_311_100000_69.in: method=Multi-Knapsack, score=1754199
+instances/10000_500_100000_100.in: method=TS (Greedy), score=1972966
+instances/3860_246_84901_66.in: method=TS (Greedy), score=1952640
+instances/regional_instance.in: method=Multi-Knapsack, score=2307580
+instances/zipF_instance.in: method=Greedy, score=1879209
+instances/big.in: method=Greedy, score=271267
+instances/supra.in: method=Greedy, score=411743
+instances/INSATANC2D.in: method=Multi-Knapsack, score=120944
+instances/INSTANCED.in: method=Multi-Knapsack, score=1283215
+instances/2_2_2_1.in: method=Greedy, score=951327
+instances/4_2_4_2.in: method=TS (Greedy), score=671392
+instances/6_2_6_2.in: method=TS (Greedy), score=665849
+instances/8_2_8_2.in: method=TSS (Greedy), score=850062
+instances/20_2_20_2.in: method=Greedy, score=524928
+instances/realistic_large_clustered.in: method=Multi-Knapsack, score=859313
+instances/realistic_large_random.in: method=PasFini, score=0
+instances/dense.in: method=OnConnaitLOptimum, score=0
+instances/dense2.in: method=OnConnaitLOptimum, score=0
+
+instances/medium_mixed_lambda.in: method=Multi-Knapsack, score=48705
+instances/medium_skew_dense_dejavu.in: method=Multi-Knapsack, score=136656
+instances/medium_skew_sparse_lambda.in: method=Multi-Knapsack, score=41561
+instances/medium_flat_dense_dejavu.in: method=Multi-Knapsack, score=86267
+instances/medium_flat_sparse_lambda.in: method=Multi-Knapsack, score=22996
