@@ -1,6 +1,6 @@
-machine : Intel64 Family 6 Model 158 Stepping 9, GenuineIntel
-coeurs  : 4
+machine : Intel Core i5-7600 (4 coeurs, 3,5 GHz), 24 Go de RAM
 systeme : Windows-10-10.0.19045-SP0
 python  : 3.11.1 (CPython)
 limite de temps par execution : 300 s
-executions en parallele : 1
+executions en parallele : 2 (bench principal et etude du voisinage)
+graines : 10 pour le tabou aleatoire (3 pour l etude du voisinage)

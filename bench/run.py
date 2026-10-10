@@ -301,6 +301,9 @@ def grid_instance(bench, instance, seeds):
 
 
 def write_machine_info(timeout, workers):
+    # on ne réécrit pas un fichier complété à la main
+    if os.path.exists(f"{DATA_DIR}/machine.txt"):
+        return
     with open(f"{DATA_DIR}/machine.txt", "w", encoding="utf-8") as f:
         f.write(f"machine : {platform.processor()}\n")
         f.write(f"coeurs  : {os.cpu_count()}\n")

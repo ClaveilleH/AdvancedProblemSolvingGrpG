@@ -89,9 +89,9 @@
     \column{0.5\textwidth}
     \textbf{Réglages}
     \begin{itemize}
-      \item \afaire{CPU, RAM, version de Python : bench/data/machine.txt}
+      \item Intel Core i5-7600, 24 Go, Python 3.11
       \item 33 instances : 4 Google, 29 de la promo
-      \item 8 algos, mêmes paramètres partout
+      \item 8 algos, paramètres de \texttt{main.py}
       \item 10 graines pour le tabou aléatoire
     \end{itemize}
     \column{0.5\textwidth}
@@ -102,7 +102,7 @@
     \end{itemize}
     \textbf{Métriques}
     \begin{itemize}
-      \item écart au meilleur score connu (\%)
+      \item écart au meilleur score de la promo (\%)
       \item temps d'exécution
       \item gain sur la solution de départ
       \item branche du sac à dos par cache
@@ -112,33 +112,35 @@
 
 % ---------------------------------------------------------------- 5
 \begin{frame}{Vue d'ensemble}
-  \fig{vue_ensemble}{0.82}
+  \fig{vue_ensemble}{0.74}
+  \small Knapsack avec mise à jour : 5,3\,\% d'écart médian, meilleur algo constructif sur 21 instances sur 28.
 \end{frame}
 
 % ---------------------------------------------------------------- 6
 \begin{frame}{Gloutons : lequel, et où ?}
   \fig{gloutons}{0.72}
-  \afaire{une phrase de constat}
+  \small Meilleur glouton : le 1 sur 17 instances, le 2 sur 11, le 3 jamais.
 \end{frame}
 
 % ---------------------------------------------------------------- 7
 \begin{frame}{Gloutons : pourquoi ?}
   \begin{columns}
-    \column{0.6\textwidth}
-    \fig{capacite}{0.7}
-    \column{0.4\textwidth}
+    \column{0.58\textwidth}
+    \fig{gloutons_gaspillage}{0.7}
+    \column{0.42\textwidth}
+    \small
     \begin{itemize}
-      \item \afaire{cause 1}
-      \item \afaire{cause 2}
-      \item \afaire{cause 3}
+      \item Glouton 3 : jusqu'à 100 copies par vidéo, 99\,\% de capacité gaspillée
+      \item Glouton 2 : une seule copie par vidéo ; 100\,\% des requêtes servies si tout endpoint voit tout cache, 15\,\% sinon
+      \item Glouton 1 : ignore la taille ; 1 à 2\,\% d'écart quand la place abonde, 65 à 86\,\% quand elle manque
     \end{itemize}
   \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------- 8
 \begin{frame}{Recherche locale : le constat}
-  \fig{recherche_locale}{0.72}
-  \afaire{une phrase de constat}
+  \fig{recherche_locale}{0.68}
+  \small Départ dégradé sur 9 à 15 instances sur 33 ; un seul gain au-dessus de 1\,\% hors instances jouets.
 \end{frame}
 
 % ---------------------------------------------------------------- 9
@@ -146,13 +148,27 @@
   \fig{voisinage}{0.62}
   \begin{itemize}
     \item Voisinage par défaut : 100 mouvements examinés par itération
-    \item \afaire{effet d'un voisinage plus grand, coût en temps}
+    \item Voisinage de 100, 400 itérations : +14,6\,\% sur une instance, moins de 1,5\,\% sur les quatre autres
+    \item Le tabou trié atteint la limite de 300 s dès le voisinage de 30
   \end{itemize}
 \end{frame}
 
 % ---------------------------------------------------------------- 10
 \begin{frame}{Knapsack : quelle résolution pour quels caches ?}
-  \fig{knapsack_branches}{0.78}
+  \begin{columns}
+    \column{0.66\textwidth}
+    \fig{knapsack_branches}{0.8}
+    \column{0.34\textwidth}
+    \small
+    Sur 3\,860 caches :
+    \begin{itemize}
+      \item DP poids : 39\,\%
+      \item DP valeur : 15\,\%
+      \item repli glouton : 8\,\%
+      \item non traités en 300 s : 39\,\%
+    \end{itemize}
+    Écart médian : 3,0\,\% en DP, 5,9\,\% avec repli.
+  \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------- 11
@@ -162,8 +178,11 @@
     \fig{knapsack_maj}{0.7}
     \column{0.4\textwidth}
     \begin{itemize}
-      \item \afaire{gain moyen de la mise à jour}
-      \item \afaire{lien avec le recouvrement des caches}
+      \item 1 cache par endpoint : aucun gain
+      \item 3 à 4 : +14 à +32\,\%
+      \item 7 à 8 : +72 à +95\,\%
+      \item 25 : score multiplié par 11
+      \item Sans mise à jour : 31\,\% de capacité en doublons inutiles (me\_at\_the\_zoo), 1\,\% avec
     \end{itemize}
   \end{columns}
 \end{frame}
@@ -175,23 +194,31 @@
     \column{0.5\textwidth}
     \begin{block}{Forces}
       \begin{itemize}
-        \item \afaire{...}
+        \item Knapsack avec mise à jour : 5,3\,\% d'écart médian
+        \item Gloutons en moins d'une seconde
+        \item Algos complémentaires : on garde le meilleur par instance
       \end{itemize}
     \end{block}
     \begin{block}{Opportunités}
       \begin{itemize}
-        \item \afaire{...}
+        \item Voisinage plus grand : +14,6\,\% sur une instance
+        \item Recherche locale lancée depuis le knapsack
+        \item DP plus rapide (numpy, langage compilé)
       \end{itemize}
     \end{block}
     \column{0.5\textwidth}
     \begin{block}{Faiblesses}
       \begin{itemize}
-        \item \afaire{...}
+        \item Knapsack non terminé en 300 s sur 5 instances
+        \item Recherche locale : dégrade 9 à 15 départs, gagne moins de 1\,\%
+        \item Tabou aléatoire non reproductible
       \end{itemize}
     \end{block}
     \begin{block}{Menaces}
       \begin{itemize}
-        \item \afaire{...}
+        \item Capacités plus grandes : table de DP en vidéos $\times$ capacité
+        \item Limite de temps plus stricte : 27 s médian contre 0,1 s
+        \item Instances pièges pour les algos constructifs
       \end{itemize}
     \end{block}
   \end{columns}
@@ -213,8 +240,8 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Secours : corrections identifiées}
-  \afaire{liste des corrections retenues}
+\begin{frame}{Secours : place disponible et écart}
+  \fig{capacite}{0.8}
 \end{frame}
 
 \end{document}
