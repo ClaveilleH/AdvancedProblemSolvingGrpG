@@ -133,3 +133,4 @@ videos_worth_spreading,TS,2,nbC=100;nbV=100;it=100;tabu=7,Greedy,ok,12.05,485235
 videos_worth_spreading,TSS,0,nbC=100;nbV=100;it=400;tabu=7,Greedy,timeout,300.0471,486036,486036,228441418321,484419,0.9999,3513,1,,,,,
 videos_worth_spreading,TS,0,nbC=100;nbV=100;it=400;tabu=7,Greedy,ok,52.7639,487818,487818,227551005396,484419,0.9999,3773,1,,,,,
 videos_worth_spreading,TS,1,nbC=100;nbV=100;it=400;tabu=7,Greedy,ok,53.6299,487897,487897,227511664789,484419,0.9998,3767,1,,,,,
+videos_worth_spreading,TS,2,nbC=100;nbV=100;it=400;tabu=7,Greedy,ok,56.7303,488405,488405,227257678333,484419,1.0,3775,1,,,,,
