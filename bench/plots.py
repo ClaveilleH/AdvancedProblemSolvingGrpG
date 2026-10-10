@@ -1,6 +1,5 @@
 """
 Graphiques de l'oral, à partir des CSV du bench.
-Uniquement les algos du groupe, non modifiés. Les versions corrigées sont dans bench/plots_exploration.py.
 
 Usage (depuis la racine) :
     python -m bench.plots
@@ -17,7 +16,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from bench.common import DATA_DIR, FIGURES_DIR, RUNS_CSV, GRID_CSV, FEATURES_CSV, TOY, read_csv, read_sheet
+from bench.common import BEFORE_CSV, DATA_DIR, FIGURES_DIR, RUNS_CSV, GRID_CSV, FEATURES_CSV, TOY, read_csv, read_sheet
 
 # instances du graphique des gloutons : liste vide = les NB_AUTO où les gloutons diffèrent le plus
 GREEDY_INSTANCES = []
@@ -238,6 +237,37 @@ def plot_local_search(runs):
     save(fig, "recherche_locale")
 
 
+def plot_before_after(runs, before):
+    """Recherche locale avant et après les corrections du 10/10 : combien d'instances dégradées."""
+    algos = ["LS", "TS", "TSS"]
+    if not any(before[i]["TS"] for i in list(before)):
+        return
+    labels, counts = [], []
+    for algo in algos:
+        for source, suffix in [(before, "avant"), (runs, "après")]:
+            gains = {**search_gains(source, algo, False), **search_gains(source, algo, True)}
+            counts.append([sum(g < -1e-9 for g in gains.values()), sum(abs(g) <= 1e-9 for g in gains.values()),
+                           sum(g > 1e-9 for g in gains.values())])
+            labels.append(f"{LABELS[algo]}, {suffix}")
+    fig, ax = plt.subplots(figsize=(7.5, 3.8))
+    ys = [0, 1, 2.4, 3.4, 4.8, 5.8]
+    start = [0] * len(ys)
+    for k, (name, color) in enumerate([("Dégradée", ORANGE), ("Inchangée", GREY), ("Améliorée", BLUE)]):
+        values = [c[k] for c in counts]
+        ax.barh(ys, values, left=start, height=0.75, color=color, label=name, edgecolor="white", linewidth=1.5)
+        for y, x0, v in zip(ys, start, values):
+            if v:
+                ax.text(x0 + v / 2, y, str(v), ha="center", va="center", fontsize=9, color="white" if k != 1 else INK)
+        start = [x0 + v for x0, v in zip(start, values)]
+    ax.set_yticks(ys, labels)
+    ax.invert_yaxis()
+    ax.set_xlabel("Nombre d'instances (sur 33)")
+    ax.set_title("Recherche locale avant et après correction : solution de départ dégradée ou améliorée ?", pad=24)
+    ax.grid(axis="y", visible=False)
+    ax.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2, fontsize=8)
+    save(fig, "recherche_locale_avant_apres")
+
+
 def plot_neighbourhood(grid, field="score", directory=None,
                        title="Tabu search : effet de la taille du voisinage (caches = vidéos) et du nombre d'itérations"):
     """Effet de la taille du voisinage et du nombre d'itérations, une vignette par instance."""
@@ -399,6 +429,7 @@ def main():
     plot_greedy_waste(plot_greedies(runs, ref), solutions)
     plot_heatmap(runs, ref)
     plot_local_search(runs)
+    plot_before_after(runs, load_runs(BEFORE_CSV))
     plot_neighbourhood(grid)
     plot_knapsack_branches(runs, features)
     plot_knapsack_update(runs, features)

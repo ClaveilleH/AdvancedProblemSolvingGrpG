@@ -4,7 +4,7 @@
 
 ## Protocole
 
-- **Algos mesurés** : nos 8 algos, non modifiés, avec les paramètres de `main.py` : gloutons 1, 2 et 3, knapsack indépendant, knapsack avec mise à jour, descente, tabou aléatoire et tabou trié (ces trois derniers lancés depuis le meilleur glouton).
+- **Algos mesurés** : nos 8 algos, avec les paramètres de `main.py` : gloutons 1, 2 et 3, knapsack indépendant, knapsack avec mise à jour, descente, tabou aléatoire et tabou trié (ces trois derniers lancés depuis le meilleur glouton).
 - **Instances** : 33 (4 Google, 29 de la promo, dont 5 instances jouets traitées à part).
 - **Machine** : Intel Core i5-7600, 24 Go de RAM, Windows 10, Python 3.11.
 - **Limite** : 300 s par exécution ; à la limite, on évalue l'état des caches à cet instant.
@@ -18,8 +18,9 @@
 2. **Mesuré chaque algo sur chaque instance** : 561 exécutions, score et temps, au lieu de ne garder que le meilleur algo comme le fait `main.py`.
 3. **Analysé les solutions des gloutons et des knapsacks** : part de la capacité occupée par des vidéos qui ne servent aucune requête, nombre de copies par vidéo, part des requêtes servies par un cache.
 4. **Compté les branches du knapsack** : nombre de caches résolus par DP sur le poids, DP sur la valeur, repli glouton, ou non traités à la limite de temps.
-5. **Étudié le voisinage des tabu search** sur 5 instances : 3 tailles de voisinage, 2 nombres d'itérations.
-6. **Produit les figures et le diaporama** (`figures/`, `diapo.tex`).
+5. **Corrigé la recherche locale** : les mesures montraient qu'elle dégradait la solution de départ sur 9 à 15 instances, parce qu'elle rendait le dernier état visité au lieu du meilleur. Corrigé dans `algos/local_search.py`, puis mesuré de nouveau.
+6. **Étudié le voisinage des tabu search** sur 5 instances : 3 tailles de voisinage, 2 nombres d'itérations.
+7. **Produit les figures et le diaporama** (`figures/`, `diapo.tex`).
 
 ## Ce qu'on en retient
 
@@ -27,7 +28,7 @@
 - La mise à jour entre caches rapporte d'autant plus que les endpoints voient de caches : rien pour 1 cache, +14 à +32 % pour 3 à 4, +72 à +95 % pour 7 à 8.
 - Le repli glouton du knapsack coûte environ 3 points d'écart ; le temps de calcul est le vrai problème.
 - Glouton 1 est le meilleur glouton sur 17 instances, glouton 2 sur 11, glouton 3 jamais. Chacun a une cause d'échec identifiée : taille ignorée, une seule copie par vidéo, copies inutiles.
-- La recherche locale dégrade la solution de départ sur 9 à 15 instances sur 33 et gagne moins de 1 % presque partout. Un voisinage plus grand aide sur une instance sur cinq (+14,6 %), au prix du temps.
+- Depuis la correction, la recherche locale ne dégrade plus aucune instance (contre 9 à 15 avant), mais elle gagne moins de 1 % sur 26 instances sur 28. Sur trois instances jouets, le tabou trié dépasse le meilleur score de la promo. Un voisinage plus grand aide sur une instance sur cinq (+14,7 %), au prix du temps.
 
 ## Pour tout rejouer
 
@@ -39,4 +40,4 @@ python -m bench.solution_stats all
 python -m bench.plots
 ```
 
-Les pistes d'amélioration discutées à part (hors oral) sont dans `docs/exploration/`.
+Les mesures d'avant correction sont archivées dans `bench/data/exploration/`. Les pistes non retenues pour l'oral sont dans `docs/exploration/`.

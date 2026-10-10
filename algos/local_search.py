@@ -4,7 +4,22 @@ from utils import calculate_video_latency, compute_cost
 
     # random_tabu_search(data, caches, caches_sizes, nb_forbiden_moves, iteration , nbCaches, nbVideos)
 
-def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nbCaches=None, nbVideos=None):
+def restore_best(data, caches, caches_sizes, best_caches):
+    """
+    Remet la meilleure solution rencontrée dans `caches` et recalcule la place restante de chaque cache.
+    Tout est modifié en place : c'est la liste de l'appelant qui est évaluée ensuite (voir main.run),
+    pas la valeur de retour.
+    """
+    video_sizes = data["video_sizes"]
+    for cache_id in range(data["N_cache"]):
+        caches[cache_id] = best_caches[cache_id]
+        caches_sizes[cache_id] = data["S_cache"] - sum(video_sizes[video_id] for video_id in best_caches[cache_id])
+
+
+def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration=10, nbCaches=None, nbVideos=None, seed=None):
+    # graine optionnelle, pour pouvoir rejouer une exécution
+    if seed is not None:
+        random.seed(seed)
     N_vid = data["N_vid"]
     N_endpoint = data["N_endpoint"]
     N_requests = data["N_requests"]
@@ -79,7 +94,7 @@ def random_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
             best_total_delta = current_total_delta
             best_caches = [c.copy() for c in caches]
     # on mets best_caches dans caches pour que la fonction retourne le meilleur résultat trouvé
-    caches = best_caches
+    restore_best(data, caches, caches_sizes, best_caches)
     return best_caches                
 
 
@@ -162,12 +177,12 @@ def sorted_tabu_search(data, caches, caches_sizes, nb_forbidden_moves, iteration
         if current_total_delta < best_total_delta:
             best_total_delta = current_total_delta
             best_caches = [c.copy() for c in caches]
-    caches= best_caches
+    restore_best(data, caches, caches_sizes, best_caches)
     return best_caches    
 
 # ######################################## LOCAL SEARCH ########################################
 
-def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, nbCaches=None, nbVideos=None, supp = False):
+def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, nbCaches=None, nbVideos=None, supp = False, best=None):
     N_vid = data["N_vid"]
     N_endpoint = data["N_endpoint"]
     N_requests = data["N_requests"]
@@ -177,7 +192,13 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
     requests = data["requests"]
     adj_list = data["adj_list"]
 
+    cost = compute_cost(caches, endpointData, requests)
+    # le meilleur voisin est appliqué même quand il dégrade : on garde la meilleure solution
+    # rencontrée depuis le premier appel, sous la forme (coût, copie des caches)
+    if best is None or cost < best[0]:
+        best = (cost, [list(cache) for cache in caches])
     if iteration == 0:
+        restore_best(data, caches, caches_sizes, best[1])
         return caches, caches_sizes
     if nbCaches is None or nbCaches > N_caches:
         nbCaches = N_caches
@@ -193,7 +214,6 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
     # print(f"Testing local search iteration {iteration} with {nbCaches}/{N_caches} caches and {nbVideos}/{N_vid} videos")
     # base_cost = compute_cost(caches, endpointData, requests)
     neighbors = []  # (cost, caches, caches_sizes, move)
-    cost = compute_cost(caches, endpointData, requests)
     # ajouts
     for cache_id in range(nbCaches):
         cache = caches[cache_id]
@@ -229,6 +249,7 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
     neighbors.sort(key=lambda x: x[1])
     if neighbors is None or len(neighbors) == 0:
         print(f"No neighbors found at iteration {iteration}, current state: previous_moves={previous_moves}, nVideos={nbVideos}, nCaches={nbCaches}, supp={supp}")
+        restore_best(data, caches, caches_sizes, best[1])
         return caches, caches_sizes
     best_neighbor = neighbors[0] if neighbors else (float('inf'), caches, caches_sizes, None)
     # print(f"Best neighbor: {best_neighbor} with cost {best_neighbor[1]}")
@@ -246,7 +267,7 @@ def local_search(data, caches, caches_sizes, iteration=10, previous_moves=None, 
 
 #          local_search(N_vid, N_endpoint, N_request, N_cache, adj_list, video_sizes, caches_sizes, caches, endpoints, requests, iteration=10, previous_moves=None, nbCaches=50, nbVideos=100, supp=True)
     # return local_search(N_vid, N_endpoint, N_requests, N_caches, adj_list, videoSizes, caches_sizes, caches, endpointData, requests, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
-    return local_search(data, caches, caches_sizes, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp)
+    return local_search(data, caches, caches_sizes, iteration-1, best_neighbor[4], nbCaches, nbVideos, supp, best)
                 
 
     # for videos 

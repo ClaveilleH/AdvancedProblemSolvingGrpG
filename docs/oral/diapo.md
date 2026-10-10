@@ -3,7 +3,7 @@
 Oral lundi 12/10/2026, 20 min : 2 min algo, 8 min évaluation expérimentale, 10 min de questions (voir `consignes.txt`).
 Diaporama : `diapo.tex` (Beamer, éditable à la main). Figures : `figures/`, régénérées par `python -m bench.plots`.
 
-**Tout ce qui est ici porte sur nos algos non modifiés.** Les corrections proposées par Claude, leurs mesures et la force brute sont dans `docs/exploration/` et ne vont pas dans l'oral.
+Les mesures portent sur notre code après les trois corrections de la recherche locale appliquées le 10/10 (détail dans les résultats). La force brute et les pistes non retenues sont dans `docs/exploration/` et ne vont pas dans l'oral.
 
 ## Ce qu'on veut dire (décidé le 10/10)
 
@@ -18,9 +18,9 @@ Diaporama : `diapo.tex` (Beamer, éditable à la main). Figures : `figures/`, r�
 
 ## Règles de travail avec Claude
 
-- L'oral et le diaporama portent exclusivement sur notre travail : nos algos, non modifiés.
+- L'oral et le diaporama portent exclusivement sur notre travail. Les trois corrections de la recherche locale ont été appliquées à notre code le 10/10, à notre demande.
 - Autorisé : créer de nouveaux fichiers qui génèrent de la donnée en réutilisant les fonctions existantes (dossier `bench/`).
-- Autorisé : proposer des modifications quand le code est faux. Elles sont proposées, pas appliquées, et rangées dans `docs/exploration/`.
+- Autorisé : proposer des modifications quand le code est faux. Elles sont proposées, et c'est nous qui décidons de les appliquer.
 - La force brute n'est pas évoquée à l'oral.
 - Le diaporama reste éditable à la main : LaTeX, pas de solution web.
 - Pas de phrases toutes faites dans le script : seulement les grandes lignes.
@@ -37,6 +37,7 @@ Diaporama : `diapo.tex` (Beamer, éditable à la main). Figures : `figures/`, r�
 | Parallélisme | 2 instances traitées en même temps (les temps sont donc un peu surestimés) |
 | Métriques | score, écart au meilleur score connu en %, temps, gain sur la solution de départ, capacité gaspillée, branche du knapsack par cache |
 | Référence | meilleur score de la promo par instance (VBS du Google Sheet, export du 10/10) |
+| Version du code | recherche locale corrigée le 10/10 ; les mesures d'avant correction sont archivées dans `bench/data/exploration/` |
 
 Commandes :
 
@@ -59,7 +60,7 @@ python -m bench.plots                     # figures de l'oral
 | 5 | Vue d'ensemble | écart au meilleur score connu, algo × instance | `vue_ensemble` | 0:40 |
 | 6 | Gloutons : résultats | colonnes sur les instances où ils diffèrent le plus | `gloutons` | 1:00 |
 | 7 | Gloutons : pourquoi | capacité gaspillée, place disponible | `gloutons_gaspillage` ou `capacite` | 0:50 |
-| 8 | Recherche locale : constat | instances dégradées / améliorées, gains | `recherche_locale` | 0:55 |
+| 8 | Recherche locale : constat | avant / après correction, gains | `recherche_locale_avant_apres`, `recherche_locale` | 0:55 |
 | 9 | Recherche locale : améliorable ? | voisinage et itérations | `voisinage` | 0:50 |
 | 10 | Knapsack : quelle branche ? | part des caches par branche | `knapsack_branches` | 1:00 |
 | 11 | Knapsack : mise à jour | gain selon le nombre de caches par endpoint | `knapsack_maj` | 0:45 |
@@ -98,9 +99,10 @@ Diapos de secours pour les questions : compromis temps / qualité (`temps_qualit
 - Glouton 1 : ignore la taille des vidéos. Bon quand la place est abondante ou les requêtes concentrées.
 
 **8–9. Recherche locale** (1:45)
-- Constat : dégrade la solution de départ sur 9 à 15 instances sur 33, gains inférieurs à 1 % presque partout.
-- Cause 1 : voisinage de 100 mouvements sur des millions possibles.
-- Cause 2 (à décider si on la dit) : l'état rendu est le dernier visité.
+- Constat de départ : elle dégradait la solution du glouton sur 9 à 15 instances sur 33.
+- Cause : l'état rendu était le dernier visité, pas le meilleur rencontré. Corrigé.
+- Après correction : plus aucune dégradation, mais des gains inférieurs à 1 % presque partout.
+- Cause restante : voisinage de 100 mouvements sur des millions possibles.
 - Voisinage plus grand : gain net sur une instance sur cinq, à un coût en temps qui explose pour le tabou trié.
 - Réponse : améliorable à la marge par les paramètres, pas au niveau du knapsack.
 
@@ -113,9 +115,9 @@ Diapos de secours pour les questions : compromis temps / qualité (`temps_qualit
 **12. SWOT** (1:10)
 - Deux ou trois points par case, chacun appuyé sur un résultat montré avant.
 
-## Résultats (nos algos, non modifiés)
+## Résultats
 
-Bench du 10/10 : 33 instances, 561 exécutions. Les pourcentages d'écart sont calculés hors instances jouets (28 instances), par rapport au meilleur score de la promo.
+Bench du 10/10 : 33 instances, 561 exécutions (recherche locale mesurée après correction). Les pourcentages d'écart sont calculés hors instances jouets (28 instances), par rapport au meilleur score de la promo.
 
 ### Vue d'ensemble
 
@@ -126,9 +128,9 @@ Bench du 10/10 : 33 instances, 561 exécutions. Les pourcentages d'écart sont c
 | Glouton 3 | 90,9 % | 0 | 0,03 s | 10 s |
 | Knapsack indépendant | 64,6 % | 3 | 34 s | 300 s (limite) |
 | Knapsack avec mise à jour | 5,3 % | 14 | 27 s | 300 s (limite) |
-| Descente | 21,8 % | 9 | 5 s | 211 s |
-| Tabou aléatoire | 21,8 % | 9 | 0,02 s | 14 s |
-| Tabou trié | 21,8 % | 9 | 0,3 s | 61 s |
+| Descente | 21,8 % | 9 | 7 s | 204 s |
+| Tabou aléatoire | 21,8 % | 9 | 0,02 s | 8 s |
+| Tabou trié | 21,8 % | 9 | 0,4 s | 90 s |
 
 - Le knapsack avec mise à jour est le meilleur algo constructif (ou ex aequo) sur 21 instances sur 28.
 - Les trois recherches locales ont le même écart médian : elles partent du meilleur glouton et ne le changent presque pas.
@@ -149,24 +151,38 @@ Bench du 10/10 : 33 instances, 561 exécutions. Les pourcentages d'écart sont c
 
 ### Recherche locale (paramètres de `main.py`)
 
-| | Instances dégradées | Inchangées | Améliorées |
-|---|---|---|---|
-| Descente | 9 | 10 | 14 |
-| Tabou aléatoire (moyenne de 10 graines) | 15 | 5 | 13 |
-| Tabou trié | 10 | 11 | 12 |
+Trois corrections appliquées à `algos/local_search.py` le 10/10 : les deux tabu search et la descente rendent la meilleure solution rencontrée au lieu du dernier état visité, et le tabou aléatoire accepte une graine.
 
-- Hors instances jouets, un seul gain dépasse 1 % : `4990_246_84901_50` (+1,5 % descente, +4,8 % tabou aléatoire, +3,3 % tabou trié).
-- Pertes notables : descente à 0 sur `2_2_2_1` (départ 951 327), tabou trié −1,7 % sur `dense2`.
-- Le tabou aléatoire n'est pas reproductible : sur `4_2_4_2`, l'écart-type entre graines vaut 26 % du score moyen ; sur `6_2_6_2`, 13 %.
+| | Dégradées | Inchangées | Améliorées |
+|---|---|---|---|
+| Descente, avant | 9 | 10 | 14 |
+| Descente, après | 0 | 18 | 15 |
+| Tabou aléatoire, avant (moyenne de 10 graines) | 15 | 5 | 13 |
+| Tabou aléatoire, après | 0 | 16 | 17 |
+| Tabou trié, avant | 10 | 11 | 12 |
+| Tabou trié, après | 0 | 17 | 16 |
+
+- Après correction, plus aucune instance n'est dégradée.
+- Hors instances jouets, deux gains dépassent 1 % : `4990_246_84901_50` (+1,5 % descente, +4,8 % tabou aléatoire, +3,3 % tabou trié) et `me_at_the_zoo` (+1,3 % tabou trié). L'écart médian reste celui du glouton de départ, 21,8 %.
+- Sur trois instances jouets, le tabou trié dépasse le meilleur score de la promo :
+
+| Instance | Meilleur de la promo | Tabou trié | Tabou aléatoire (moyenne de 10 graines) |
+|---|---|---|---|
+| `4_2_4_2` | 671 392 | 982 271 | 884 186 |
+| `6_2_6_2` | 832 174 | 998 499 | 931 969 |
+| `8_2_8_2` | 857 014 | 991 480 | 924 247 |
+
+- Le tabou aléatoire dépend de la graine : sur `4_2_4_2`, il va de 655 321 à 982 271 (écart-type de 17 % du score moyen).
 
 ### Étude du voisinage (tabu search, 5 instances)
 
 Voisinage = nombre de caches et de vidéos examinés à chaque itération (10, 30 ou 100), avec 100 ou 400 itérations.
 
-- `medium_mixed_lambda` : le tabou aléatoire passe de 0 % à +14,6 % de gain (voisinage 100, 400 itérations, 6,5 s). Il reste loin du knapsack sur cette instance.
-- `videos_worth_spreading` : +0,75 % au mieux (tabou aléatoire, 54 s). Le tabou trié atteint la limite de 300 s dès le voisinage 30 avec 400 itérations.
-- `me_at_the_zoo` : +1,25 % au mieux, mais −2,7 % pour le tabou aléatoire avec 400 itérations et un voisinage de 10.
+- `medium_mixed_lambda` : le tabou aléatoire passe de +0,1 % (voisinage 10) à +4,8 % (30) puis +14,7 % (100, 400 itérations, 9 s). Il reste loin du knapsack sur cette instance. Le tabou trié plafonne à +1,2 %.
+- `videos_worth_spreading` : +0,75 % au mieux (tabou aléatoire, voisinage 100, 400 itérations, 67 s). Le tabou trié met 272 s avec un voisinage de 30 et atteint la limite de 300 s au-delà.
+- `me_at_the_zoo` : +1,3 % avec le voisinage par défaut du tabou trié ; un voisinage plus grand donne moins (+0,4 %, puis 0).
 - `zipF_instance`, `big` : aucun gain, quel que soit le réglage.
+- Passer de 100 à 400 itérations ne change rien, sauf sur les deux premières instances.
 
 ### Knapsack : branches
 
@@ -201,5 +217,5 @@ Sur les 21 instances où les deux versions finissent :
 
 | | Positif | Négatif |
 |---|---|---|
-| **Interne** | **Forces** : knapsack avec mise à jour à 5,3 % d'écart médian, meilleur constructif sur 21 instances sur 28 ; gloutons en moins d'une seconde ; algos complémentaires, `main.py` garde le meilleur par instance | **Faiblesses** : knapsack non terminé en 300 s sur 5 instances (39 % des caches non traités) ; recherche locale qui dégrade le départ sur 9 à 15 instances et gagne moins de 1 % ; tabou aléatoire non reproductible ; glouton 3 jamais compétitif |
-| **Externe** | **Opportunités** : voisinage plus grand (+14,6 % sur une instance) ; lancer la recherche locale depuis le knapsack plutôt que depuis un glouton ; DP plus rapide (numpy, langage compilé) ; glouton au gain par Mo | **Menaces** : capacités plus grandes (table de DP en vidéos × capacité, repli au-delà de 10 000) ; limite de temps plus stricte (27 s médian contre 0,1 s) ; instances pièges où tous nos algos constructifs donnent le même score |
+| **Interne** | **Forces** : knapsack avec mise à jour à 5,3 % d'écart médian, meilleur constructif sur 21 instances sur 28 ; gloutons en moins d'une seconde ; recherche locale qui ne dégrade plus jamais et dépasse le meilleur score de la promo sur 3 instances jouets ; algos complémentaires, `main.py` garde le meilleur par instance | **Faiblesses** : knapsack non terminé en 300 s sur 5 instances (39 % des caches non traités) ; recherche locale à moins de 1 % de gain sur 26 instances sur 28 ; tabou aléatoire dépendant de la graine ; glouton 3 jamais compétitif |
+| **Externe** | **Opportunités** : voisinage plus grand (+14,7 % sur une instance) ; lancer la recherche locale depuis le knapsack plutôt que depuis un glouton ; DP plus rapide (numpy, langage compilé) ; glouton au gain par Mo | **Menaces** : capacités plus grandes (table de DP en vidéos × capacité, repli au-delà de 10 000) ; limite de temps plus stricte (27 s médian contre 0,1 s) ; instances pièges où tous nos algos constructifs donnent le même score et où seule la recherche locale s'en sort |

@@ -139,8 +139,13 @@
 
 % ---------------------------------------------------------------- 8
 \begin{frame}{Recherche locale : le constat}
-  \fig{recherche_locale}{0.68}
-  \small Départ dégradé sur 9 à 15 instances sur 33 ; un seul gain au-dessus de 1\,\% hors instances jouets.
+  \fig{recherche_locale_avant_apres}{0.62}
+  \small
+  \begin{itemize}
+    \item Avant : l'état rendu était le dernier visité, pas le meilleur rencontré
+    \item Après correction : plus aucun départ dégradé, mais deux gains seulement au-dessus de 1\,\% hors instances jouets
+    \item Tabou trié au-dessus du meilleur score de la promo sur 3 instances jouets
+  \end{itemize}
 \end{frame}
 
 % ---------------------------------------------------------------- 9
@@ -148,8 +153,8 @@
   \fig{voisinage}{0.62}
   \begin{itemize}
     \item Voisinage par défaut : 100 mouvements examinés par itération
-    \item Voisinage de 100, 400 itérations : +14,6\,\% sur une instance, moins de 1,5\,\% sur les quatre autres
-    \item Le tabou trié atteint la limite de 300 s dès le voisinage de 30
+    \item Voisinage de 100, 400 itérations : +14,7\,\% sur une instance, moins de 1,5\,\% sur les quatre autres
+    \item Le tabou trié atteint la limite de 300 s dès le voisinage de 30 avec 400 itérations
   \end{itemize}
 \end{frame}
 
@@ -196,12 +201,13 @@
       \begin{itemize}
         \item Knapsack avec mise à jour : 5,3\,\% d'écart médian
         \item Gloutons en moins d'une seconde
+        \item Recherche locale qui ne dégrade plus jamais
         \item Algos complémentaires : on garde le meilleur par instance
       \end{itemize}
     \end{block}
     \begin{block}{Opportunités}
       \begin{itemize}
-        \item Voisinage plus grand : +14,6\,\% sur une instance
+        \item Voisinage plus grand : +14,7\,\% sur une instance
         \item Recherche locale lancée depuis le knapsack
         \item DP plus rapide (numpy, langage compilé)
       \end{itemize}
@@ -210,8 +216,8 @@
     \begin{block}{Faiblesses}
       \begin{itemize}
         \item Knapsack non terminé en 300 s sur 5 instances
-        \item Recherche locale : dégrade 9 à 15 départs, gagne moins de 1\,\%
-        \item Tabou aléatoire non reproductible
+        \item Recherche locale : moins de 1\,\% de gain sur 26 instances sur 28
+        \item Tabou aléatoire dépendant de la graine
       \end{itemize}
     \end{block}
     \begin{block}{Menaces}
@@ -226,6 +232,10 @@
 
 % ================================================================
 \appendix
+
+\begin{frame}{Secours : gains de la recherche locale}
+  \fig{recherche_locale}{0.8}
+\end{frame}
 
 \begin{frame}{Secours : compromis temps / qualité}
   \fig{temps_qualite}{0.8}
