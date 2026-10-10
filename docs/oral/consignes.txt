@@ -1,0 +1,4 @@
+Each group must present its experimental analysis of its solution using the problem instances dataset. The oral of 20 minutes (in English or French) will be organized in three parts as follows:
+    - Algorithmic (2 min): it must describe the solution approach in a nutshell.
+    - Experimental Evaluation (8 min): it must include the experimental protocol (settings, limits, metrics, etc), the experimental analysis with data visualization, and a SWOT analysis.
+    - Questions (10 min) about the solution and the evaluation : you can use a whiteboard for answering.
