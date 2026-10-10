@@ -41,10 +41,14 @@ python -m bench.features all                 # caractéristiques d'instances -> 
 python -m bench.run all --timeout 300        # chaque algo sur chaque instance -> bench/data/runs.csv
 python -m bench.run kittens --grid           # voisinage des tabu search -> bench/data/grid.csv
 python -m bench.solution_stats all           # placements inutiles -> bench/data/solutions.csv
-python -m bench.plots                        # figures -> docs/oral/figures/
+python -m bench.plots                        # figures de l'oral -> docs/oral/figures/
+python -m bench.run all --algos LS_fix TS_fix TSS_fix   # exploration -> bench/data/exploration/runs_fix.csv
+python -m bench.plots_exploration            # figures d'exploration -> docs/exploration/figures/
 ```
 
 `bench.run` reprend là où il s'est arrêté (`--force` pour repartir de zéro), lance chaque exécution dans son propre processus et, à la limite de temps, évalue l'état courant des caches. Il compte les branches du knapsack en enveloppant les fonctions de `knapsack_slay` à l'exécution.
+
+**Séparation stricte entre le travail du groupe et l'exploration.** Le diaporama et l'oral portent exclusivement sur les algos du groupe, non modifiés. Tout ce qui vient d'une modification proposée par Claude (versions corrigées de `bench/fixes.py`, colonne `score_best`, force brute complétée par Claude dans `algos/brute_force.py`) va dans `bench/data/exploration/` et `docs/exploration/`, jamais dans `bench/data/*.csv`, `docs/oral/` ni `bench/plots.py`. Ces éléments servent à discuter des améliorations possibles, pas à l'oral.
 
 `mesure_metrics` doit être lancé avec `-m` (il importe `metrics.plot_metrics`). Les binaires présents dans `judge/` sont des ELF Linux : à recompiler ou à lancer sous WSL. `metrics/solution_metric.py` (et sa copie) ne s'exécute pas en l'état (fonction `metrics_sol` vide).
 

@@ -1,2 +1,11 @@
 kittens                                LS_fix    graine=0 nbC=10;nbV=10;it=5           ok        140.8059s  score=858869 
 me_at_the_zoo                          LS_fix    graine=0 nbC=10;nbV=10;it=5           ok          0.0032s  score=471938 
+trending_today                         LS_fix    graine=0 nbC=10;nbV=10;it=5           ok         98.9838s  score=499991 
+videos_worth_spreading                 LS_fix    graine=0 nbC=10;nbV=10;it=5           ok          3.2659s  score=484449 
+custom_dejavu42                        LS_fix    graine=0 nbC=10;nbV=10;it=5           ok         15.6503s  score=19097 
+custom_universallambda42               LS_fix    graine=0 nbC=10;nbV=10;it=5           ok         40.0861s  score=185808 
+custom_universallambda42_asymmetric    LS_fix    graine=0 nbC=10;nbV=10;it=5           ok        114.6204s  score=223919 
+instance1                              LS_fix    graine=0 nbC=10;nbV=10;it=5           ok          8.7481s  score=1247191 
+instance2                              LS_fix    graine=0 nbC=10;nbV=10;it=5           ok         19.1667s  score=1494065 
+4990_246_84901_50                      LS_fix    graine=0 nbC=10;nbV=10;it=5           ok         23.0597s  score=1230043 
+6970_311_100000_69                     LS_fix    graine=0 nbC=10;nbV=10;it=5           ok         33.6914s  score=1255925 

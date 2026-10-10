@@ -125,3 +125,10 @@ videos_worth_spreading                 TSS       graine=0 nbC=30;nbV=30;it=400;t
 videos_worth_spreading                 TS        graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          3.4618s  score=485676 
 videos_worth_spreading                 TS        graine=1 nbC=30;nbV=30;it=400;tabu=7  ok          0.0182s  score=484512 
 videos_worth_spreading                 TS        graine=2 nbC=30;nbV=30;it=400;tabu=7  ok          2.1784s  score=484795 
+videos_worth_spreading                 TSS       graine=0 nbC=100;nbV=100;it=100;tabu=7 timeout   300.0458s  score=486036 
+videos_worth_spreading                 TS        graine=0 nbC=100;nbV=100;it=100;tabu=7 ok         11.6358s  score=485274 
+videos_worth_spreading                 TS        graine=1 nbC=100;nbV=100;it=100;tabu=7 ok         12.0294s  score=485270 
+videos_worth_spreading                 TS        graine=2 nbC=100;nbV=100;it=100;tabu=7 ok           12.05s  score=485235 
+videos_worth_spreading                 TSS       graine=0 nbC=100;nbV=100;it=400;tabu=7 timeout   300.0471s  score=486036 
+videos_worth_spreading                 TS        graine=0 nbC=100;nbV=100;it=400;tabu=7 ok         52.7639s  score=487818 
+videos_worth_spreading                 TS        graine=1 nbC=100;nbV=100;it=400;tabu=7 ok         53.6299s  score=487897 

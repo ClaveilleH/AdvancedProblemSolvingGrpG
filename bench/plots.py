@@ -1,5 +1,6 @@
 """
 Graphiques de l'oral, à partir des CSV du bench.
+Uniquement les algos du groupe, non modifiés. Les versions corrigées sont dans bench/plots_exploration.py.
 
 Usage (depuis la racine) :
     python -m bench.plots
@@ -43,9 +44,10 @@ plt.rcParams.update({
 })
 
 
-def save(fig, name):
-    os.makedirs(FIGURES_DIR, exist_ok=True)
-    path = f"{FIGURES_DIR}/{name}.png"
+def save(fig, name, directory=None):
+    directory = directory or FIGURES_DIR
+    os.makedirs(directory, exist_ok=True)
+    path = f"{directory}/{name}.png"
     fig.savefig(path)
     plt.close(fig)
     print(f"Image enregistrée : {path}")
@@ -84,7 +86,7 @@ def reference_scores(runs):
     sheet = read_sheet()
     res = {}
     for instance, algos in runs.items():
-        measured = [mean_score(rows, "score_best") for rows in algos.values()]
+        measured = [mean_score(rows) for algo, rows in algos.items() if algo in ALGOS]
         measured = [s for s in measured if s is not None]
         res[instance] = max([sheet.get(instance, {}).get("VBS") or 0] + measured)
     return res
@@ -180,64 +182,64 @@ def plot_heatmap(runs, ref):
 
 # ============================ 3. Recherche locale ============================
 
-def search_gains(runs, algo, toys):
+def search_gains(runs, algo, toys, field="score"):
     """{instance: gain moyen (%) de l'algo sur sa solution de départ}"""
     res = {}
     for instance, algos in runs.items():
         rows = [r for r in algos[algo] if r["status"] in ("ok", "timeout") and number(r["start_score"])]
         if rows and (instance in TOY) == toys:
-            res[instance] = mean((number(r["score"]) - number(r["start_score"])) / number(r["start_score"]) * 100 for r in rows)
+            res[instance] = mean((number(r[field]) - number(r["start_score"])) / number(r["start_score"]) * 100 for r in rows)
     return res
 
 
 def plot_local_search(runs):
-    """Recherche locale avant et après correction : combien d'instances dégradées, et quels gains."""
-    pairs = [("LS", "LS_fix"), ("TS", "TS_fix"), ("TSS", "TSS_fix")]
-    if not any(runs[i]["TS_fix"] for i in runs):
+    """Recherche locale : combien d'instances dégradées ou améliorées, et de combien."""
+    algos = ["LS", "TS", "TSS"]
+    if not any(runs[i]["TS"] for i in runs):
         return
-    fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.2), gridspec_kw={"width_ratios": [1, 1.25]})
+    fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4), gridspec_kw={"width_ratios": [1, 1.25]})
 
     # à gauche : nombre d'instances dégradées / inchangées / améliorées (toutes instances)
-    labels, counts = [], []
-    for before, after in pairs:
-        for algo, suffix in [(before, "avant"), (after, "après")]:
-            gains = {**search_gains(runs, algo, False), **search_gains(runs, algo, True)}
-            counts.append([sum(g < -1e-9 for g in gains.values()), sum(abs(g) <= 1e-9 for g in gains.values()),
-                           sum(g > 1e-9 for g in gains.values())])
-            labels.append(f"{LABELS[before]}, {suffix}")
-    ys = [0, 1, 2.4, 3.4, 4.8, 5.8]
-    start = [0] * len(ys)
+    counts = []
+    for algo in algos:
+        gains = {**search_gains(runs, algo, False), **search_gains(runs, algo, True)}
+        counts.append([sum(g < -1e-9 for g in gains.values()), sum(abs(g) <= 1e-9 for g in gains.values()),
+                       sum(g > 1e-9 for g in gains.values())])
+    ys = range(len(algos))
+    start = [0] * len(algos)
     for k, (name, color) in enumerate([("Dégradée", ORANGE), ("Inchangée", GREY), ("Améliorée", BLUE)]):
         values = [c[k] for c in counts]
-        left.barh(ys, values, left=start, height=0.75, color=color, label=name, edgecolor="white", linewidth=1.5)
+        left.barh(ys, values, left=start, height=0.6, color=color, label=name, edgecolor="white", linewidth=1.5)
         for y, x0, v in zip(ys, start, values):
             if v:
                 left.text(x0 + v / 2, y, str(v), ha="center", va="center", fontsize=9, color="white" if k != 1 else INK)
         start = [x0 + v for x0, v in zip(start, values)]
-    left.set_yticks(ys, labels)
+    left.set_yticks(ys, [LABELS[a] for a in algos])
     left.invert_yaxis()
     left.set_xlabel("Nombre d'instances")
     left.set_title("Solution de départ dégradée ou améliorée ?", pad=24)
     left.grid(axis="y", visible=False)
     left.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2, fontsize=8)
 
-    # à droite : gain après correction, sur les instances non jouets où il est le plus grand
-    after = {algo: search_gains(runs, algo, False) for _, algo in pairs}
-    instances = sorted(after["TS_fix"], key=lambda i: max(after[a].get(i, 0) for a in after), reverse=True)[:8]
+    # à droite : gain sur les instances non jouets où il se passe le plus de choses
+    gains = {algo: search_gains(runs, algo, False) for algo in algos}
+    instances = sorted(gains["TS"], key=lambda i: max(abs(gains[a].get(i, 0)) for a in algos), reverse=True)[:8]
     width = 0.26
-    for k, ((before, algo), color) in enumerate(zip(pairs, [BLUE, AQUA, ORANGE])):
+    for k, (algo, color) in enumerate(zip(algos, [BLUE, AQUA, ORANGE])):
         xs = [i + (k - 1) * width for i in range(len(instances))]
-        right.bar(xs, [after[algo].get(i, 0) for i in instances], width - 0.03, color=color, label=LABELS[before])
+        right.bar(xs, [gains[algo].get(i, 0) for i in instances], width - 0.03, color=color, label=LABELS[algo])
+    right.axhline(0, color=INK2, linewidth=0.8)
     right.set_xticks(range(len(instances)), [short(i) for i in instances], rotation=30, ha="right", fontsize=8)
     right.set_ylabel("Gain sur le glouton de départ (%)")
-    right.set_title("Gain après correction, hors instances jouets", pad=24)
+    right.set_title("Gain ou perte, hors instances jouets", pad=24)
     right.grid(axis="x", visible=False)
     right.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2, fontsize=8)
     fig.tight_layout()
     save(fig, "recherche_locale")
 
 
-def plot_neighbourhood(grid):
+def plot_neighbourhood(grid, field="score", directory=None,
+                       title="Tabu search : effet de la taille du voisinage (caches = vidéos) et du nombre d'itérations"):
     """Effet de la taille du voisinage et du nombre d'itérations, une vignette par instance."""
     instances = [i for i in grid if grid[i]["TS"]]
     if not instances:
@@ -250,7 +252,7 @@ def plot_neighbourhood(grid):
                 if r["status"] not in ("ok", "timeout") or not number(r["start_score"]):
                     continue
                 params = dict(p.split("=") for p in r["params"].split(";"))
-                gain = (number(r["score_best"]) - number(r["start_score"])) / number(r["start_score"]) * 100
+                gain = (number(r[field]) - number(r["start_score"])) / number(r["start_score"]) * 100
                 series[(algo, int(params["it"]))][int(params["nbC"])].append(gain)
         for (algo, iterations), points in sorted(series.items()):
             sizes = sorted(points)
@@ -266,10 +268,9 @@ def plot_neighbourhood(grid):
     axes[0][0].set_ylabel("Gain sur le glouton de départ (%)")
     handles, names = axes[0][-1].get_legend_handles_labels()
     fig.legend(handles, names, ncols=4, fontsize=8, loc="lower center", bbox_to_anchor=(0.5, -0.08))
-    fig.suptitle("Tabu search corrigée : effet de la taille du voisinage (caches = vidéos) et du nombre d'itérations",
-                 x=0.01, ha="left", fontsize=11, fontweight="bold")
+    fig.suptitle(title, x=0.01, ha="left", fontsize=11, fontweight="bold")
     fig.tight_layout()
-    save(fig, "voisinage")
+    save(fig, "voisinage", directory)
 
 
 # ============================ 4. Knapsack ============================
