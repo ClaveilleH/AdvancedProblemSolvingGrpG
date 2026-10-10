@@ -132,3 +132,4 @@ videos_worth_spreading                 TS        graine=2 nbC=100;nbV=100;it=100
 videos_worth_spreading                 TSS       graine=0 nbC=100;nbV=100;it=400;tabu=7 timeout   300.0471s  score=486036 
 videos_worth_spreading                 TS        graine=0 nbC=100;nbV=100;it=400;tabu=7 ok         52.7639s  score=487818 
 videos_worth_spreading                 TS        graine=1 nbC=100;nbV=100;it=400;tabu=7 ok         53.6299s  score=487897 
+videos_worth_spreading                 TS        graine=2 nbC=100;nbV=100;it=400;tabu=7 ok         56.7303s  score=488405 
