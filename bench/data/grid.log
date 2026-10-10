@@ -1,0 +1,127 @@
+me_at_the_zoo                          Greedy    graine=0                              ok          0.0028s  score=471938 
+zipF_instance                          Greedy    graine=0                              ok          0.0031s  score=1879209 
+me_at_the_zoo                          Greedy2   graine=0                              ok          0.0011s  score=351943 
+zipF_instance                          Greedy2   graine=0                              ok          0.0028s  score=778677 
+me_at_the_zoo                          Greedy3   graine=0                              ok          0.0008s  score=280477 
+zipF_instance                          Greedy3   graine=0                              ok          0.0015s  score=348509 
+me_at_the_zoo                          TSS       graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0341s  score=473590 
+zipF_instance                          TSS       graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.1908s  score=1879209 
+me_at_the_zoo                          TS        graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0161s  score=464737 
+me_at_the_zoo                          TS        graine=1 nbC=10;nbV=10;it=100;tabu=7  ok          0.0155s  score=471843 
+zipF_instance                          TS        graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0199s  score=1879209 
+me_at_the_zoo                          TS        graine=2 nbC=10;nbV=10;it=100;tabu=7  ok          0.0152s  score=472256 
+zipF_instance                          TS        graine=1 nbC=10;nbV=10;it=100;tabu=7  ok          0.0213s  score=1879209 
+zipF_instance                          TS        graine=2 nbC=10;nbV=10;it=100;tabu=7  ok          0.0229s  score=1879209 
+me_at_the_zoo                          TSS       graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.1345s  score=477824 
+me_at_the_zoo                          TS        graine=0 nbC=10;nbV=10;it=400;tabu=7  ok           0.063s  score=464737 
+me_at_the_zoo                          TS        graine=1 nbC=10;nbV=10;it=400;tabu=7  ok          0.0592s  score=467034 
+me_at_the_zoo                          TS        graine=2 nbC=10;nbV=10;it=400;tabu=7  ok          0.0591s  score=445937 
+zipF_instance                          TSS       graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.7773s  score=1879209 
+me_at_the_zoo                          TSS       graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          0.0542s  score=473911 
+me_at_the_zoo                          TS        graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          0.0378s  score=471938 
+zipF_instance                          TS        graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.0881s  score=1879209 
+me_at_the_zoo                          TS        graine=1 nbC=30;nbV=30;it=100;tabu=7  ok          0.0409s  score=471938 
+zipF_instance                          TS        graine=1 nbC=10;nbV=10;it=400;tabu=7  ok          0.0863s  score=1879209 
+me_at_the_zoo                          TS        graine=2 nbC=30;nbV=30;it=100;tabu=7  ok          0.0411s  score=471938 
+zipF_instance                          TS        graine=2 nbC=10;nbV=10;it=400;tabu=7  ok          0.1071s  score=1879209 
+me_at_the_zoo                          TSS       graine=0 nbC=30;nbV=30;it=400;tabu=7  ok           0.232s  score=473911 
+me_at_the_zoo                          TS        graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          0.1449s  score=471938 
+me_at_the_zoo                          TS        graine=1 nbC=30;nbV=30;it=400;tabu=7  ok          0.1469s  score=471938 
+zipF_instance                          TSS       graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          1.0052s  score=1879209 
+me_at_the_zoo                          TS        graine=2 nbC=30;nbV=30;it=400;tabu=7  ok          0.1489s  score=471938 
+me_at_the_zoo                          TSS       graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          0.0895s  score=471938 
+zipF_instance                          TS        graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          0.1724s  score=1879209 
+me_at_the_zoo                          TS        graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          0.1217s  score=471938 
+zipF_instance                          TS        graine=1 nbC=30;nbV=30;it=100;tabu=7  ok          0.1714s  score=1879209 
+me_at_the_zoo                          TS        graine=1 nbC=100;nbV=100;it=100;tabu=7 ok          0.1138s  score=473911 
+zipF_instance                          TS        graine=2 nbC=30;nbV=30;it=100;tabu=7  ok          0.1693s  score=1879209 
+me_at_the_zoo                          TS        graine=2 nbC=100;nbV=100;it=100;tabu=7 ok          0.1712s  score=471938 
+me_at_the_zoo                          TSS       graine=0 nbC=100;nbV=100;it=400;tabu=7 ok          0.3425s  score=471938 
+me_at_the_zoo                          TS        graine=0 nbC=100;nbV=100;it=400;tabu=7 ok          0.4585s  score=471938 
+me_at_the_zoo                          TS        graine=1 nbC=100;nbV=100;it=400;tabu=7 ok          0.4885s  score=473911 
+me_at_the_zoo                          TS        graine=2 nbC=100;nbV=100;it=400;tabu=7 ok          0.4784s  score=471938 
+big                                    Greedy    graine=0                              ok           0.008s  score=271267 
+big                                    Greedy2   graine=0                              ok            0.02s  score=271267 
+big                                    Greedy3   graine=0                              ok          0.0025s  score=122089 
+big                                    TSS       graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0055s  score=270463 
+big                                    TS        graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0015s  score=271267 
+big                                    TS        graine=1 nbC=10;nbV=10;it=100;tabu=7  ok          0.0022s  score=270911 
+big                                    TS        graine=2 nbC=10;nbV=10;it=100;tabu=7  ok          0.0016s  score=271225 
+big                                    TSS       graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.0056s  score=270463 
+zipF_instance                          TSS       graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          4.1812s  score=1879209 
+big                                    TS        graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.0014s  score=271267 
+big                                    TS        graine=1 nbC=10;nbV=10;it=400;tabu=7  ok          0.0022s  score=270911 
+big                                    TS        graine=2 nbC=10;nbV=10;it=400;tabu=7  ok          0.0024s  score=271225 
+big                                    TSS       graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          0.0107s  score=269654 
+zipF_instance                          TS        graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          0.6599s  score=1879209 
+big                                    TS        graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          0.0254s  score=270907 
+big                                    TS        graine=1 nbC=30;nbV=30;it=100;tabu=7  ok          0.0139s  score=271170 
+big                                    TS        graine=2 nbC=30;nbV=30;it=100;tabu=7  ok          0.0433s  score=271267 
+big                                    TSS       graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          0.0134s  score=269654 
+big                                    TS        graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          0.0225s  score=270907 
+zipF_instance                          TS        graine=1 nbC=30;nbV=30;it=400;tabu=7  ok          0.8381s  score=1879209 
+big                                    TS        graine=1 nbC=30;nbV=30;it=400;tabu=7  ok          0.0155s  score=271170 
+big                                    TS        graine=2 nbC=30;nbV=30;it=400;tabu=7  ok          0.0303s  score=271267 
+zipF_instance                          TS        graine=2 nbC=30;nbV=30;it=400;tabu=7  ok            0.65s  score=1879962 
+big                                    TSS       graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          0.9847s  score=271267 
+big                                    TS        graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          1.3916s  score=271082 
+big                                    TS        graine=1 nbC=100;nbV=100;it=100;tabu=7 ok          1.4541s  score=271001 
+zipF_instance                          TSS       graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          4.9872s  score=1879209 
+big                                    TS        graine=2 nbC=100;nbV=100;it=100;tabu=7 ok          1.5772s  score=270996 
+zipF_instance                          TS        graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          2.1537s  score=1879209 
+zipF_instance                          TS        graine=1 nbC=100;nbV=100;it=100;tabu=7 ok          1.8893s  score=1879209 
+big                                    TSS       graine=0 nbC=100;nbV=100;it=400;tabu=7 ok          4.8364s  score=271267 
+zipF_instance                          TS        graine=2 nbC=100;nbV=100;it=100;tabu=7 ok           1.819s  score=1879209 
+big                                    TS        graine=0 nbC=100;nbV=100;it=400;tabu=7 ok          7.1358s  score=269721 
+big                                    TS        graine=1 nbC=100;nbV=100;it=400;tabu=7 ok          7.9575s  score=269959 
+big                                    TS        graine=2 nbC=100;nbV=100;it=400;tabu=7 ok          9.2554s  score=269894 
+videos_worth_spreading                 Greedy    graine=0                              ok          0.2354s  score=484419 
+videos_worth_spreading                 Greedy2   graine=0                              ok          0.5431s  score=129415 
+videos_worth_spreading                 Greedy3   graine=0                              ok          0.0093s  score=257888 
+zipF_instance                          TSS       graine=0 nbC=100;nbV=100;it=400;tabu=7 ok         27.9577s  score=1879209 
+zipF_instance                          TS        graine=0 nbC=100;nbV=100;it=400;tabu=7 ok          7.1297s  score=1879209 
+zipF_instance                          TS        graine=1 nbC=100;nbV=100;it=400;tabu=7 ok          7.5106s  score=1879209 
+zipF_instance                          TS        graine=2 nbC=100;nbV=100;it=400;tabu=7 ok          7.8263s  score=1879209 
+medium_mixed_lambda                    Greedy    graine=0                              ok          0.1044s  score=14476 
+medium_mixed_lambda                    Greedy2   graine=0                              ok          0.4662s  score=18347 
+medium_mixed_lambda                    Greedy3   graine=0                              ok          0.0492s  score=7577 
+medium_mixed_lambda                    TSS       graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.4939s  score=18062 
+medium_mixed_lambda                    TS        graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0073s  score=18261 
+medium_mixed_lambda                    TS        graine=1 nbC=10;nbV=10;it=100;tabu=7  ok          0.0156s  score=18425 
+medium_mixed_lambda                    TS        graine=2 nbC=10;nbV=10;it=100;tabu=7  ok           0.004s  score=18347 
+medium_mixed_lambda                    TSS       graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          1.5661s  score=18051 
+medium_mixed_lambda                    TS        graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.0079s  score=18261 
+medium_mixed_lambda                    TS        graine=1 nbC=10;nbV=10;it=400;tabu=7  ok          0.0146s  score=18425 
+medium_mixed_lambda                    TS        graine=2 nbC=10;nbV=10;it=400;tabu=7  ok          0.0038s  score=18347 
+medium_mixed_lambda                    TSS       graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          1.8073s  score=18405 
+medium_mixed_lambda                    TS        graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          0.2911s  score=19173 
+medium_mixed_lambda                    TS        graine=1 nbC=30;nbV=30;it=100;tabu=7  ok          0.6489s  score=19943 
+medium_mixed_lambda                    TS        graine=2 nbC=30;nbV=30;it=100;tabu=7  ok          0.0927s  score=18562 
+medium_mixed_lambda                    TSS       graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          7.0233s  score=18373 
+medium_mixed_lambda                    TS        graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          0.2969s  score=19173 
+medium_mixed_lambda                    TS        graine=1 nbC=30;nbV=30;it=400;tabu=7  ok          0.6488s  score=19943 
+medium_mixed_lambda                    TS        graine=2 nbC=30;nbV=30;it=400;tabu=7  ok             0.1s  score=18562 
+videos_worth_spreading                 TSS       graine=0 nbC=10;nbV=10;it=100;tabu=7  ok         51.3872s  score=484525 
+videos_worth_spreading                 TS        graine=0 nbC=10;nbV=10;it=100;tabu=7  ok          0.0034s  score=484419 
+videos_worth_spreading                 TS        graine=1 nbC=10;nbV=10;it=100;tabu=7  ok           0.002s  score=484419 
+videos_worth_spreading                 TS        graine=2 nbC=10;nbV=10;it=100;tabu=7  ok          0.0017s  score=484419 
+medium_mixed_lambda                    TSS       graine=0 nbC=100;nbV=100;it=100;tabu=7 ok          6.8335s  score=18546 
+medium_mixed_lambda                    TS        graine=0 nbC=100;nbV=100;it=100;tabu=7 ok           4.824s  score=21070 
+medium_mixed_lambda                    TS        graine=1 nbC=100;nbV=100;it=100;tabu=7 ok          6.4418s  score=21020 
+medium_mixed_lambda                    TS        graine=2 nbC=100;nbV=100;it=100;tabu=7 ok          1.5569s  score=19196 
+medium_mixed_lambda                    TSS       graine=0 nbC=100;nbV=100;it=400;tabu=7 ok         29.8722s  score=18546 
+medium_mixed_lambda                    TS        graine=0 nbC=100;nbV=100;it=400;tabu=7 ok          4.6852s  score=21070 
+medium_mixed_lambda                    TS        graine=1 nbC=100;nbV=100;it=400;tabu=7 ok         13.2641s  score=22787 
+medium_mixed_lambda                    TS        graine=2 nbC=100;nbV=100;it=400;tabu=7 ok          1.4524s  score=19196 
+videos_worth_spreading                 TSS       graine=0 nbC=10;nbV=10;it=400;tabu=7  ok        202.0286s  score=484525 
+videos_worth_spreading                 TS        graine=0 nbC=10;nbV=10;it=400;tabu=7  ok          0.0019s  score=484419 
+videos_worth_spreading                 TS        graine=1 nbC=10;nbV=10;it=400;tabu=7  ok           0.002s  score=484419 
+videos_worth_spreading                 TS        graine=2 nbC=10;nbV=10;it=400;tabu=7  ok          0.0018s  score=484419 
+videos_worth_spreading                 TSS       graine=0 nbC=30;nbV=30;it=100;tabu=7  ok        181.5677s  score=486721 
+videos_worth_spreading                 TS        graine=0 nbC=30;nbV=30;it=100;tabu=7  ok          1.0576s  score=484447 
+videos_worth_spreading                 TS        graine=1 nbC=30;nbV=30;it=100;tabu=7  ok           0.018s  score=484512 
+videos_worth_spreading                 TS        graine=2 nbC=30;nbV=30;it=100;tabu=7  ok          1.0824s  score=484715 
+videos_worth_spreading                 TSS       graine=0 nbC=30;nbV=30;it=400;tabu=7  timeout   300.0454s  score=487160 
+videos_worth_spreading                 TS        graine=0 nbC=30;nbV=30;it=400;tabu=7  ok          3.4618s  score=485676 
+videos_worth_spreading                 TS        graine=1 nbC=30;nbV=30;it=400;tabu=7  ok          0.0182s  score=484512 
+videos_worth_spreading                 TS        graine=2 nbC=30;nbV=30;it=400;tabu=7  ok          2.1784s  score=484795 

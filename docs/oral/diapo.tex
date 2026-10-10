@@ -1,0 +1,220 @@
+% Oral Advanced Problem Solving - groupe G
+% Compilation : pdflatex diapo.tex (depuis docs/oral/), ou import du dossier docs/oral dans Overleaf.
+% Les figures sont dans figures/ et se régénèrent avec : python -m bench.plots
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\usetheme{default}
+\usecolortheme{dove}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{series=\bfseries}
+\graphicspath{{figures/}}
+
+% \fig{nom}{hauteur} : insère figures/nom.png, ou un cadre vide si l'image n'existe pas encore
+\newcommand{\fig}[2]{%
+  \begin{center}
+  \IfFileExists{figures/#1.png}%
+    {\includegraphics[height=#2\textheight,width=\textwidth,keepaspectratio]{#1}}%
+    {\fbox{\parbox[c][#2\textheight][c]{0.8\textwidth}{\centering figure à générer : #1.png}}}
+  \end{center}}
+
+% \afaire{texte} : rappel visible dans le PDF, à supprimer avant l'oral
+\newcommand{\afaire}[1]{\textcolor{red}{[#1]}}
+
+\title{Streaming Videos -- Hash Code 2017}
+\subtitle{Analyse expérimentale de notre solution}
+\author{Groupe G \\ \afaire{noms}}
+\date{12 octobre 2026}
+
+\begin{document}
+
+% ---------------------------------------------------------------- 1
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ================================================================
+\section{Algorithmique}
+
+% ---------------------------------------------------------------- 2
+\begin{frame}{Le problème}
+  \begin{columns}
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Des vidéos, des caches de capacité limitée, des endpoints
+      \item Chaque requête est servie par le cache le plus rapide qui contient la vidéo, sinon par le datacenter
+      \item Score : latence moyenne économisée par requête
+    \end{itemize}
+    \column{0.45\textwidth}
+    \afaire{schéma de l'énoncé}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 3
+\begin{frame}{Nos algorithmes}
+  \small
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Algo & Idée & Particularité \\
+    \midrule
+    Glouton 1 & par requête, les plus grosses d'abord & cache le plus rapide qui a la place \\
+    Glouton 2 & par vidéo, les plus populaires d'abord & cache vu par le plus de demandeurs \\
+    Glouton 3 & par cache, endpoints par gain décroissant & une vidéo par endpoint \\
+    \midrule
+    Knapsack indépendant & un sac à dos par cache & doublons entre caches voisins \\
+    Knapsack avec mise à jour & caches du plus au moins prometteur & valeurs revues après chaque cache \\
+    \midrule
+    Descente & meilleur voisin, 5 mouvements & part du meilleur glouton \\
+    Tabou aléatoire & voisinage tiré au hasard & 100 itérations, liste de 7 \\
+    Tabou trié & vidéos les plus lourdes en requêtes & déterministe \\
+    \bottomrule
+  \end{tabular}
+
+  \medskip
+  Sac à dos : deux DP exactes (sur le poids ou sur la valeur), repli sur un glouton au-delà de 10\,000.
+\end{frame}
+
+% ================================================================
+\section{Évaluation expérimentale}
+
+% ---------------------------------------------------------------- 4
+\begin{frame}{Protocole expérimental}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \textbf{Réglages}
+    \begin{itemize}
+      \item \afaire{CPU, RAM, version de Python : bench/data/machine.txt}
+      \item 33 instances : 4 Google, 29 de la promo
+      \item 8 algos, mêmes paramètres partout
+      \item 10 graines pour le tabou aléatoire
+    \end{itemize}
+    \column{0.5\textwidth}
+    \textbf{Limites}
+    \begin{itemize}
+      \item 300 s par exécution
+      \item à la limite : on évalue l'état courant
+    \end{itemize}
+    \textbf{Métriques}
+    \begin{itemize}
+      \item écart au meilleur score connu (\%)
+      \item temps d'exécution
+      \item gain sur la solution de départ
+      \item branche du sac à dos par cache
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 5
+\begin{frame}{Vue d'ensemble}
+  \fig{vue_ensemble}{0.82}
+\end{frame}
+
+% ---------------------------------------------------------------- 6
+\begin{frame}{Gloutons : lequel, et où ?}
+  \fig{gloutons}{0.72}
+  \afaire{une phrase de constat}
+\end{frame}
+
+% ---------------------------------------------------------------- 7
+\begin{frame}{Gloutons : pourquoi ?}
+  \begin{columns}
+    \column{0.6\textwidth}
+    \fig{capacite}{0.7}
+    \column{0.4\textwidth}
+    \begin{itemize}
+      \item \afaire{cause 1}
+      \item \afaire{cause 2}
+      \item \afaire{cause 3}
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 8
+\begin{frame}{Recherche locale : le constat}
+  \fig{recherche_locale}{0.72}
+  \afaire{une phrase de constat}
+\end{frame}
+
+% ---------------------------------------------------------------- 9
+\begin{frame}{Recherche locale : améliorable ?}
+  \fig{voisinage}{0.62}
+  \begin{itemize}
+    \item Voisinage par défaut : 100 mouvements examinés par itération
+    \item \afaire{effet d'un voisinage plus grand, coût en temps}
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------- 10
+\begin{frame}{Knapsack : quelle résolution pour quels caches ?}
+  \fig{knapsack_branches}{0.78}
+\end{frame}
+
+% ---------------------------------------------------------------- 11
+\begin{frame}{Knapsack : l'effet de la mise à jour}
+  \begin{columns}
+    \column{0.6\textwidth}
+    \fig{knapsack_maj}{0.7}
+    \column{0.4\textwidth}
+    \begin{itemize}
+      \item \afaire{gain moyen de la mise à jour}
+      \item \afaire{lien avec le recouvrement des caches}
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 12
+\begin{frame}{SWOT}
+  \small
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Forces}
+      \begin{itemize}
+        \item \afaire{...}
+      \end{itemize}
+    \end{block}
+    \begin{block}{Opportunités}
+      \begin{itemize}
+        \item \afaire{...}
+      \end{itemize}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{Faiblesses}
+      \begin{itemize}
+        \item \afaire{...}
+      \end{itemize}
+    \end{block}
+    \begin{block}{Menaces}
+      \begin{itemize}
+        \item \afaire{...}
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% ================================================================
+\appendix
+
+\begin{frame}{Secours : compromis temps / qualité}
+  \fig{temps_qualite}{0.8}
+\end{frame}
+
+\begin{frame}{Secours : complexité des deux DP}
+  \begin{itemize}
+    \item DP sur le poids : $O(n \cdot W)$, $n$ vidéos utiles, $W$ capacité du cache
+    \item DP sur la valeur : $O(n \cdot \sum v_i)$
+    \item On prend la plus petite table ; si les deux dépassent 10\,000 : glouton par densité
+    \item Poids et valeurs divisés par leur pgcd
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Secours : corrections identifiées}
+  \afaire{liste des corrections retenues}
+\end{frame}
+
+\end{document}
