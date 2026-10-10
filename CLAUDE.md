@@ -42,13 +42,11 @@ python -m bench.run all --timeout 300        # chaque algo sur chaque instance -
 python -m bench.run kittens --grid           # voisinage des tabu search -> bench/data/grid.csv
 python -m bench.solution_stats all           # placements inutiles -> bench/data/solutions.csv
 python -m bench.plots                        # figures de l'oral -> docs/oral/figures/
-python -m bench.run all --algos LS_fix TS_fix TSS_fix   # exploration -> bench/data/exploration/runs_fix.csv
-python -m bench.plots_exploration            # figures d'exploration -> docs/exploration/figures/
 ```
 
 `bench.run` reprend là où il s'est arrêté (`--force` pour repartir de zéro), lance chaque exécution dans son propre processus et, à la limite de temps, évalue l'état courant des caches. Il compte les branches du knapsack en enveloppant les fonctions de `knapsack_slay` à l'exécution.
 
-**Séparation stricte entre le travail du groupe et l'exploration.** Le diaporama et l'oral portent exclusivement sur les algos du groupe, non modifiés. Tout ce qui vient d'une modification proposée par Claude (versions corrigées de `bench/fixes.py`, colonne `score_best`, force brute complétée par Claude dans `algos/brute_force.py`) va dans `bench/data/exploration/` et `docs/exploration/`, jamais dans `bench/data/*.csv`, `docs/oral/` ni `bench/plots.py`. Ces éléments servent à discuter des améliorations possibles, pas à l'oral.
+**Ce qui va dans l'oral et ce qui n'y va pas.** Le diaporama et l'oral portent exclusivement sur le travail du groupe. Pour le code du groupe, proposer les corrections et ne les appliquer que sur demande explicite : le 10/10, le groupe a demandé d'appliquer trois corrections à `algos/local_search.py` (voir `docs/exploration/ameliorations.md`), les autres restent à l'état de proposition. La force brute (`algos/brute_force.py`, complétée par Claude) ne doit apparaître dans aucun document de `docs/oral/` : le groupe ne veut pas que les autres groupes sachent que les instances jouets se résolvent exactement. `bench/data/exploration/` contient les mesures d'avant correction, gardées comme archive.
 
 `mesure_metrics` doit être lancé avec `-m` (il importe `metrics.plot_metrics`). Les binaires présents dans `judge/` sont des ELF Linux : à recompiler ou à lancer sous WSL. `metrics/solution_metric.py` (et sa copie) ne s'exécute pas en l'état (fonction `metrics_sol` vide).
 
@@ -63,7 +61,7 @@ Chaque algo a la signature `algo(data, caches, caches_sizes)` et **modifie `cach
 - `data` est le dictionnaire construit dans `main.main()`. Plusieurs clés sont des alias (`N_request`/`N_requests`, `S_cache`/`cache_size`) car les algos n'utilisent pas tous le même nom.
 - `endpoints[e] = (latence_datacenter, [(cache_id, latence), ...])`, `requests[r] = (video_id, endpoint_id, nb_requêtes)`, `adj_list[v]` = indices des requêtes portant sur la vidéo `v`.
 - `caches[c]` est une `list` ou un `set` de vidéos selon l'algo : `run()` reçoit le type de conteneur attendu en paramètre (`list` pour gloutons, knapsack et `local_search`, `set` pour les deux tabu search).
-- Réaffecter `caches = ...` dans un algo n'a aucun effet pour l'appelant. C'est le cas à la fin de `random_tabu_search` et `sorted_tabu_search` : la meilleure solution rencontrée (`best_caches`) est perdue et c'est le dernier état visité qui est évalué.
+- Réaffecter `caches = ...` dans un algo n'a aucun effet pour l'appelant : il faut modifier la liste en place. Les recherches locales passent pour cela par `restore_best` (`algos/local_search.py`), qui remet la meilleure solution rencontrée dans `caches` et recalcule `caches_sizes`.
 
 ### Les algos
 
@@ -72,7 +70,7 @@ Chaque algo a la signature `algo(data, caches, caches_sizes)` et **modifie `cach
 - `greedy3.py` : par cache, parcourt ses endpoints par gain de latence décroissant.
 - `knapsack_slay.py` : version utilisée (`multiknapsack_bg` importé sous le nom `multi_knapsack`). Un sac à dos par cache, traités du plus prometteur au moins prometteur ; après chaque cache, la valeur des vidéos placées est diminuée dans les caches voisins. Choisit entre la DP indexée sur le poids et la DP indexée sur la valeur selon la plus petite table, et **se rabat sur un glouton par densité** quand capacité et somme des valeurs dépassent toutes deux `LIMIT = 10000`. Poids et valeurs sont réduits par leur pgcd. En Python pur, la DP ne termine pas en temps raisonnable sur les plus grosses instances.
 - `knapsack.py` : ancienne version, plus importée.
-- `local_search.py` : `local_search` (descente récursive, ajouts et suppressions), `random_tabu_search` (voisinage tiré au hasard, sans graine fixée, donc non reproductible) et `sorted_tabu_search`. Le voisinage est borné par `nbCaches` et `nbVideos` : `local_search` et `sorted_tabu_search` ne regardent que les `nbCaches` **premiers** caches. Les deltas sont calculés par `utils.calculate_video_latency`, qui ne réévalue que les requêtes de la vidéo concernée.
+- `local_search.py` : `local_search` (descente récursive, ajouts et suppressions), `random_tabu_search` (voisinage tiré au hasard ; paramètre `seed` optionnel, que `main.py` ne passe pas, donc non reproductible par défaut) et `sorted_tabu_search`. Le voisinage est borné par `nbCaches` et `nbVideos` : `local_search` et `sorted_tabu_search` ne regardent que les `nbCaches` **premiers** caches. Les deltas sont calculés par `utils.calculate_video_latency`, qui ne réévalue que les requêtes de la vidéo concernée.
 
 ### Coût et score
 

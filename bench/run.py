@@ -6,11 +6,9 @@ Usage (depuis la racine) :
     python -m bench.run google --timeout 300     # les 4 instances Google
     python -m bench.run kittens big --algos Greedy Greedy2 Greedy3
     python -m bench.run kittens --grid           # étude du voisinage des tabu search
-    python -m bench.run all --algos LS_fix TS_fix TSS_fix    # versions corrigées (exploration, hors oral)
 
 Sorties :
-    bench/data/runs.csv   (ou grid.csv avec --grid) : algos du groupe, non modifiés
-    bench/data/exploration/runs_fix.csv : versions corrigées, jamais mélangées aux précédentes
+    bench/data/runs.csv   (ou grid.csv avec --grid)
     results/bench/<instance>__<algo>.out   solution de chaque algo
 
 Le bench reprend là où il s'est arrêté : une ligne déjà présente dans le CSV n'est pas relancée
@@ -40,17 +38,13 @@ from algos.greedy3 import greedy3
 from algos import knapsack_slay as ks
 from algos.local_search import local_search, random_tabu_search, sorted_tabu_search
 from utils import create_results_files
-from bench.fixes import local_search_fix, random_tabu_search_fix, sorted_tabu_search_fix
-from bench.common import (DATA_DIR, SOLUTIONS_DIR, RUNS_CSV, GRID_CSV, EXPLORATION_CSV, load_instance, evaluate,
+from bench.common import (DATA_DIR, SOLUTIONS_DIR, RUNS_CSV, GRID_CSV, load_instance, evaluate,
                           read_solution, read_csv, select_instances)
 
 GREEDIES = ["Greedy", "Greedy2", "Greedy3"]
 KNAPSACKS = ["KS_indep", "KS_maj"]
 SEARCHES = ["LS", "TS", "TSS"]
-# versions corrigées (bench/fixes.py) : exploration, mesurées dans un CSV séparé
-SEARCHES_FIX = ["LS_fix", "TS_fix", "TSS_fix"]
-TABU = ["TS", "TSS", "TS_fix", "TSS_fix"]
-RANDOM = ["TS", "TS_fix"]
+TABU = ["TS", "TSS"]
 
 # paramètres de main.py
 DEFAULT_PARAMS = {
@@ -58,8 +52,6 @@ DEFAULT_PARAMS = {
     "TS": {"nbC": 10, "nbV": 10, "it": 100, "tabu": 7},
     "TSS": {"nbC": 10, "nbV": 10, "it": 100, "tabu": 7},
 }
-for _algo in SEARCHES:
-    DEFAULT_PARAMS[_algo + "_fix"] = DEFAULT_PARAMS[_algo]
 # étude du voisinage (--grid) : taille du voisinage (nbCaches = nbVideos) x nombre d'itérations
 GRID_SIZES = [10, 30, 100]
 GRID_ITERATIONS = [100, 400]
@@ -121,15 +113,6 @@ def call_algo(algo, params, data, caches, sizes):
     if algo == "TSS":
         return sorted_tabu_search(data, caches, sizes, nb_forbidden_moves=params["tabu"],
                                   iteration=params["it"], nbCaches=params["nbC"], nbVideos=params["nbV"])
-    if algo == "LS_fix":
-        return local_search_fix(data, caches, sizes, iteration=params["it"],
-                                nbCaches=params["nbC"], nbVideos=params["nbV"], supp=True)
-    if algo == "TS_fix":
-        return random_tabu_search_fix(data, caches, sizes, nb_forbidden_moves=params["tabu"],
-                                      iteration=params["it"], nbCaches=params["nbC"], nbVideos=params["nbV"])
-    if algo == "TSS_fix":
-        return sorted_tabu_search_fix(data, caches, sizes, nb_forbidden_moves=params["tabu"],
-                                      iteration=params["it"], nbCaches=params["nbC"], nbVideos=params["nbV"])
     raise ValueError(f"algo inconnu : {algo}")
 
 
@@ -176,8 +159,8 @@ def child(task, out_queue, ready, counters):
             final = [list(c) for c in caches]
             res.update(evaluate(data, final))
             res["score_best"] = res["score"]
-            # les tabu search renvoient la meilleure solution rencontrée, qui n'est pas forcément
-            # l'état final laissé dans `caches`
+            # solution renvoyée par les tabu search (la même que l'état de `caches` depuis la correction
+            # du 10/10 ; avant, c'était la meilleure rencontrée alors que `caches` gardait le dernier état)
             ret = box.get("ret")
             if task["algo"] in TABU and isinstance(ret, list):
                 res["score_best"] = evaluate(data, ret)["score"]
@@ -229,13 +212,11 @@ def run_task(task):
 
 
 class Bench:
-    def __init__(self, csv_path, timeout, force, reference_csv=None):
+    def __init__(self, csv_path, timeout, force):
         self.csv_path = csv_path
         self.timeout = timeout
         self.lock = threading.Lock()
         self.rows = [] if force else read_csv(csv_path)
-        # lignes consultées mais jamais écrites ici (les gloutons de départ des versions corrigées)
-        self.reference_rows = read_csv(reference_csv) if reference_csv else []
         os.makedirs(os.path.dirname(csv_path), exist_ok=True)
         if force or not os.path.exists(csv_path):
             with open(csv_path, "w", newline="", encoding="utf-8") as f:
@@ -243,7 +224,7 @@ class Bench:
 
     def find(self, instance, algo, seed, params):
         key = (instance, algo, str(seed), params_str(params))
-        for row in self.rows + self.reference_rows:
+        for row in self.rows:
             if (row["instance"], row["algo"], str(row["seed"]), row["params"]) == key:
                 return row
         return None
@@ -276,7 +257,7 @@ def bench_instance(bench, instance, algos, seeds):
     for algo in GREEDIES + KNAPSACKS:
         if algo in algos:
             bench.run(instance, algo)
-    searches = [algo for algo in SEARCHES + SEARCHES_FIX if algo in algos]
+    searches = [algo for algo in SEARCHES if algo in algos]
     if not searches:
         return
     start = bench.best_greedy(instance)
@@ -284,7 +265,7 @@ def bench_instance(bench, instance, algos, seeds):
         return
     for algo in searches:
         # seule la tabu search aléatoire dépend de la graine
-        for seed in range(seeds if algo in RANDOM else 1):
+        for seed in range(seeds if algo == "TS" else 1):
             bench.run(instance, algo, seed, DEFAULT_PARAMS[algo], start, save=False)
 
 
@@ -317,7 +298,7 @@ def main():
     parser = argparse.ArgumentParser(description="Mesure chaque algo sur chaque instance")
     parser.add_argument("instances", nargs="+", help="google, promo, all, ou des noms d'instances")
     parser.add_argument("--algos", nargs="+", default=GREEDIES + KNAPSACKS + SEARCHES,
-                        choices=GREEDIES + KNAPSACKS + SEARCHES + SEARCHES_FIX)
+                        choices=GREEDIES + KNAPSACKS + SEARCHES)
     parser.add_argument("--timeout", type=int, default=300, help="limite de temps par exécution, en secondes")
     parser.add_argument("--seeds", type=int, default=10, help="nombre de graines pour la tabu search aléatoire")
     parser.add_argument("--workers", type=int, default=1,
@@ -327,14 +308,8 @@ def main():
     args = parser.parse_args()
 
     instances = select_instances(args.instances)
-    fixes = [algo for algo in args.algos if algo in SEARCHES_FIX]
-    if fixes and (args.grid or len(fixes) != len(args.algos)):
-        parser.error("les versions corrigées se lancent seules : --algos LS_fix TS_fix TSS_fix")
-    if fixes:
-        bench = Bench(EXPLORATION_CSV, args.timeout, args.force, reference_csv=RUNS_CSV)
-    else:
-        bench = Bench(GRID_CSV if args.grid else RUNS_CSV, args.timeout, args.force)
-        write_machine_info(args.timeout, args.workers)
+    bench = Bench(GRID_CSV if args.grid else RUNS_CSV, args.timeout, args.force)
+    write_machine_info(args.timeout, args.workers)
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         if args.grid:
