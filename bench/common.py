@@ -8,13 +8,19 @@ from utils import read_input_file, make_adj_list, compute_cost, compute_score
 from algos.local_search import preprocess_data
 
 INSTANCES_DIR = "instances"
-DATA_DIR = "bench/data"                 # CSV produits par le bench (suivis par git)
+DATA_DIR = "bench/data"                 # mesures des algos du groupe, non modifiés
 SOLUTIONS_DIR = "results/bench"         # solutions .out de chaque algo (ignorées par git)
 FIGURES_DIR = "docs/oral/figures"
 
 RUNS_CSV = f"{DATA_DIR}/runs.csv"
 GRID_CSV = f"{DATA_DIR}/grid.csv"
 FEATURES_CSV = f"{DATA_DIR}/features.csv"
+
+# Tout ce qui ne mesure pas les algos du groupe tels quels (versions corrigées, pistes d'amélioration)
+# est rangé à part et ne doit pas servir au diaporama.
+EXPLORATION_DIR = f"{DATA_DIR}/exploration"
+EXPLORATION_CSV = f"{EXPLORATION_DIR}/runs_fix.csv"
+EXPLORATION_FIGURES_DIR = "docs/exploration/figures"
 
 GOOGLE = ["kittens", "me_at_the_zoo", "trending_today", "videos_worth_spreading"]
 PROMO = [

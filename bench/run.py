@@ -6,9 +6,11 @@ Usage (depuis la racine) :
     python -m bench.run google --timeout 300     # les 4 instances Google
     python -m bench.run kittens big --algos Greedy Greedy2 Greedy3
     python -m bench.run kittens --grid           # étude du voisinage des tabu search
+    python -m bench.run all --algos LS_fix TS_fix TSS_fix    # versions corrigées (exploration, hors oral)
 
 Sorties :
-    bench/data/runs.csv   (ou grid.csv avec --grid)
+    bench/data/runs.csv   (ou grid.csv avec --grid) : algos du groupe, non modifiés
+    bench/data/exploration/runs_fix.csv : versions corrigées, jamais mélangées aux précédentes
     results/bench/<instance>__<algo>.out   solution de chaque algo
 
 Le bench reprend là où il s'est arrêté : une ligne déjà présente dans le CSV n'est pas relancée
@@ -39,13 +41,13 @@ from algos import knapsack_slay as ks
 from algos.local_search import local_search, random_tabu_search, sorted_tabu_search
 from utils import create_results_files
 from bench.fixes import local_search_fix, random_tabu_search_fix, sorted_tabu_search_fix
-from bench.common import (DATA_DIR, SOLUTIONS_DIR, RUNS_CSV, GRID_CSV, load_instance, evaluate,
+from bench.common import (DATA_DIR, SOLUTIONS_DIR, RUNS_CSV, GRID_CSV, EXPLORATION_CSV, load_instance, evaluate,
                           read_solution, read_csv, select_instances)
 
 GREEDIES = ["Greedy", "Greedy2", "Greedy3"]
 KNAPSACKS = ["KS_indep", "KS_maj"]
 SEARCHES = ["LS", "TS", "TSS"]
-# versions corrigées (bench/fixes.py), pour comparer avant / après
+# versions corrigées (bench/fixes.py) : exploration, mesurées dans un CSV séparé
 SEARCHES_FIX = ["LS_fix", "TS_fix", "TSS_fix"]
 TABU = ["TS", "TSS", "TS_fix", "TSS_fix"]
 RANDOM = ["TS", "TS_fix"]
@@ -227,19 +229,21 @@ def run_task(task):
 
 
 class Bench:
-    def __init__(self, csv_path, timeout, force):
+    def __init__(self, csv_path, timeout, force, reference_csv=None):
         self.csv_path = csv_path
         self.timeout = timeout
         self.lock = threading.Lock()
         self.rows = [] if force else read_csv(csv_path)
-        os.makedirs(DATA_DIR, exist_ok=True)
+        # lignes consultées mais jamais écrites ici (les gloutons de départ des versions corrigées)
+        self.reference_rows = read_csv(reference_csv) if reference_csv else []
+        os.makedirs(os.path.dirname(csv_path), exist_ok=True)
         if force or not os.path.exists(csv_path):
             with open(csv_path, "w", newline="", encoding="utf-8") as f:
                 csv.DictWriter(f, fieldnames=FIELDS).writeheader()
 
     def find(self, instance, algo, seed, params):
         key = (instance, algo, str(seed), params_str(params))
-        for row in self.rows:
+        for row in self.rows + self.reference_rows:
             if (row["instance"], row["algo"], str(row["seed"]), row["params"]) == key:
                 return row
         return None
@@ -309,7 +313,7 @@ def write_machine_info(timeout, workers):
 def main():
     parser = argparse.ArgumentParser(description="Mesure chaque algo sur chaque instance")
     parser.add_argument("instances", nargs="+", help="google, promo, all, ou des noms d'instances")
-    parser.add_argument("--algos", nargs="+", default=GREEDIES + KNAPSACKS + SEARCHES + SEARCHES_FIX,
+    parser.add_argument("--algos", nargs="+", default=GREEDIES + KNAPSACKS + SEARCHES,
                         choices=GREEDIES + KNAPSACKS + SEARCHES + SEARCHES_FIX)
     parser.add_argument("--timeout", type=int, default=300, help="limite de temps par exécution, en secondes")
     parser.add_argument("--seeds", type=int, default=10, help="nombre de graines pour la tabu search aléatoire")
@@ -320,8 +324,14 @@ def main():
     args = parser.parse_args()
 
     instances = select_instances(args.instances)
-    bench = Bench(GRID_CSV if args.grid else RUNS_CSV, args.timeout, args.force)
-    write_machine_info(args.timeout, args.workers)
+    fixes = [algo for algo in args.algos if algo in SEARCHES_FIX]
+    if fixes and (args.grid or len(fixes) != len(args.algos)):
+        parser.error("les versions corrigées se lancent seules : --algos LS_fix TS_fix TSS_fix")
+    if fixes:
+        bench = Bench(EXPLORATION_CSV, args.timeout, args.force, reference_csv=RUNS_CSV)
+    else:
+        bench = Bench(GRID_CSV if args.grid else RUNS_CSV, args.timeout, args.force)
+        write_machine_info(args.timeout, args.workers)
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         if args.grid:
