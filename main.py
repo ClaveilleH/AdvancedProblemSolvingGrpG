@@ -9,6 +9,7 @@ from algos.greedy2 import greedy2
 from algos.greedy3 import greedy3
 from algos.local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
 from algos.knapsack_slay import multiknapsack_bg as multi_knapsack
+from algos.brute_force import brute_force
 #from knapsack import multi_knapsack 
 
 PRINT = True
@@ -18,6 +19,8 @@ KNAPSACK = True
 BEST_OF_GREEDY = True
 
 TEST_LOCAL_SEARCH = True
+
+BRUTE_FORCE = False
 
 INSTANCES_DIR = "instances"
 RESULTS_DIR = "results"
@@ -104,6 +107,9 @@ def main(args):
     
     if PRINT:
         print("===============================================================")
+
+    if BRUTE_FORCE:
+        run("Brute Force", brute_force, starts[""], list, data, base_cost, results)
 
     if KNAPSACK:
         run("Multi-Knapsack", multi_knapsack, starts[""], list, data, base_cost, results)
