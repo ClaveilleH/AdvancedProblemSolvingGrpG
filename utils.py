@@ -1,3 +1,4 @@
+from collections import defaultdict
 from copy import deepcopy
 
 def make_adj_list(N_vid, N_requests, requests):
@@ -106,10 +107,16 @@ def read_input_file(input_file):
 
         last_line_index = 2 + N_endpoint * (1 + N_cache)
 
-        requests = []
-        for req_id in range(N_request):
-            video_id, endpoint_id, num_requests = map(int, f.readline().split())
-            requests.append((video_id, endpoint_id, num_requests))
+        merged = defaultdict(int)
+        for _ in range(N_request):
+                video_id, endpoint_id, num_requests = map(int, f.readline().split())
+                merged[(video_id, endpoint_id)] += num_requests
+        
+        requests = [(v, e, n) for (v, e), n in merged.items()]
+        N_request = len(requests)  # Update N_request after merging duplicates
+        
+
+       
     except FileNotFoundError:
             print(f"Error: File '{input_file}' not found.")
             return
