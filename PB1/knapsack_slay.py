@@ -1,7 +1,6 @@
 from math import gcd
 from functools import reduce
-LIMIT = 10000
-
+LIMIT = 100000000
 
 
 
@@ -60,8 +59,7 @@ def knapsack_weight(values, weights, W):
     return score, bag
 
 def knapsack_goulton(values, weights, W):
-    if len(values)>LIMIT:
-        return 0,set()
+    
     order = sorted(range(len(values)), key=lambda i: values[i] / weights[i], reverse=True)
     bag = set()
     total_weight = 0
@@ -73,97 +71,93 @@ def knapsack_goulton(values, weights, W):
             total_value += values[i]
     return total_value, bag
 
-def multiknapsack(data,caches,caches_sizes):
-    weight, gcd_weight = preprocess_weight_genius(data)
-    values,gcd_values = preprocess_values_genius(data)
-    for cache_id in range(data["N_cache"]):
-        capacity = caches_sizes[cache_id] // gcd_weight
-        sumvalue=sum(values[cache_id])
-        
-        if sumvalue>LIMIT and capacity>LIMIT:
-            return 0,set()
-        
-        elif sumvalue>capacity:
-
-            score, bag = knapsack_weight(values[cache_id], weight, capacity)
-            caches[cache_id] = bag
-        else:
-            score, bag = knapsack_value(values[cache_id], weight, capacity)
-            caches[cache_id] = bag
 
 def multiknapsack_bg(data,caches,caches_sizes):
+
+
+
     endpoints = data["endpoints"]
     requests = data["requests"]
-    weight,gcd_weight = preprocess_weight_genius(data)
-    values,gcd_values= preprocess_values_genius(data)
+    weight = data["video_sizes"]
+    caches_endpoints = data["caches_endpoints"]
+
+
+
+   
+    best = {}   # (endpoint_id, vid_id) -> meilleure latence actuelle
+
+
+
+    values= preprocess_values_genius(data)
     adj_list = data["adj_list"]
     remaining=set(range(data["N_cache"]))
     while remaining:
-        cache_id=max(remaining,key=lambda c: sum(values[c])*gcd_values[c])
+        cache_id=max(remaining,key=lambda c: sum(values[c])/sum(weight)     )
         remaining.discard(cache_id)
-        capacity = caches_sizes[cache_id] // gcd_weight
+       
+        capacity = caches_sizes[cache_id] 
         objects=[i for i in range(data["N_vid"]) if values[cache_id][i]>0 and weight[i]<=capacity]
+        
+
         sub_values=[values[cache_id][i] for i in objects]
         sub_weight=[weight[i] for i in objects]
-        sumsubvalues=sum(sub_values)
-        if sumsubvalues>LIMIT and capacity>LIMIT:
-            score,bag=knapsack_goulton(sub_values,sub_weight,capacity)
+
+        gcd_values = reduce(gcd, sub_values,0) or 1
+        sub_values_reduced = [v // gcd_values for v in sub_values]
+        gcd_weights = reduce(gcd, sub_weight,0) or 1
+        sub_weight_reduced = [w // gcd_weights for w in sub_weight]
+        capacity_reduced = capacity // gcd_weights
+
+
+
+        sumsubvalues=sum(sub_values_reduced)
+        n=len(objects)
+
+
+        if sumsubvalues*n>LIMIT and capacity_reduced*n>LIMIT:
+            score,bag=knapsack_goulton(sub_values_reduced,sub_weight_reduced,capacity_reduced)
             
-        elif sumsubvalues > capacity:
-            score, bag = knapsack_weight(sub_values, sub_weight, capacity)
+        elif sumsubvalues > capacity_reduced:
+            score, bag = knapsack_weight(sub_values_reduced, sub_weight_reduced, capacity_reduced)
            
         else:
-            score, bag = knapsack_value(sub_values, sub_weight, capacity)
+            score, bag = knapsack_value(sub_values_reduced, sub_weight_reduced, capacity_reduced)
 
         bag={objects[i] for i in bag}
         caches[cache_id]=bag
-           
+
+
         for vid_id in bag:
-            for request_id in adj_list[vid_id]:
-                _, endpoint_id, num_requests = requests[request_id]
-                endpoint_latency, linked_caches = endpoints[endpoint_id]
+                for request_id in adj_list[vid_id]:
+                    _, endpoint_id, num_requests = requests[request_id]
+                    endpoint_latency, linked_caches = endpoints[endpoint_id]
 
-                # latence entre cet endpoint et le cache qu'on vient de remplir
-                cache_latency = dict(linked_caches).get(cache_id)
-                if cache_latency is None:      # endpoint non relié à ce cache : rien à mettre à jour
-                    continue
-
-                for cache_id2, latency2 in linked_caches:
-                    if cache_id2 == cache_id:
+                    # latence de cet endpoint vers le cache qu'on vient de remplir
+                    cache_latency = caches_endpoints[cache_id].get(endpoint_id)
+                    if cache_latency is None:        # endpoint non relié à ce cache
                         continue
-                    # gain qu'avait cache2 pour cette requête, moins le gain qui lui reste
-                    # maintenant que cache_id sert déjà la vidéo
-                    perte = max(0, endpoint_latency - latency2) - max(0, cache_latency - latency2)
-                    if perte > 0:
-                        values[cache_id2][vid_id] = max(
-                            0,
-                            values[cache_id2][vid_id] - (perte * num_requests) // gcd_values[cache_id2]
-                        )
 
+                    key = (endpoint_id, vid_id)
+                    old = best.get(key, endpoint_latency)   # meilleure latence avant ce cache
+                    new = min(old, cache_latency)           # meilleure latence après
+                    if new == old:                          # ce cache n'améliore rien
+                        continue
+                    best[key] = new
+
+                    for cache_id2, latency2 in linked_caches:
+                        if cache_id2 in remaining:          # seulement les caches pas encore remplis
+                            # gain marginal de cache2 avant, moins gain marginal après
+                            perte = max(0, old - latency2) - max(0, new - latency2)
+                            if perte > 0:
+                                values[cache_id2][vid_id] -= perte * num_requests
 
         
         
-def useless_object(weights,values,capacity):
-    n = len(values)
-    res=set()
-    for i in range(n):
-        if weights[i]>capacity or values[i]==0:
-            res.add(i)
-    return res
 
-    
 
-def preprocess_weight_genius(data):
-    weights=data["video_sizes"]
-    gcd_weight=reduce(gcd, weights,0) or 1 
-    if gcd_weight>1:
-        weights=[w//gcd_weight for w in weights]
-
-    return weights,gcd_weight
-
+  
 
 def preprocess_values_genius(data):
-        gcd_values=[]
         values=[[0]*data["N_vid"] for _ in range(data["N_cache"])]
         for request in data["requests"]:
             vid_id, endpoint_id, num_request= request
@@ -172,12 +166,8 @@ def preprocess_values_genius(data):
                 gain = latency - cache_latency
                 if gain>0:
                     values[cache_id][vid_id]+=(gain*num_request)
-        for cache_id in range(data["N_cache"]):
-            gcd_value=reduce(gcd, values[cache_id],0) or 1
-            if gcd_value>1:
-                values[cache_id]=[v//gcd_value for v in values[cache_id]]
-            gcd_values.append(gcd_value)
+       
 
-        return values,gcd_values
+        return values
 
 
