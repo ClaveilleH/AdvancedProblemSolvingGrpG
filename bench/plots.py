@@ -25,7 +25,7 @@ NB_AUTO = 10
 ALGOS = ["Greedy", "Greedy2", "Greedy3", "KS_indep", "KS_maj", "LS", "TS", "TSS"]
 LABELS = {"Greedy": "Glouton 1", "Greedy2": "Glouton 2", "Greedy3": "Glouton 3",
           "KS_indep": "Knapsack indép.", "KS_maj": "Knapsack m.à.j.",
-          "LS": "Descente", "TS": "Tabou aléatoire", "TSS": "Tabou trié"}
+          "LS": "local_search", "TS": "Tabou aléatoire", "TSS": "Tabou trié"}
 
 # couleurs fixes par rôle (palette catégorielle : bleu, orange, aqua, jaune)
 BLUE, ORANGE, AQUA, YELLOW = "#2a78d6", "#eb6834", "#1baf7a", "#eda100"
@@ -105,17 +105,21 @@ def plot_greedies(runs, ref):
     instances = GREEDY_INSTANCES or sorted(gaps, key=lambda i: max(gaps[i]) - min(gaps[i]), reverse=True)[:NB_AUTO]
     instances = [i for i in instances if i in gaps]
 
-    fig, ax = plt.subplots(figsize=(9, 4))
-    width = 0.26
-    for k, (algo, color) in enumerate(zip(greedies, [BLUE, ORANGE, AQUA])):
-        xs = [i + (k - 1) * width for i in range(len(instances))]
-        ax.bar(xs, [gaps[i][k] for i in instances], width - 0.03, color=color, label=LABELS[algo])
-    ax.set_xticks(range(len(instances)), [short(i) for i in instances], rotation=30, ha="right")
-    ax.set_ylabel("Écart au meilleur score connu (%)")
-    ax.set_title("Les trois gloutons, sur les instances où ils diffèrent le plus (plus bas = mieux)", pad=24)
-    ax.grid(axis="x", visible=False)
-    ax.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2)
-    save(fig, "gloutons")
+    # deux versions : l'écart au meilleur score (plus bas = mieux) et la part du meilleur score atteinte (plus haut = mieux)
+    for name, inverse in [("gloutons", False), ("gloutons_inverse", True)]:
+        fig, ax = plt.subplots(figsize=(9, 4))
+        width = 0.26
+        for k, (algo, color) in enumerate(zip(greedies, [BLUE, ORANGE, AQUA])):
+            xs = [i + (k - 1) * width for i in range(len(instances))]
+            values = [100 - gaps[i][k] if inverse else gaps[i][k] for i in instances]
+            ax.bar(xs, values, width - 0.03, color=color, label=LABELS[algo])
+        ax.set_xticks(range(len(instances)), [short(i) for i in instances], rotation=30, ha="right")
+        ax.set_ylabel("Part du meilleur score connu (%)" if inverse else "Écart au meilleur score connu (%)")
+        ax.set_title("Les trois gloutons, sur les instances où ils diffèrent le plus "
+                     + ("(plus haut = mieux)" if inverse else "(plus bas = mieux)"), pad=24)
+        ax.grid(axis="x", visible=False)
+        ax.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2)
+        save(fig, name)
     return instances
 
 
@@ -151,32 +155,36 @@ def plot_heatmap(runs, ref):
         return
     bounds = [1, 3, 6, 12, 25]          # classes d'écart, en %
     half = (len(instances) + 1) // 2
-    fig, axes = plt.subplots(1, 2, figsize=(13, 0.33 * half + 1.4))
-    for ax, part in zip(axes, [instances[:half], instances[half:]]):
-        for y, instance in enumerate(part):
-            for x, algo in enumerate(ALGOS):
-                rows = runs[instance][algo]
-                value = gap(mean_score(rows), ref[instance]) if rows else None
-                if value is None:
-                    color, text, dark = "#f0efec", "–", False
-                else:
-                    level = sum(value > b for b in bounds)
-                    color, text, dark = SEQUENTIAL[level], f"{value:.1f}" + ("*" if timed_out(rows) else ""), level >= 3
-                ax.add_patch(plt.Rectangle((x + 0.03, y + 0.06), 0.94, 0.88, color=color, linewidth=0))
-                ax.text(x + 0.5, y + 0.5, text, ha="center", va="center", fontsize=8, color="white" if dark else INK)
-        ax.set_xlim(0, len(ALGOS))
-        ax.set_ylim(len(part), 0)
-        ax.set_xticks([x + 0.5 for x in range(len(ALGOS))], [LABELS[a] for a in ALGOS], rotation=30, ha="left", fontsize=8)
-        ax.xaxis.tick_top()
-        ax.set_yticks([y + 0.5 for y in range(len(part))], [short(i) for i in part], fontsize=8)
-        ax.tick_params(length=0)
-        ax.grid(False)
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-    fig.tight_layout()
-    fig.text(0.01, -0.02, "Écart au meilleur score connu, en % (plus clair = mieux).  * limite de temps atteinte.  « – » : pas de résultat.",
-             color=INK2, fontsize=8)
-    save(fig, "vue_ensemble")
+    # deux versions de l'écart au meilleur score : plus clair = mieux, ou plus foncé = mieux
+    for name, inverse in [("vue_ensemble", False), ("vue_ensemble_inverse", True)]:
+        fig, axes = plt.subplots(1, 2, figsize=(13, 0.33 * half + 1.4))
+        for ax, part in zip(axes, [instances[:half], instances[half:]]):
+            for y, instance in enumerate(part):
+                for x, algo in enumerate(ALGOS):
+                    rows = runs[instance][algo]
+                    value = gap(mean_score(rows), ref[instance]) if rows else None
+                    if value is None:
+                        color, text, dark = "#f0efec", "–", False
+                    else:
+                        level = sum(value > b for b in bounds)
+                        if inverse:
+                            level = len(bounds) - level
+                        color, text, dark = SEQUENTIAL[level], f"{value:.1f}" + ("*" if timed_out(rows) else ""), level >= 3
+                    ax.add_patch(plt.Rectangle((x + 0.03, y + 0.06), 0.94, 0.88, color=color, linewidth=0))
+                    ax.text(x + 0.5, y + 0.5, text, ha="center", va="center", fontsize=8, color="white" if dark else INK)
+            ax.set_xlim(0, len(ALGOS))
+            ax.set_ylim(len(part), 0)
+            ax.set_xticks([x + 0.5 for x in range(len(ALGOS))], [LABELS[a] for a in ALGOS], rotation=30, ha="left", fontsize=8)
+            ax.xaxis.tick_top()
+            ax.set_yticks([y + 0.5 for y in range(len(part))], [short(i) for i in part], fontsize=8)
+            ax.tick_params(length=0)
+            ax.grid(False)
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+        fig.tight_layout()
+        legend = "Écart au meilleur score connu, en % (plus foncé = mieux)." if inverse else "Écart au meilleur score connu, en % (plus clair = mieux)."
+        fig.text(0.01, -0.02, legend + "  * limite de temps atteinte.  « – » : pas de résultat.", color=INK2, fontsize=8)
+        save(fig, name)
 
 
 # ============================ 3. Recherche locale ============================
@@ -230,7 +238,7 @@ def plot_local_search(runs):
     right.axhline(0, color=INK2, linewidth=0.8)
     right.set_xticks(range(len(instances)), [short(i) for i in instances], rotation=30, ha="right", fontsize=8)
     right.set_ylabel("Gain sur le glouton de départ (%)")
-    right.set_title("Gain ou perte, hors instances jouets", pad=24)
+    right.set_title("Gain ou perte", pad=24)
     right.grid(axis="x", visible=False)
     right.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2, fontsize=8)
     fig.tight_layout()
@@ -266,6 +274,35 @@ def plot_before_after(runs, before):
     ax.grid(axis="y", visible=False)
     ax.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2, fontsize=8)
     save(fig, "recherche_locale_avant_apres")
+
+
+def plot_seeds(runs, nb=10):
+    """Tabou aléatoire : dispersion du gain selon la graine, sur les instances non jouets où il varie le plus."""
+    gains = {}
+    for instance, algos in runs.items():
+        rows = [r for r in algos["TS"] if r["status"] in ("ok", "timeout") and number(r["start_score"])]
+        if len(rows) > 1 and instance not in TOY:
+            gains[instance] = [(number(r["score"]) - number(r["start_score"])) / number(r["start_score"]) * 100 for r in rows]
+    instances = sorted(gains, key=lambda i: max(gains[i]) - min(gains[i]), reverse=True)[:nb]
+    instances = [i for i in instances if max(gains[i]) > min(gains[i])]
+    if not instances:
+        return
+    fig, ax = plt.subplots(figsize=(9, 0.36 * len(instances) + 1.3))
+    for y, instance in enumerate(instances):
+        values = gains[instance]
+        ax.plot([min(values), max(values)], [y, y], color=GREY, linewidth=2, zorder=2, solid_capstyle="round")
+        # léger décalage vertical par graine, pour distinguer les graines qui donnent le même résultat
+        ax.scatter(values, [y + (k - (len(values) - 1) / 2) * 0.05 for k in range(len(values))], s=26, color=AQUA,
+                   edgecolor="white", linewidth=0.6, zorder=3, label="seed" if y == 0 else None)
+        ax.scatter([mean(values)], [y], marker="|", s=260, color=INK, linewidth=1.8, zorder=4, label="Moyenne" if y == 0 else None)
+    ax.set_yticks(range(len(instances)), [short(i) for i in instances], fontsize=8)
+    ax.set_ylim(len(instances) - 0.4, -0.6)
+    ax.set_xlabel("Gain sur le glouton de départ (%)")
+    nb_seeds = max(len(v) for v in gains.values())
+    ax.set_title(f"Tabou aléatoire selon la seed ({nb_seeds} seeds/instance)", pad=24)
+    ax.grid(axis="y", visible=False)
+    ax.legend(ncols=2, loc="lower left", bbox_to_anchor=(0, 1), borderaxespad=0.2, fontsize=8)
+    save(fig, "tabou_graines")
 
 
 def plot_neighbourhood(grid, field="score", directory=None,
@@ -356,6 +393,11 @@ def plot_knapsack_update(runs, features):
     ax.scatter([p[0] for p in points], [p[1] for p in points], s=45, color=BLUE, edgecolor="white", linewidth=1, zorder=3)
     for x, y, instance in sorted(points, key=lambda p: -abs(p[1]))[:3]:
         ax.annotate(short(instance), (x, y), xytext=(6, 4), textcoords="offset points", fontsize=7, color=INK2)
+    # dense et dense2 sont au même endroit : une seule étiquette pour les deux
+    same = [p[2] for p in points if p[:2] == next((q[:2] for q in points if q[2] == "dense"), None)]
+    if same:
+        x, y = next(p[:2] for p in points if p[2] == "dense")
+        ax.annotate(", ".join(sorted(same)), (x, y), xytext=(0, -12), textcoords="offset points", ha="center", fontsize=7, color=INK2)
     ax.axhline(0, color=INK2, linewidth=0.8)
     # échelle linéaire jusqu'à 10 %, logarithmique au-delà : quelques gains dépassent 100 %
     ax.set_yscale("symlog", linthresh=10)
@@ -430,6 +472,7 @@ def main():
     plot_heatmap(runs, ref)
     plot_local_search(runs)
     plot_before_after(runs, load_runs(BEFORE_CSV))
+    plot_seeds(runs)
     plot_neighbourhood(grid)
     plot_knapsack_branches(runs, features)
     plot_knapsack_update(runs, features)
