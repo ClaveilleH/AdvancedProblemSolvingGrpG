@@ -83,7 +83,7 @@ def build(P, X, L1min, L1max, seed, noise_per_cache=6):
     return "\n".join(lines) + "\n"
 
 
-def build_big(P, X, L1min, L1max, seed, n_e0=10, noise_per_cache=6):
+def build_big(P, X, L1min, L1max, seed, n_e0=10, noise_per_cache=6, witness=0, ghosts=True, dense=False):
     """Variante « grosse vidéo » : dans chaque paire, e0 n'a qu'UNE vidéo, de taille X.
 
     Le côté e0 est porté par n_e0 endpoints (reliés à S_p et B_p) qui demandent tous cette vidéo.
@@ -117,6 +117,7 @@ def build_big(P, X, L1min, L1max, seed, n_e0=10, noise_per_cache=6):
             reqs.append((vid(s), e1, n1)); F += n1 * (LD1 - L0b)
         big = vid(X)
         E = 0
+        Eb = 0                       # valeur de la grosse vidéo si elle est dans B_p
         e0s = []
         for _ in range(n_e0):
             LD0 = rng.randint(3850, 4000)
@@ -127,20 +128,47 @@ def build_big(P, X, L1min, L1max, seed, n_e0=10, noise_per_cache=6):
         while E <= target:
             for e0, LD0, L0a in e0s:
                 n0 = rng.randint(1000, 3000)
-                reqs.append((big, e0, n0)); E += n0 * (LD0 - L0a)
+                reqs.append((big, e0, n0)); E += n0 * (LD0 - L0a); Eb += n0 * (LD0 - L1)
                 if E > target:
                     break
         LDn = rng.randint(800, 1200)
-        en = len(eps); eps.append((LDn, [(B, rng.randint(300, 500))]))
-        for _ in range(noise_per_cache):
-            reqs.append((vid(rng.randint(1, X)), en, rng.randint(200, 2000)))
+        Ln = rng.randint(300, 500)
+        en = len(eps); eps.append((LDn, [(B, Ln)]))
+        if not dense:
+            for _ in range(noise_per_cache):
+                reqs.append((vid(rng.randint(1, X)), en, rng.randint(200, 2000)))
+        else:
+            # parasites DENSES : densité (valeur / taille) entre 1,15 et 1,6 fois celle de la grosse vidéo
+            # dans B_p, tailles 1 ou 2. Un glouton qui remplit B_p par densité les prend d'abord, et la grosse
+            # vidéo (taille X) ne tient plus. Leur valeur totale reste petite devant celle de la grosse
+            # vidéo : un sac à dos EXACT préfère la grosse vidéo.
+            d_big = Eb / X
+            gn = LDn - Ln
+            budget = int(0.45 * X)
+            for _ in range(noise_per_cache):
+                u = rng.uniform(1.15, 1.6)
+                smax = max(1, min(budget, int(10000 * gn / (u * d_big))))
+                if budget <= 0 or smax < 1:
+                    break
+                sz = rng.randint(1, min(2, smax))
+                n = -(-int(u * d_big * sz) // gn)
+                assert n <= 10000 and n * gn > d_big * sz
+                reqs.append((vid(sz), en, n)); budget -= sz
         shared_total_max = max(shared_total_max, E + F)
         ghost_links.append((B, rng.randint(1, 500)))
-    LDg = 4000
-    g = len(eps); eps.append((LDg, ghost_links))
-    per_ghost = 10000 * (LDg - max(l for _, l in ghost_links))
-    for _ in range(shared_total_max // per_ghost + 2):
-        reqs.append((vid(min(1000, X + 1 + rng.randint(0, 1000 - X - 1))), g, 10000))
+        # endpoints « témoins » : reliés à B_p seulement, 1 requête pour la grosse vidéo. Ils ne changent
+        # presque rien aux gains, mais B_p compte alors plus d'endpoints demandeurs de la grosse vidéo que
+        # S_p : greedy2 de MOI (cache relié au plus grand nombre d'endpoints demandeurs) l'y range.
+        for _ in range(witness):
+            LDw = rng.randint(1000, 4000)
+            w = len(eps); eps.append((LDw, [(B, rng.randint(1, LDw - 1))]))
+            reqs.append((big, w, 1))
+    if ghosts:
+        LDg = 4000
+        g = len(eps); eps.append((LDg, ghost_links))
+        per_ghost = 10000 * (LDg - max(l for _, l in ghost_links))
+        for _ in range(shared_total_max // per_ghost + 2):
+            reqs.append((vid(min(1000, X + 1 + rng.randint(0, 1000 - X - 1))), g, 10000))
     rng.shuffle(reqs)
     lines = [f"{len(sizes)} {len(eps)} {len(reqs)} {C} {X}", " ".join(map(str, sizes))]
     for ld, links in eps:
@@ -159,8 +187,14 @@ if __name__ == "__main__":
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--big", action="store_true", help="variante grosse vidéo (barrière plus haute)")
     ap.add_argument("--noise", type=int, default=6, help="vidéos parasites par cache de secours")
+    ap.add_argument("--witness", type=int, default=0, help="endpoints témoins par paire (route greedy2)")
+    ap.add_argument("--no-ghosts", action="store_true", help="sans vidéos fantômes (route knapsack)")
+    ap.add_argument("--dense", action="store_true", help="parasites denses : il faut un sac à dos EXACT dans B_p")
     a = ap.parse_args()
     assert a.X < 1000, "il faut X < 1000 pour que les vidéos fantômes (taille <= 1000) ne tiennent pas"
-    f_build = build_big if a.big else build
     with open(a.out, "w", newline="\n") as f:
-        f.write(f_build(a.P, a.X, a.L1[0], a.L1[1], a.seed, noise_per_cache=a.noise))
+        if a.big:
+            f.write(build_big(a.P, a.X, a.L1[0], a.L1[1], a.seed, noise_per_cache=a.noise,
+                              witness=a.witness, ghosts=not a.no_ghosts, dense=a.dense))
+        else:
+            f.write(build(a.P, a.X, a.L1[0], a.L1[1], a.seed, noise_per_cache=a.noise))

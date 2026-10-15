@@ -1,0 +1,12 @@
+Instance : best/instance_greedy2_pgcd.in (53 654 octets, V=1485 E=390 R=2649 C=60 X=6·10^7, PGCD des tailles 10^6)
+Régénération :
+  python generator/trap_affectation_bruit.py best/instance_greedy2.in --big --L1 900 1000 --noise 40 --witness 1 --no-ghosts --seed 1
+  python generator/scale_pgcd.py best/instance_greedy2.in best/instance_greedy2_pgcd.in --g 1000000
+
+MOI (3 relances identiques ; gloutons seuls : idem)   2 616 087 = optimum (30/30 paires)
+AUTRE_1 / AUTRE_2 / AUTRE_3                          1 571 363 / 1 571 363 / 1 560 227
+substitut C (sac à dos exact par cache, 1 tour)      1 571 911
+sac à dos exact SANS PGCD (harness/dp_raw_proxy.py)  TIMEOUT à 600 s, aucune sortie
+recuit simulé (meilleur réglage)                     1 806 473
+Juges émulés (32 et 64 bits) et scoreur d'AUTRE_1    identiques au scoreur exact
+AUTRE_4                                              non testé : dépôt inaccessible

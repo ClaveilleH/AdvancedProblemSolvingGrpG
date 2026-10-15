@@ -1,0 +1,22 @@
+Error: ENOENT: no such file or directory, stat 's:\dev\AdvancedProblemSolving\adversarial\sandbox\moi_14760\algos\knapsack.py'
+	at statSync (node:fs:1795:25)
+	at Object.<anonymous> (node:electron/js2c/node_init:2:5584)
+	at Object.statSync (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\graceful-fs\polyfills.js:308:16)
+	at c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\out\core\Application.js:94:48
+	at Array.forEach (<anonymous>)
+	at Application.<anonymous> (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\out\core\Application.js:91:34)
+	at step (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:133:27)
+	at Object.next (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:114:57)
+	at c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:107:75
+	at new Promise (<anonymous>)
+	at Object.__awaiter (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:103:16)
+	at run (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\out\core\Application.js:84:48)
+	at Application.<anonymous> (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\out\core\Application.js:153:50)
+	at step (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:133:27)
+	at Object.next (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:114:57)
+	at c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:107:75
+	at new Promise (<anonymous>)
+	at Object.__awaiter (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\node_modules\tslib\tslib.js:103:16)
+	at Timeout._onTimeout (c:\Users\hclav\.vscode\extensions\qiu8310.dot-template-vscode-0.4.0\node_modules\dot-template-core\out\core\Application.js:144:59)
+	at listOnTimeout (node:internal/timers:685:17)
+	at process.processTimers (node:internal/timers:618:7)

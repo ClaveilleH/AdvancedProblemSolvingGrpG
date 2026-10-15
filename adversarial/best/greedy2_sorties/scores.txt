@@ -1,0 +1,10 @@
+Instance : best/instance_greedy2.in (44 738 octets, V=1485 E=390 R=2649 C=60 X=60)
+Régénération : python generator/trap_affectation_bruit.py best/instance_greedy2.in --big --L1 900 1000 --noise 40 --witness 1 --no-ghosts --seed 1
+
+MOI complet                                          2 616 087 = optimum (30/30 paires bien affectées)
+MOI gloutons seuls (sans knapsack ni recherche locale) 2 616 087 : c'est greedy2 qui trouve
+AUTRE_1 / AUTRE_2 / AUTRE_3                          1 571 363 / 1 571 363 / 1 560 227
+substitut C (sac à dos exact par cache, 1 tour)      1 571 911
+recuit simulé, 4 réglages                            1 571 388 à 1 806 473
+borne supérieure                                     3 123 427
+AUTRE_4                                              non testé : dépôt inaccessible

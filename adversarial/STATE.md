@@ -63,3 +63,9 @@ Dernier rapport : `reports/LATEST.md`.
 13. Piste PGCD sur l instance bruitée (rapport 09) : best/instance_promo_bruitee_pgcd.in (scale_pgcd.py --g 1e6). MOI identique (2 464 469, 0,36 s), DP brute sans PGCD (harness/dp_raw_proxy.py) en timeout à 600 s.
 
 14. Instance PGCD pure (rapport 10) : best/instance_pgcd.in (trap_pgcd.py --seed 1). MOI optimum 1 562 573 ; gloutons 1 525 969 / 1 361 211 ; DP sans PGCD : MemoryError ; recuit <= 1 562 283, 0/30 caches exacts.
+
+15. Instance greedy2 (rapport 11) : best/instance_greedy2.in (trap_affectation_bruit.py --big --L1 900 1000 --noise 40 --witness 1 --no-ghosts). MOI optimum 2 616 087 via greedy2 seul ; dépôts ~1,57 M ; recuit <= 1 806 473.
+
+16. RECOMMANDÉE pour le classement (rapport 12) : best/instance_greedy2_pgcd.in = instance_greedy2 x 10^6 (scale_pgcd.py). MOI 2 616 087 optimum ; dépôts ~1,57 M ; DP sans PGCD : timeout ; recuit <= 1 806 473.
+
+17. Instance knapsack PGCD (rapport 13) : best/instance_knapsack_pgcd.in (trap_affectation_bruit.py --big --X 600 --L1 900 1000 --noise 40 --dense, puis scale_pgcd --g 1e6). Seul knapsack_slay trouve (2 355 465) ; tout le reste <= 1 765 088. Outil : harness/knapsack_routes.py.

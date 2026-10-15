@@ -1,0 +1,15 @@
+Instance : best/instance_knapsack_pgcd.in (49 536 octets, V=1471 E=361 R=2424 C=60 X=6·10^8, PGCD des tailles 10^6)
+Régénération :
+  python generator/trap_affectation_bruit.py instances/gen/ks2.in --big --X 600 --L1 900 1000 --noise 40 --dense --seed 1
+  python generator/scale_pgcd.py instances/gen/ks2.in best/instance_knapsack_pgcd.in --g 1000000
+
+MOI (3 relances identiques)                                   2 355 465 = optimum (30/30 paires)
+  dont knapsack seul (caches par valeur + DP exacte + PGCD)   2 355 465  <- seule route qui trouve
+  même tri par valeur, remplissage glouton                    1 542 411
+  gloutons seuls (greedy, greedy2, greedy3)                   1 765 088
+AUTRE_1 / AUTRE_2 / AUTRE_3                                   1 542 411
+substitut C (sac à dos exact, ordre des index)                1 542 411
+sac à dos exact SANS PGCD                                     TIMEOUT à 600 s, aucune sortie
+recuit simulé, 4 réglages                                     1 361 868 à 1 542 411
+Juges émulés (32 et 64 bits)                                  identiques au scoreur exact
+AUTRE_4                                                       non testé : dépôt inaccessible

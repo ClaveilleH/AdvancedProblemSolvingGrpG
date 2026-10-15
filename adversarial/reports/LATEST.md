@@ -1,33 +1,37 @@
-# Rapport 10 — instance « PGCD pur »
+# Rapport 13 — instance qui ne se résout qu'avec le knapsack PGCD
 
 > **AUTRE_4 non testé : dépôt inaccessible** (404). Instances testées contre 3 adversaires seulement.
 
 ## L'essentiel
-`best/instance_pgcd.in` (30 Ko, `generator/trap_pgcd.py --seed 1`) : 30 sacs à dos indépendants (un cache, un
-endpoint, 50 vidéos chacun), valeurs « fortement corrélées » (valeur = taille réduite + 100), tailles et capacité
-multipliées par g = 10⁵ (capacité 10⁹ = 10 000 × g).
+`best/instance_knapsack_pgcd.in` (50 Ko) : piège d'affectation bruité (30 paires), vidéos fantômes, parasites
+**denses** dans les caches de secours, tailles × 10⁶.
 
-| algo | score | type |
+| route | score |
+|---|---|
+| **knapsack de MOI** (caches par valeur totale + DP exacte + division par le PGCD) | **2 355 465** = optimum |
+| même tri par valeur, remplissage glouton | 1 542 411 |
+| gloutons de MOI (greedy, greedy2, greedy3) | 1 765 088 |
+| AUTRE_1 / AUTRE_2 / AUTRE_3 | 1 542 411 |
+| sac à dos exact dans l'ordre des index (type C) | 1 542 411 |
+| sac à dos exact sans PGCD | timeout (600 s) |
+| recuit simulé, 4 réglages | ≤ 1 542 411 |
+
+Ratio ×1,53 contre tous les adversaires testés. Juges émulés identiques.
+
+## Pourquoi il faut les trois briques
+1. **Ordre par valeur totale** : les vidéos fantômes font passer les caches de secours avant les caches
+   partagés. Dans l'ordre des index, le cache partagé prend la grosse vidéo et e1 n'a plus rien.
+2. **Sac à dos exact** : dans le cache de secours, des parasites de taille 1 ou 2 sont 15 à 60 % plus denses
+   que la grosse vidéo. Un glouton les prend, et la grosse vidéo (taille de tout le cache) ne tient plus. Seul
+   un sac à dos exact voit que la grosse vidéo vaut plus que tous les parasites réunis.
+3. **Division par le PGCD** : capacité 6·10⁸ ; sans division, la table de la DP est hors de portée.
+Les parasites nombreux bloquent aussi le recuit.
+
+## Comparaison avec instance_greedy2_pgcd
+| | route vers l'optimum | ratio |
 |---|---|---|
-| **MOI** (stable, sans recherche locale aussi) | **1 562 573** = optimum | — |
-| AUTRE_1 / AUTRE_2 | 1 525 969 | score (glouton par densité : place perdue) |
-| AUTRE_3 | 1 361 211 | score (tri par valeur) |
-| sac à dos exact sans PGCD (substitut) | — | **crash** : MemoryError (table 50 × 10⁹) |
-| recuit simulé, 4 réglages | 1 417 365 à 1 562 283 | score ; **0 cache sur 30** résolu exactement |
-
-Juges émulés et scoreur exact identiques (tout en 32 bits).
-
-## Pourquoi seul le PGCD réussit
-- Chaque cache est un sac à dos où la meilleure combinaison est fine à trouver : les gloutons laissent de la
-  place, et le recuit s'arrête juste en dessous de l'optimum dans chaque cache.
-- La seule méthode exacte de MOI (DP) n'est faisable qu'après division par le PGCD (table 50 × 10 000).
-- Pour faire jeu égal, une recherche locale devrait réussir les 30 caches au point près.
-
-## Limites
-- Un groupe qui divise aussi par le PGCD, ou qui résout le sac à dos exactement autrement (DP sur les
-  valeurs, séparation-évaluation, frontière de Pareto comme mon solveur), trouve aussi l'optimum : égalité.
-- L'écart avec le meilleur recuit est faible (290 points) : l'instance garantit la 1re place, pas un grand ratio.
-- Tailles jusqu'à 10⁸ et capacité 10⁹ : hors des bornes historiques (retirées par les profs).
+| `instance_greedy2_pgcd` | placement selon le nombre d'endpoints demandeurs (greedy2) | ×1,66 |
+| `instance_knapsack_pgcd` | tri par valeur + sac à dos exact + PGCD (knapsack_slay) | ×1,53 |
 
 ## Vérification « aucun dépôt modifié »
 ```
