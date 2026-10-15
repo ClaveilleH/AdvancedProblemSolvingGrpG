@@ -1,0 +1,6 @@
+== best/instance_principale.in (113 octets)
+  moi     ok       score=      1073741822 t=    0.23s 
+  autre1  ok       score=               0 t=    0.09s 
+  autre2  ok       score=               0 t=    0.21s 
+  autre3  ok       score=               0 t=    0.04s 
+  ratio = inf   écart = 1073741822

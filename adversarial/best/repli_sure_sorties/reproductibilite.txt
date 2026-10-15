@@ -1,0 +1,12 @@
+tour 1 : amélioration
+tour 2 : amélioration
+tour 3 : stable
+tour 1 : amélioration
+tour 2 : amélioration
+tour 3 : stable
+sorties identiques
+score exÃ©cution 1 : 20723000
+score exÃ©cution 2 : 20723000
+borne supÃ©rieure (sans capacitÃ©s) : 20724800
+39c4e6c347a3a8b171eb668ec5593e70219f84c4d57f852b2f603ecdc9c14cac *best/repli_sure_sorties/solver_run1.out
+39c4e6c347a3a8b171eb668ec5593e70219f84c4d57f852b2f603ecdc9c14cac *best/repli_sure_sorties/solver_run2.out

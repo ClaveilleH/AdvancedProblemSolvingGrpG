@@ -20,6 +20,7 @@ FIELDS = [
     "capacity_ratio", "videos_per_cache", "caches_per_endpoint", "endpoints_per_cache",
     "top10_share", "upper_bound",
     "ks_gcd_weight", "ks_pred_dp_weight", "ks_pred_dp_value", "ks_pred_greedy", "ks_pred_dp_cells",
+    "ks_gcd_value_caches", "ks_gcd_branch_changes", "ks_pred_dp_cells_no_gcd",
 ]
 
 
@@ -48,6 +49,35 @@ def knapsack_prediction(data):
     return gcd_weight, counts, cells
 
 
+def branch(sum_values, capacity):
+    """Branche de multiknapsack_bg et largeur de sa table de DP (0 pour le glouton)."""
+    if sum_values > ks.LIMIT and capacity > ks.LIMIT:
+        return "greedy", 0
+    if sum_values > capacity:
+        return "dp_weight", capacity + 1
+    return "dp_value", sum_values + 1
+
+
+def gcd_effect(data):
+    """
+    Effet de la division par le pgcd, avec les valeurs initiales : nombre de caches dont le pgcd
+    des valeurs dépasse 1, nombre de caches qui changent de branche grâce à la division, et
+    nombre de cases des tables de DP si on ne divisait ni les poids ni les valeurs.
+    """
+    weight, gcd_weight = ks.preprocess_weight_genius(data)
+    values, gcd_values = ks.preprocess_values_genius(data)
+    capacity = data["S_cache"] // gcd_weight
+    changes = cells = 0
+    for cache_id in range(data["N_cache"]):
+        objects = [i for i in range(data["N_vid"]) if values[cache_id][i] > 0 and weight[i] <= capacity]
+        sum_values = sum(values[cache_id][i] for i in objects)
+        with_gcd, _ = branch(sum_values, capacity)
+        without_gcd, width = branch(sum_values * gcd_values[cache_id], data["S_cache"])
+        changes += with_gcd != without_gcd
+        cells += (len(objects) + 1) * width
+    return sum(g > 1 for g in gcd_values), changes, cells
+
+
 def features(name):
     data = load_instance(name)
     sizes, endpoints, requests = data["video_sizes"], data["endpoints"], data["requests"]
@@ -64,6 +94,7 @@ def features(name):
     nb_links = sum(len(linked_caches) for _, linked_caches in endpoints)
 
     gcd_weight, counts, cells = knapsack_prediction(data)
+    gcd_caches, gcd_changes, cells_no_gcd = gcd_effect(data)
     return {
         "instance": name, "V": V, "E": E, "R": data["N_request"], "C": C, "X": X,
         "total_requests": total_requests,
@@ -81,6 +112,9 @@ def features(name):
         "ks_pred_dp_value": counts["dp_value"],
         "ks_pred_greedy": counts["greedy"],
         "ks_pred_dp_cells": cells,
+        "ks_gcd_value_caches": gcd_caches,
+        "ks_gcd_branch_changes": gcd_changes,
+        "ks_pred_dp_cells_no_gcd": cells_no_gcd,
     }
 
 

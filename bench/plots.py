@@ -409,6 +409,41 @@ def plot_knapsack_update(runs, features):
     save(fig, "knapsack_maj")
 
 
+def plot_knapsack_gcd(features):
+    """Division par le pgcd : sur combien de caches change-t-elle quelque chose ?"""
+    rows = []
+    for instance, f in features.items():
+        if instance in TOY or f.get("ks_gcd_value_caches") in ("", None):
+            continue
+        nb_caches, reduced, changed = int(f["C"]), int(f["ks_gcd_value_caches"]), int(f["ks_gcd_branch_changes"])
+        rows.append((instance, [changed, reduced - changed, nb_caches - reduced], nb_caches))
+    if not rows:
+        return
+    rows.sort(key=lambda row: ((row[1][0] + row[1][1]) / row[2], row[1][0]))
+
+    fig, ax = plt.subplots(figsize=(10, 0.19 * len(rows) + 1.4))
+    names = ["pgcd des valeurs > 1 et la résolution change", "pgcd des valeurs > 1, même résolution",
+             "pgcd des valeurs = 1 (rien à diviser)"]
+    left = [0] * len(rows)
+    for k, color in enumerate([ORANGE, BLUE, GREY]):
+        shares = [row[1][k] / row[2] * 100 for row in rows]
+        ax.barh(range(len(rows)), shares, left=left, height=0.7, color=color, label=names[k], edgecolor="white", linewidth=1)
+        left = [l + s for l, s in zip(left, shares)]
+    for y, row in enumerate(rows):
+        if row[1][0]:
+            ax.text(101, y, f"{row[1][0]} cache{'s' if row[1][0] > 1 else ''} sur {row[2]}", va="center", fontsize=7, color=ORANGE)
+    ax.set_yticks(range(len(rows)), [f"{short(row[0])}  ({row[2]} caches)" for row in rows], fontsize=7)
+    ax.set_xlim(0, 100)
+    ax.set_ylim(-0.6, len(rows) - 0.4)
+    ax.set_xlabel("Part des caches (%)")
+    weights = sum(int(f["ks_gcd_weight"]) > 1 for i, f in features.items() if i not in TOY)
+    ax.set_title("Division par le pgcd : sur combien de caches change-t-elle quelque chose ?\n"
+                 f"pgcd des poids > 1 sur {weights} instance sur {len(rows)}")
+    ax.grid(axis="y", visible=False)
+    ax.legend(ncols=3, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.1))
+    save(fig, "knapsack_pgcd")
+
+
 # ============================ 5. Temps et capacité ============================
 
 def plot_time_gap(runs, ref):
@@ -476,6 +511,7 @@ def main():
     plot_neighbourhood(grid)
     plot_knapsack_branches(runs, features)
     plot_knapsack_update(runs, features)
+    plot_knapsack_gcd(features)
     plot_time_gap(runs, ref)
     plot_capacity(runs, ref, features)
 

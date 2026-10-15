@@ -1,0 +1,10 @@
+tour 1 : am�lioration
+tour 2 : stable
+tour 1 : am�lioration
+tour 2 : stable
+sorties identiques
+score exécution 1 : 1073741822964
+score exécution 2 : 1073741822964
+borne supérieure (sans capacités) : 1073741823472
+cfabffaab1ba46d5f6db92ce5fa5c78fc6446f39cb4d6c627d630715ac48f92c *best/repli_sorties/solver_run1.out
+cfabffaab1ba46d5f6db92ce5fa5c78fc6446f39cb4d6c627d630715ac48f92c *best/repli_sorties/solver_run2.out

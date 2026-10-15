@@ -1,0 +1,26 @@
+[     0.0s] constantes : KNAPSACK=True TEST_LOCAL_SEARCH=True
+[3.5929s] Base cost (no videos in caches): 1494852240501
+[0.0340s] Adjacency list created
+[    11.4s] DÉBUT greedy
+[    16.1s] FIN   greedy (4.6s)
+[4.6333s] Greedy : 959252118908 (35.83%) | Score: 535470
+[    67.0s] DÉBUT greedy2
+---> 0 videos unused, 0 caches unlinked
+[    85.1s] FIN   greedy2 (18.2s)
+[18.1807s] Greedy2 : 636283018056 (57.44%) | Score: 858361
+[   120.2s] DÉBUT greedy3
+[   134.5s] FIN   greedy3 (14.4s)
+[14.3701s] Greedy3 : 1437127346624 (3.86%) | Score: 57710
+
+Écart avec le meilleur (Greedy2, score = 858361.00)
+-----------------------------------------------
+Greedy2 | score:         858361 | écart:   -0.00%  <- meilleur
+Greedy  | score:         535470 | écart:  -37.62%
+Greedy3 | score:          57710 | écart:  -93.28%
+===============================================================
+[   169.0s] DÉBUT multi_knapsack
+[   212.3s]   sac n°   1 DP poids  n=10000 capacité=6000 table=60,010,000 cases -> 21.47s
+[   234.1s]   sac n°   2 DP poids  n=10000 capacité=6000 table=60,010,000 cases -> 20.06s
+[   254.9s]   sac n°   3 DP poids  n=10000 capacité=6000 table=60,010,000 cases -> 19.64s
+[   277.2s]   sac n°   4 DP poids  n=10000 capacité=6000 table=60,010,000 cases -> 21.23s
+[   299.2s]   sac n°   5 DP poids  n= 9999 capacité=6000 table=60,003,999 cases -> 20.83s

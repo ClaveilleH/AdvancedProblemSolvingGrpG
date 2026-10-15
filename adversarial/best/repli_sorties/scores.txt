@@ -1,0 +1,7 @@
+== best/instance_repli.in (2020 octets)
+  moi     ok       score=             507 t=    0.22s 
+  autre1  ok       score=             507 t=    0.12s 
+  autre2  ok       score=             507 t=    0.24s 
+  autre3  ok       score=             507 t=    0.06s 
+  ratio = 1   écart = 0
+  solveur  1073741822964

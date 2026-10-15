@@ -1,0 +1,6 @@
+== best/instance_repli_sure.in (126 octets)
+  moi     ok       score=            1999 t=    0.26s 
+  autre1  ok       score=            1999 t=    0.08s 
+  autre2  ok       score=            1799 t=    0.12s 
+  autre3  ok       score=            1999 t=    0.01s 
+  ratio = 1   écart = 0
