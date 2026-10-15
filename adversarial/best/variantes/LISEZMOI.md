@@ -10,3 +10,4 @@
 - `ancien_repli_R1/` : ancienne instance de repli (R1, m = 4, 159 o) ; solveur 429 496 729 000, meilleur algo 1 199 → ×3,58e8.
 - `repli_R2_k3/` (228 o) : R2 avec 3 lignes de B et A₁ sur 4 lignes ; solveur 920 350 133 510, algos 714 → ×1,29e9 (remplacée par k = 63 : ×2,12e9).
 - `r2_m1_k63_sans_recherche_locale.in` (1 963 o) : repli avec une seule petite vidéo ; suffit depuis que la recherche locale de MOI est désactivée (solveur 1 073 741 822 992, algos 507), mais ne piège plus MOI si la recherche locale est réactivée. On garde m = 8, valable dans les deux cas.
+- `s1_sur_sans_remplissage.in` (82 o) : T1 sûre (32 bits) sans remplissage ; MOI 715 827 882 000, autres 1 000 → ratio 7,16e8 fini ; identique avec les juges émulés et le scoreur d'AUTRE_1.

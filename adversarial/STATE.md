@@ -51,3 +51,7 @@ Dernier rapport : `reports/LATEST.md`.
     Instances recommandées : best/instance_principale_sure.in (T1, 95 o, ratio ∞ au score, MOI 715 589 352)
     et best/instance_repli_sure.in (R1, 126 o, solveur 20 723 000 vs 1 999 → ×1,04e4).
     Émulation des juges : scorer/judge_emulation.py. AUTRE_4 : non testé (404), à relancer dès qu'un lien arrive.
+
+11. Analyse du tableau de la promo (rapport 07) : AUTRE_1 = groupe A. Piège d'affectation (structure 6_2_6_2,
+    generator/trap_affectation.py --k 3 --LD 4000) : best/instance_promo.in, MOI 3 998 499, tous les autres
+    (et un substitut de groupe à DP exacte : solver.py --max-rounds 1) 1 999 599 → ×2. MOI robuste pour k ≤ 4.

@@ -1,0 +1,7 @@
+== best/instance_promo.in (105 octets)
+  moi     ok       score=         3998499 t=    0.17s 
+  autre1  ok       score=         1999599 t=    0.09s 
+  autre2  ok       score=         1999599 t=    0.14s 
+  autre3  ok       score=         1999599 t=    0.02s 
+  ratio = 1.99965   écart = 1998900
+  substitut C (sac à dos exact par cache, 1 tour) 1999599
