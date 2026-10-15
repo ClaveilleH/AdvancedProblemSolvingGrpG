@@ -92,16 +92,19 @@ def multiknapsack_bg(data,caches,caches_sizes):
     adj_list = data["adj_list"]
     remaining=set(range(data["N_cache"]))
     while remaining:
+        # On choisit quelle cache sur lesquel on va utiliser l'algo et on l'enlève de remaining.
         cache_id=max(remaining,key=lambda c: sum(values[c])/sum(weight)     )
         remaining.discard(cache_id)
-       
+        
+        # On fait une liste(Objects) contenant les id des vidéos pouvant aller dans le cache.
         capacity = caches_sizes[cache_id] 
         objects=[i for i in range(data["N_vid"]) if values[cache_id][i]>0 and weight[i]<=capacity]
         
-
+        # On répère pour les vidéos dans "objects" leur gains et leur taille.
         sub_values=[values[cache_id][i] for i in objects]
         sub_weight=[weight[i] for i in objects]
 
+        # Réduit leur gain et leur poids pour les vidéos grâce à leur gcd puis on réduit les capacités des caches.
         gcd_values = reduce(gcd, sub_values,0) or 1
         sub_values_reduced = [v // gcd_values for v in sub_values]
         gcd_weights = reduce(gcd, sub_weight,0) or 1
@@ -109,11 +112,12 @@ def multiknapsack_bg(data,caches,caches_sizes):
         capacity_reduced = capacity // gcd_weights
 
 
-
+        # On fait la somme des gains de latence des videos(les gains de latence réduit) et on a la valeur n qui représente le nombre de vidéo qui peuvent 
+        # être dans le cache.
         sumsubvalues=sum(sub_values_reduced)
         n=len(objects)
 
-
+        # On détermine quelle knapsack a utilisé.
         if sumsubvalues*n>LIMIT and capacity_reduced*n>LIMIT:
             score,bag=knapsack_goulton(sub_values_reduced,sub_weight_reduced,capacity_reduced)
             
@@ -158,6 +162,9 @@ def multiknapsack_bg(data,caches,caches_sizes):
   
 
 def preprocess_values_genius(data):
+        """
+        Pour chaque cache on fait une liste contenant le gain de latence pour chaque vidéo si elle est ajouter au cache
+        """
         values=[[0]*data["N_vid"] for _ in range(data["N_cache"])]
         for request in data["requests"]:
             vid_id, endpoint_id, num_request= request
