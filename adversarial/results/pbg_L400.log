@@ -1,0 +1,6 @@
+== instances/gen/pbg_L400.in (25748 octets)
+  moi     ok       score=         3249903 t=    0.58s 
+  autre1  ok       score=         1803106 t=    0.13s 
+  autre2  ok       score=         1803106 t=    0.23s 
+  autre3  ok       score=         1802657 t=    0.03s 
+  ratio = 1.80239   écart = 1446797

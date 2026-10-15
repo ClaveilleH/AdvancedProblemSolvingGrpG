@@ -1,0 +1,12 @@
+Instance : best/instance_promo_bruitee.in (43 312 octets, V=1494 E=361 R=2560 C=60 X=60)
+Régénération : python generator/trap_affectation_bruit.py best/instance_promo_bruitee.in --big --L1 900 1000 --noise 40 --seed 1
+
+MOI (5 relances identiques ; idem sans recherche locale)   2 464 469
+AUTRE_1                                                     1 483 653
+AUTRE_2                                                     1 483 653
+AUTRE_3                                                     1 473 346
+substitut C (sac à dos exact par cache, 1 tour)             1 484 073
+solveur de repli (plusieurs tours)                          1 484 073
+recuit simulé (harness/ls_proxy.py), 8 réglages             1 483 653 à 1 669 269
+borne supérieure (sans capacités)                           2 944 290
+AUTRE_4                                                     non testé : dépôt inaccessible

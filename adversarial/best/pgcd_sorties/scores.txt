@@ -1,0 +1,9 @@
+Instance : best/instance_pgcd.in (30 448 octets, V=1500 E=30 R=1500 C=30 X=10^9, PGCD des tailles 10^5)
+Régénération : python generator/trap_pgcd.py best/instance_pgcd.in --seed 1
+
+MOI (3 relances identiques ; idem sans recherche locale ; 7 s)     1 562 573   = optimum (identique au sac à dos exact par frontière de Pareto)
+AUTRE_1 / AUTRE_2 (glouton par densité)                            1 525 969
+AUTRE_3 (tri par valeur)                                            1 361 211
+sac à dos exact par cache SANS PGCD (harness/dp_raw_proxy.py)      CRASH : MemoryError à l'allocation (table 50 x 10^9)
+recuit simulé, 4 réglages (1 M mouvements)                          1 417 365 à 1 562 283 ; 0 cache sur 30 résolu exactement
+AUTRE_4                                                             non testé : dépôt inaccessible

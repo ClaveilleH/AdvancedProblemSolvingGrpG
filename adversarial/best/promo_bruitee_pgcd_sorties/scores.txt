@@ -1,0 +1,8 @@
+Instance : best/instance_promo_bruitee_pgcd.in (52 282 octets) = instance_promo_bruitee.in avec X et toutes les tailles × 10^6
+Régénération : python generator/scale_pgcd.py best/instance_promo_bruitee.in best/instance_promo_bruitee_pgcd.in --g 1000000
+
+MOI (knapsack divisé par le PGCD : table identique à l'instance d'origine)   2 464 469 (0,36 s)
+AUTRE_1 / AUTRE_2 / AUTRE_3 (gloutons, insensibles à l'échelle)               1 483 653 / 1 483 653 / 1 473 346
+substitut « sac à dos exact par cache SANS PGCD » (harness/dp_raw_proxy.py)    TIMEOUT à 600 s, aucune sortie (même algo : 1 484 073 en < 1 s sur l'instance d'origine)
+recuit simulé                                                                  inchangé (insensible à l'échelle) : ≤ 1 669 269
+AUTRE_4                                                                        non testé : dépôt inaccessible

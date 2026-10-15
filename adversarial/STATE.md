@@ -55,3 +55,11 @@ Dernier rapport : `reports/LATEST.md`.
 11. Analyse du tableau de la promo (rapport 07) : AUTRE_1 = groupe A. Piège d'affectation (structure 6_2_6_2,
     generator/trap_affectation.py --k 3 --LD 4000) : best/instance_promo.in, MOI 3 998 499, tous les autres
     (et un substitut de groupe à DP exacte : solver.py --max-rounds 1) 1 999 599 → ×2. MOI robuste pour k ≤ 4.
+
+12. Piège d'affectation bruité contre les recherches locales (rapport 08) : best/instance_promo_bruitee.in
+    (trap_affectation_bruit.py --big --L1 900 1000 --noise 40 --seed 1). MOI 2 464 469 (via knapsack + vidéos fantômes,
+    sans recherche locale), dépôts ~1 483 653, substitut C 1 484 073, recuit (harness/ls_proxy.py) ≤ 1 669 269.
+
+13. Piste PGCD sur l instance bruitée (rapport 09) : best/instance_promo_bruitee_pgcd.in (scale_pgcd.py --g 1e6). MOI identique (2 464 469, 0,36 s), DP brute sans PGCD (harness/dp_raw_proxy.py) en timeout à 600 s.
+
+14. Instance PGCD pure (rapport 10) : best/instance_pgcd.in (trap_pgcd.py --seed 1). MOI optimum 1 562 573 ; gloutons 1 525 969 / 1 361 211 ; DP sans PGCD : MemoryError ; recuit <= 1 562 283, 0/30 caches exacts.
