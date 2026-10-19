@@ -20,7 +20,8 @@ BEST_OF_GREEDY = True
 TEST_LOCAL_SEARCH = True
 
 INSTANCES_DIR = "instances"
-RESULTS_DIR = "results"
+RESULTS_DIR = "concour/results"
+FORMAT = "txt"
 INSTANCES_FILES = [
     "test.in",
     "me_at_the_zoo.in",
@@ -155,7 +156,7 @@ def main(args):
     else:
         output_file = input_file
         
-    output_file = output_file.split('.')[0] + '.out'
+    output_file = output_file.split('.')[0] + f'.{FORMAT}'
     # create_results_files(results[best_method]["caches"], f"{RESULTS_DIR}/{output_file}")
     # return results
     results[best_method]["method"] = best_method
@@ -221,7 +222,7 @@ def exec_all():
         all_results[input_file] = res
         f.write(f"{input_file}: method={res['method']}, score={int(res['score'])}\n")
         f.flush()
-        create_results_files(res["caches"], f"{RESULTS_DIR}/{input_file.split('/')[-1].split('.')[0]}.out")
+        create_results_files(res["caches"], f"{RESULTS_DIR}/{input_file.split('/')[-1].split('.')[0]}.{FORMAT}")
     print("\n=== Summary of all instances ===")
     for input_file, res in all_results.items():
         print(f"{input_file}: cost={res['cost']}, score={int(res['score'])}")
@@ -231,7 +232,7 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
         results = main([f"{INSTANCES_DIR}/{INSTANCES_FILES[0]}"])  # Default input file for testing
-        create_results_files(results["caches"], f"{RESULTS_DIR}/{INSTANCES_FILES[0].split('.')[0]}.out")
+        create_results_files(results["caches"], f"{RESULTS_DIR}/{INSTANCES_FILES[0].split('.')[0]}.{FORMAT}")
     elif sys.argv[1] == "all":
         PRINT = False
         exec_all()
@@ -247,4 +248,4 @@ if __name__ == "__main__":
     else:
         print(f"\n=== Running on {sys.argv[1]} ===")
         results = main(sys.argv[1:])
-        create_results_files(results["caches"], f"{RESULTS_DIR}/{sys.argv[1].split('/')[-1].split('.')[0]}.out")
+        create_results_files(results["caches"], f"{RESULTS_DIR}/{sys.argv[1].split('/')[-1].split('.')[0]}.{FORMAT}")
