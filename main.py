@@ -125,7 +125,14 @@ def main(args):
 
     if KNAPSACK:
         run("Multi-Knapsack", multi_knapsack, starts[""], list, data, base_cost, results)
-    
+        # il faut mettre a jour les tailles des caches aprés le multi-knapsack
+        caches = results["Multi-Knapsack"]["caches"]
+        sizes = results["Multi-Knapsack"]["caches_sizes"]
+        for i in range(N_cache):
+            taille_utilisee = sum(video_sizes[vid] for vid in caches[i])
+            sizes[i] = S_cache - taille_utilisee
+        results["Multi-Knapsack"]["caches_sizes"] = sizes
+
     if PRINT:
         print("===============================================================")
     results["Base"] = starts[""]
