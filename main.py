@@ -140,9 +140,15 @@ def main(args):
     _, videos_info = preprocess_data(N_vid, N_endpoint, N_request, N_cache, empty_sizes, video_sizes, empty_caches, endpoints, requests)
     data["videos_by_popularity"] = [video[0] for video in videos_info]
 
-    local_search_func   = partial(local_search, iteration=5, previous_moves=None, nbCaches=10, nbVideos=10, supp=True)
-    tabu_search_func = partial(random_tabu_search, nb_forbidden_moves=7, iteration=100, nbCaches=10, nbVideos=10)
-    sorted_tabu_search_func = partial(sorted_tabu_search, nb_forbidden_moves=7, iteration=100, nbCaches=10, nbVideos=10)
+    iteration = 400
+    nbCaches = 100
+    nbVideos = 100
+
+
+
+    local_search_func   = partial(local_search, iteration=iteration, previous_moves=None, nbCaches=nbCaches, nbVideos=nbVideos, supp=True)
+    tabu_search_func = partial(random_tabu_search, nb_forbidden_moves=7, iteration=iteration, nbCaches=nbCaches, nbVideos=nbVideos)
+    sorted_tabu_search_func = partial(sorted_tabu_search, nb_forbidden_moves=7, iteration=iteration, nbCaches=nbCaches, nbVideos=nbVideos)
 
     algos = [
         ("LS", local_search_func, list),
