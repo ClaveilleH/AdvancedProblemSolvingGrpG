@@ -149,8 +149,10 @@ def main(args):
     # if best_greedy == "Greedy": best_greedy = "g"
     # else: best_greedy = "g2"
     if BEST_OF_GREEDY:
+        starts["multi-knapsack"] = results["Multi-Knapsack"]
+        best_process = max(["Greedy", "Greedy2","Greedy3","Multi-Knapsack"], key=lambda x: results[x]["score"])
         for label, algo, container in algos:
-            run(f"{label} ({best_greedy})", algo, starts[best_greedy.lower()], container, data, base_cost, results)
+            run(f"{label} ({best_process})", algo, starts[best_process.lower()], container, data, base_cost, results)
     else:
         # print(starts.keys())
         for start_label in starts.keys():
