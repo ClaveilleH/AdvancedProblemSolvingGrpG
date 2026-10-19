@@ -8,13 +8,13 @@ from algos.greedy import greedy
 from algos.greedy2 import greedy2
 from algos.greedy3 import greedy3
 from algos.local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
-from algos.knapsack_slay import multiknapsack_bg as multi_knapsack, knap_double_passes
+from algos.knapsack_slay import multi_pass_knapsack  as multi_knapsack
 #from knapsack import multi_knapsack 
 
 PRINT = True
 
-KNAPSACK = False
-KNAP_DOUBLE = True
+KNAPSACK = True
+KNAP_DOUBLE = False
 
 BEST_OF_GREEDY = False
 
