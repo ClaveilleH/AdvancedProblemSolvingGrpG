@@ -8,16 +8,17 @@ from algos.greedy import greedy
 from algos.greedy2 import greedy2
 from algos.greedy3 import greedy3
 from algos.local_search import local_search, random_tabu_search, sorted_tabu_search, preprocess_data
-from algos.knapsack_slay import multiknapsack_bg as multi_knapsack
+from algos.knapsack_slay import multiknapsack_bg as multi_knapsack, knap_double_passes
 #from knapsack import multi_knapsack 
 
 PRINT = True
 
-KNAPSACK = True
+KNAPSACK = False
+KNAP_DOUBLE = True
 
-BEST_OF_GREEDY = True
+BEST_OF_GREEDY = False
 
-TEST_LOCAL_SEARCH = True
+TEST_LOCAL_SEARCH = False
 
 INSTANCES_DIR = "concour/instances"
 RESULTS_DIR = "concour/results"
@@ -117,8 +118,10 @@ def main(args):
         "requests": requests,
         "adj_list": adj_list,
     }
-
-    results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
+    starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
+    results = {}
+    best_greedy = None
+    # results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
     
     if PRINT:
         print("===============================================================")
@@ -132,6 +135,15 @@ def main(args):
             taille_utilisee = sum(video_sizes[vid] for vid in caches[i])
             sizes[i] = S_cache - taille_utilisee
         results["Multi-Knapsack"]["caches_sizes"] = sizes
+
+    if KNAP_DOUBLE:
+        run("Double Knapsack", knap_double_passes, starts[""], list, data, base_cost, results)
+        caches = results["Double Knapsack"]["caches"]
+        sizes = results["Double Knapsack"]["caches_sizes"]
+        for i in range(N_cache):
+            taille_utilisee = sum(video_sizes[vid] for vid in caches[i])
+            sizes[i] = S_cache - taille_utilisee
+        results["Double Knapsack"]["caches_sizes"] = sizes
 
     if PRINT:
         print("===============================================================")

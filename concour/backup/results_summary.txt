@@ -1,0 +1,15 @@
+concour/instances/instance01.txt: method=Greedy2, score=864882
+concour/instances/instance02.txt: method=Greedy2, score=807623
+concour/instances/instance03.txt: method=Greedy2, score=2550000
+concour/instances/instance04.txt: method=Greedy, score=1891808
+concour/instances/instance05.txt: method=Greedy2, score=5069722
+concour/instances/instance06.txt: method=Greedy, score=1765088
+concour/instances/instance07.txt: method=Greedy, score=416912
+concour/instances/instance08.txt: method=Greedy2, score=12595
+concour/instances/instance09.txt: method=Greedy, score=642505
+concour/instances/instance10.txt: method=Greedy2, score=233873
+concour/instances/instance11.txt: method=Greedy2, score=51273
+concour/instances/instance12.txt: method=Greedy, score=237549
+concour/instances/instance13.txt: method=Greedy2, score=5050237
+concour/instances/instance14.txt: method=Greedy2, score=15528
+concour/instances/instance15.txt: method=Greedy, score=214520

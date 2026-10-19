@@ -154,12 +154,86 @@ def multiknapsack_bg(data,caches,caches_sizes):
                             perte = max(0, old - latency2) - max(0, new - latency2)
                             if perte > 0:
                                 values[cache_id2][vid_id] -= perte * num_requests
-
+    return values      
         
-        
+def knap_un_cache(values_cache, weight, capacity):
+    """
+    Fait le knapsack d'un seul cache et renvoie l'ensemble des vidéos choisies.
+    Même choix de knapsack que dans multiknapsack_bg.
+    """
+    objects = [i for i in range(len(values_cache)) if values_cache[i] > 0 and weight[i] <= capacity]
+    if not objects:
+        return set()
+
+    sub_values = [values_cache[i] for i in objects]
+    sub_weight = [weight[i] for i in objects]
+
+    gcd_values = reduce(gcd, sub_values, 0) or 1
+    sub_values = [v // gcd_values for v in sub_values]
+    gcd_weights = reduce(gcd, sub_weight, 0) or 1
+    sub_weight = [w // gcd_weights for w in sub_weight]
+    capacity = capacity // gcd_weights
+
+    n = len(objects)
+    if sum(sub_values) * n > LIMIT and capacity * n > LIMIT:
+        _, bag = knapsack_goulton(sub_values, sub_weight, capacity)
+    elif sum(sub_values) > capacity:
+        _, bag = knapsack_weight(sub_values, sub_weight, capacity)
+    else:
+        _, bag = knapsack_value(sub_values, sub_weight, capacity)
+
+    return {objects[i] for i in bag}
 
 
-  
+def valeurs_un_cache(data, caches, cache_id):
+    """
+    Gain de chaque vidéo si on l'ajoute dans cache_id,
+    en tenant compte des vidéos déjà présentes dans les autres caches.
+    """
+    values = [0] * data["N_vid"]
+    for vid_id, endpoint_id, num_requests in data["requests"]:
+        cache_latency = data["caches_endpoints"][cache_id].get(endpoint_id)
+        if cache_latency is None:       # endpoint non relié à ce cache
+            continue
+
+        # meilleure latence actuelle sans ce cache
+        endpoint_latency, linked_caches = data["endpoints"][endpoint_id]
+        best = endpoint_latency
+        for cache_id2, latency2 in linked_caches:
+            if cache_id2 != cache_id and vid_id in caches[cache_id2]:
+                best = min(best, latency2)
+
+        gain = best - cache_latency
+        if gain > 0:
+            values[vid_id] += gain * num_requests
+    return values
+
+
+
+def knap_double_passes(data,caches,caches_sizes):
+    """
+    On fait deux passes de l'algorithme de knapsack :
+    1) le knapsack normal sur tous les caches
+    2) on reprend chaque cache un par un : on le vide, on recalcule les gains
+       des vidéos avec le contenu des autres caches, et on refait le knapsack dessus
+    """
+    multiknapsack_bg(data, caches, caches_sizes)
+    for cache_id in range(data["N_cache"]):
+        # on vide le cache
+        caches[cache_id] = set()
+        # on remet les valeurs à jour en fonction des autres caches
+        values = valeurs_un_cache(data, caches, cache_id)
+        # on refait le knapsack sur ce cache
+        caches[cache_id] = knap_un_cache(values, data["video_sizes"], caches_sizes[cache_id])
+    for cache_id in range(data["N_cache"]):
+        # on vide le cache
+        caches[cache_id] = set()
+        # on remet les valeurs à jour en fonction des autres caches
+        values = valeurs_un_cache(data, caches, cache_id)
+        # on refait le knapsack sur ce cache
+        caches[cache_id] = knap_un_cache(values, data["video_sizes"], caches_sizes[cache_id])
+
+
 
 def preprocess_values_genius(data):
         """
