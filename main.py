@@ -19,8 +19,9 @@ BEST_OF_GREEDY = True
 
 TEST_LOCAL_SEARCH = True
 
-INSTANCES_DIR = "instances"
+INSTANCES_DIR = "concour/instances"
 RESULTS_DIR = "concour/results"
+
 FORMAT = "txt"
 INSTANCES_FILES = [
     "test.in",
@@ -61,6 +62,22 @@ INSTANCES_FILES = [
     "medium_flat_dense_dejavu.in",
     "medium_flat_sparse_lambda.in"
 ]
+# instance04.txt
+INSTANCES_FILES = [ "instance01.txt",
+                    "instance02.txt",
+                    "instance03.txt", 
+                    "instance04.txt", 
+                    "instance05.txt", 
+                    "instance06.txt", 
+                    "instance07.txt", 
+                    "instance08.txt", 
+                    "instance09.txt", 
+                    "instance10.txt", 
+                    "instance11.txt", 
+                    "instance12.txt", 
+                    "instance13.txt", 
+                    "instance14.txt", 
+                    "instance15.txt" ]
 USED_METHODS = ["Greedy", "Greedy2", "Greedy3", "LS", "TS", "TSS"]
 
 
