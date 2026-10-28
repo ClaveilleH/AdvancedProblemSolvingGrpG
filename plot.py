@@ -1,0 +1,27 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+
+path= "convergence1.csv"
+
+df = pd.read_csv(path, header=None)  
+for i, ligne in df.iterrows():
+    plt.plot(ligne.values, label=f"Ligne {i}")  # x = indice automatiquement
+
+plt.xlabel("Indice")
+plt.ylabel("Valeur")
+plt.legend()
+plt.show()
+
+
+"""
+867309,867309,867309,867309,867309
+950720,965458,965655,965655,965655
+2550000,2550000,2550000,2550000,2550000
+1881709,1902316,1907894,1908338,1908338
+2355465,2355465,2355465,2355465,2355465
+5241434,5254182,5254198,5254201,5254201
+1094472,1094472,1094472,1094472,1094472
+1022070,1022070,1022070,1022070,1022070
+52571,52571,52571,52571,52571
+
+"""
