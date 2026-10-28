@@ -1,7 +1,9 @@
 from math import gcd
 from functools import reduce
-LIMIT = 100000000
+from utils import compute_score
+import pandas as pd
 
+LIMIT = 100000000
 
 
 def knapsack_value(values, weights, W):
@@ -157,7 +159,7 @@ def multiknapsack_bg(data,caches,caches_sizes,weight,values,best):
 
 
 
-def multi_pass_knapsack(data, caches, caches_sizes,nb_iter=3):
+def multi_pass_knapsack(data, caches, caches_sizes,nb_iter=15):
     weight = data["video_sizes"]
 
 
@@ -170,6 +172,8 @@ def multi_pass_knapsack(data, caches, caches_sizes,nb_iter=3):
     values= preprocess_values_genius(data)
     for _ in range(nb_iter):
         multiknapsack_bg(data, caches, caches_sizes,weight, values, best)
+      
+    
 
 
         
