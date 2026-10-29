@@ -1,0 +1,155 @@
+% Oral final Advanced Problem Solving - groupe G
+% Compilation : make (depuis docs/oralFinal/), ou import du dossier dans Overleaf.
+% Répartition et minutage : ORAL.md. Chaque frame indique en sous-titre qui parle et combien de temps.
+\documentclass[aspectratio=169]{pres}
+
+\graphicspath{{assets/}{../oral/figures/}}
+
+% \afaire{texte} : rappel visible dans le PDF, à supprimer avant l'oral
+\newcommand{\afaire}[1]{\textcolor{red}{[#1]}}
+
+% \fig{nom}{hauteur} : insère nom.png (assets/ ou ../oral/figures/), ou un cadre vide s'il n'existe pas encore
+\newcommand{\fig}[2]{%
+  \begin{center}
+  \IfFileExists{assets/#1.png}{\includegraphics[height=#2\textheight,width=\textwidth,keepaspectratio]{#1}}{%
+  \IfFileExists{../oral/figures/#1.png}{\includegraphics[height=#2\textheight,width=\textwidth,keepaspectratio]{#1}}{%
+    \fbox{\parbox[c][#2\textheight][c]{0.8\textwidth}{\centering\afaire{figure : \detokenize{#1}.png}}}}}
+  \end{center}}
+
+\title[Streaming Videos -- Hash Code 2017]{Streaming Videos -- Hash Code 2017}
+\subtitle{Notre solution finale}
+\author[Groupe G]{Groupe G \\ Jade, Hugo, Kyllian, Valentin}
+\date{\afaire{date}}
+
+\begin{document}
+
+% ---------- Titre ----------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ---------- Plan ----------
+\begin{frame}{Plan}
+  \setcounter{tocdepth}{1}
+  \tableofcontents
+\end{frame}
+
+%====================================================
+\section{Algorithmique}
+
+\begin{frame}{L'algorithme}{Hugo -- 2 min}
+  \begin{block}{Le problème en une phrase}
+    \afaire{vidéos, caches de capacité limitée, endpoints : minimiser la latence}
+  \end{block}
+  \begin{block}{Notre idée}
+    \afaire{idée générale de l'algorithme final et pourquoi ce choix}
+  \end{block}
+\end{frame}
+
+\begin{frame}{L'algorithme : pseudo-code}{Hugo}
+  \afaire{à vérifier / simplifier}
+  \begin{algorithmic}[1]
+    \Require instance (vidéos, caches, endpoints, requêtes)
+    \Ensure contenu de chaque cache
+    \State remplir chaque cache par un sac à dos, du plus prometteur au moins prometteur
+    \For{deux passes}
+      \ForAll{cache $c$}
+        \State vider $c$
+        \State recalculer le gain de chaque vidéo sachant le contenu des autres caches
+        \State remplir $c$ par un sac à dos sur ces gains
+      \EndFor
+    \EndFor
+  \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Trace d'exécution : l'instance}{Jade -- 4 min}
+  \centering
+  \afaire{instance jouet : vidéos, caches, endpoints}
+
+  \vspace{1em}
+  \begin{tikzpicture}[node distance=1.6cm and 2.2cm,
+      box/.style={draw=accent, fill=accent!10, rounded corners, minimum width=2cm, minimum height=0.9cm}]
+    \node[box] (dc) {Datacenter};
+    \node[box, below left=of dc] (c0) {Cache 0};
+    \node[box, below right=of dc] (c1) {Cache 1};
+    \node[box, below=3.2cm of dc] (e0) {Endpoint 0};
+    \draw[-Stealth, thick] (e0) -- node[left] {\afaire{lat.}} (c0);
+    \draw[-Stealth, thick] (e0) -- node[right] {\afaire{lat.}} (c1);
+    \draw[-Stealth, thick, dashed] (e0) -- node[right] {\afaire{lat.}} (dc);
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Trace d'exécution : étapes}{Jade}
+  \only<1>{\begin{block}{Étape 1}\afaire{état initial}\end{block}}
+  \only<2>{\begin{block}{Étape 2}\afaire{calcul des gains}\end{block}}
+  \only<3>{\begin{block}{Étape 3}\afaire{sac à dos sur le premier cache}\end{block}}
+  \only<4>{\begin{block}{Étape 4}\afaire{passes de réoptimisation}\end{block}}
+  \only<5>{\begin{block}{Résultat}\afaire{contenu final et score}\end{block}}
+\end{frame}
+
+%====================================================
+\section{Évaluation expérimentale}
+
+\begin{frame}{Protocole expérimental}{Kyllian -- 2 min}
+  \begin{table}
+    \centering
+    \begin{tabular}{|l|p{9cm}|}
+      \hline
+      \textbf{Réglages} & \afaire{machine, paramètres} \\ \hline
+      \textbf{Limites}  & \afaire{temps, taille des instances} \\ \hline
+      \textbf{Métriques} & \afaire{score, temps, \dots} \\ \hline
+      \textbf{Instances} & \afaire{lesquelles et pourquoi} \\ \hline
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Résultats}{Valentin -- 4 min}
+  \fig{resultats}{0.7}
+\end{frame}
+
+\begin{frame}{Résultats (suite)}{Valentin}
+  \fig{resultats_2}{0.7}
+\end{frame}
+
+\begin{frame}{Analyse SWOT}{\afaire{qui ?}}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \setbeamercolor{block title}{fg=white,bg=green}
+    \begin{block}{Forces}\afaire{}\end{block}
+    \setbeamercolor{block title}{fg=white,bg=accent}
+    \begin{block}{Opportunités}\afaire{}\end{block}
+    \column{0.48\textwidth}
+    \setbeamercolor{block title}{fg=white,bg=red!80!black}
+    \begin{block}{Faiblesses}\afaire{}\end{block}
+    \setbeamercolor{block title}{fg=dark,bg=yellow}
+    \begin{block}{Menaces}\afaire{}\end{block}
+  \end{columns}
+\end{frame}
+
+%====================================================
+\section{Code}
+
+\begin{frame}{Choix d'implémentation}{Hugo -- 3 min}
+  \begin{itemize}
+    \item \afaire{structures de données}
+    \item \afaire{optimisations}
+    \item \afaire{ce qu'on a écarté et pourquoi}
+  \end{itemize}
+\end{frame}
+
+%====================================================
+\section{Conclusion}
+
+\begin{frame}{Conclusion}{Kyllian -- 2 min}
+  \begin{itemize}
+    \item \afaire{bilan}
+    \item \afaire{perspectives}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Questions}
+  \centering\Large Merci pour votre attention !\\[1em]
+  \normalsize Des questions ?
+\end{frame}
+
+\end{document}
