@@ -16,9 +16,9 @@ PRINT = True
 KNAPSACK = True
 KNAP_DOUBLE = False
 
-BEST_OF_GREEDY = False
+BEST_OF_GREEDY = True
 
-TEST_LOCAL_SEARCH = False
+TEST_LOCAL_SEARCH = True
 
 INSTANCES_DIR = "concour/instances"
 RESULTS_DIR = "concour/results"
@@ -121,7 +121,7 @@ def main(args):
     starts = { "":snapshot(empty_caches, empty_sizes, endpoints, requests) }
     results = {}
     best_greedy = None
-    # results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
+    results, starts, best_greedy = best_of_greedy(data, empty_caches, empty_sizes, endpoints, requests, base_cost)
     
     if PRINT:
         print("===============================================================")

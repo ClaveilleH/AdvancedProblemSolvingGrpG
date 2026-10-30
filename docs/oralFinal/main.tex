@@ -37,29 +37,48 @@
 %====================================================
 \section{Algorithmique}
 
-\begin{frame}{L'algorithme}{Hugo -- 2 min}
-  \begin{block}{Le problème en une phrase}
-    \afaire{vidéos, caches de capacité limitée, endpoints : minimiser la latence}
-  \end{block}
-  \begin{block}{Notre idée}
-    \afaire{idée générale de l'algorithme final et pourquoi ce choix}
-  \end{block}
+\begin{frame}{Chaîne de résolution}{Hugo -- 2 min}
+  % \begin{block}{Le problème}
+  %   Placer des vidéos dans des caches de capacité limitée pour maximiser
+  %   la latence économisée, pondérée par le nombre de requêtes.
+  % \end{block}
+  \vspace{0.5em}
+  \centering
+  \begin{tikzpicture}[node distance=0.2cm and 0.6cm,
+      box/.style={draw=accent, fill=accent!10, rounded corners, minimum width=3.4cm, minimum height=0.6cm, align=center, font=\small}]
+    \node[box] (g1) {Glouton par requête};
+    \node[box, below=of g1] (g2) {Glouton par vidéo};
+    \node[box, below=of g2] (g3) {Glouton par cache};
+    \node[box, below=of g3, fill=accent!30] (ks) {Sac à dos multi-passes};
+    \node[box, minimum width=2.2cm] (best) at ($(g2)!0.5!(g3) + (3.7,0)$) {Meilleure\\solution};
+    \node[box, minimum width=2.2cm, right=of best] (ls) {Recherche locale};
+    \node[box, minimum width=2.2cm, right=of ls] (fin) {Meilleure solution\\rencontrée};
+    \foreach \n in {g1,g2,g3,ks} \draw[-Stealth, thick] (\n.east) -- (best.west);
+    \draw[-Stealth, thick] (best) -- (ls);
+    \draw[-Stealth, thick] (ls) -- (fin);
+  \end{tikzpicture}
 \end{frame}
 
-\begin{frame}{L'algorithme : pseudo-code}{Hugo}
-  \afaire{à vérifier / simplifier}
+\begin{frame}{Le sac à dos multi-passes}{Hugo}
+  \begin{block}{Idée clé}
+    Les autres caches étant fixés, remplir \textbf{un} cache est un sac à dos 0/1 :
+    objet = vidéo, poids = taille, valeur = latence gagnée sachant ce que servent déjà les autres caches.
+  \end{block}
   \begin{algorithmic}[1]
-    \Require instance (vidéos, caches, endpoints, requêtes)
-    \Ensure contenu de chaque cache
-    \State remplir chaque cache par un sac à dos, du plus prometteur au moins prometteur
-    \For{deux passes}
-      \ForAll{cache $c$}
-        \State vider $c$
-        \State recalculer le gain de chaque vidéo sachant le contenu des autres caches
-        \State remplir $c$ par un sac à dos sur ces gains
-      \EndFor
+    \State calculer le gain de chaque vidéo pour chaque cache (caches vides)
+    \For{chaque passe}
+      \While{il reste des caches à traiter dans cette passe}
+        \State $c \gets$ le cache restant de plus grand gain total
+        \State vider $c$ \Comment{ses vidéos redeviennent utiles aux voisins}
+        \State remplir $c$ par un sac à dos résolu exactement
+        \State baisser le gain de ces vidéos dans les caches voisins
+      \EndWhile
     \EndFor
   \end{algorithmic}
+  \pause
+  \begin{block}{Garantie}
+    L'ancien contenu reste possible : une étape ne fait jamais baisser le score.
+  \end{block}
 \end{frame}
 
 \begin{frame}{Trace d'exécution : l'instance}{Jade -- 4 min}
