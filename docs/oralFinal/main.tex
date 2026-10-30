@@ -1,7 +1,7 @@
 % Oral final Advanced Problem Solving - groupe G
 % Compilation : make (depuis docs/oralFinal/), ou import du dossier dans Overleaf.
 % Répartition et minutage : ORAL.md. Chaque frame indique en sous-titre qui parle et combien de temps.
-\documentclass[aspectratio=169]{pres}
+\documentclass[aspectratio=169,xcolor=table]{pres}
 
 \graphicspath{{assets/}{../oral/figures/}}
 
@@ -100,29 +100,159 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Trace d'exécution : l'instance}{Jade -- 4 min}
-  \centering
-  \afaire{instance jouet : vidéos, caches, endpoints}
+% ---------- Trace : instance jouet ----------
+% une couleur par vidéo
+\colorlet{vcol1}{yellow!70}
+\colorlet{vcol2}{red!35}
+\colorlet{vcol3}{cyan!35}
+\tikzset{vid/.style={draw=dark, fill=vcol#1, minimum size=0.42cm, inner sep=1pt, font=\scriptsize},
+  % c1, c2, c3 : style des caches, à redéfinir dans une frame pour en mettre un en évidence
+  c1/.style={}, c2/.style={}, c3/.style={}}
+% \vb{n} : carré coloré de la vidéo Vn, utilisable dans le texte et les tableaux
+\newcommand{\vb}[1]{\tikz[baseline=(x.base)]\node[vid=#1] (x) {V#1};}
+% \videos{cache}{liste} : carrés des vidéos au-dessus du cache, nommés <cache>-v<n>
+\newcommand{\videos}[2]{%
+  \ifx\relax#2\relax\else
+    \foreach \v [count=\i] in {#2} {\xdef\nbvid{\i}}
+    \foreach \v [count=\i] in {#2} {%
+      \node[vid=\v] (#1-v\v) at ([xshift={(\i-(\nbvid+1)/2)*0.5cm}, yshift=0.35cm]#1.north) {V\v};}
+  \fi}
+% \reseau[échelle]{vidéos C1}{vidéos C2}{vidéos C3}{code TikZ en plus} (latences en ms)
+\newcommand{\reseau}[5][0.8]{%
+  \begin{tikzpicture}[scale=#1, every node/.style={transform shape},
+      box/.style={draw=accent, fill=accent!10, rounded corners, minimum width=1.9cm, minimum height=0.7cm, font=\small, align=center},
+      lien/.style={thick, draw=gray},
+      lat/.style={font=\scriptsize, fill=white, inner sep=1pt}]
+    \node[box, fill=gray!15, draw=gray] (dc) at (0,5.4) {Datacenter};
+    \node[box, c1] (c1) at (-2.8,3.2) {Cache 1};
+    \node[box, c2] (c2) at (0,3.2) {Cache 2};
+    \node[box, c3] (c3) at (2.8,3.2) {Cache 3};
+    \node[box, fill=green!10, draw=green] (e1) at (-1.4,1.4) {Endpoint 1};
+    \node[box, fill=green!10, draw=green] (e2) at (1.4,1.4) {Endpoint 2};
+    \draw[lien] (e1) -- node[lat] {100} (c1);
+    \draw[lien] (e1) -- node[lat] {500} (c2);
+    \draw[lien] (e2) -- node[lat] {100} (c2);
+    \draw[lien] (e2) -- node[lat] {300} (c3);
+    \draw[lien, dashed, rounded corners] (e1) -- (-1.4,3.2) -- node[lat, pos=0.7] {1000} (dc);
+    \draw[lien, dashed, rounded corners] (e2) -- (1.4,3.2) -- node[lat, pos=0.7] {1000} (dc);
+    \videos{c1}{#2}
+    \videos{c2}{#3}
+    \videos{c3}{#4}
+    #5
+  \end{tikzpicture}}
 
-  \vspace{1em}
-  \begin{tikzpicture}[node distance=1.6cm and 2.2cm,
-      box/.style={draw=accent, fill=accent!10, rounded corners, minimum width=2cm, minimum height=0.9cm}]
-    \node[box] (dc) {Datacenter};
-    \node[box, below left=of dc] (c0) {Cache 0};
-    \node[box, below right=of dc] (c1) {Cache 1};
-    \node[box, below=3.2cm of dc] (e0) {Endpoint 0};
-    \draw[-Stealth, thick] (e0) -- node[left] {\afaire{lat.}} (c0);
-    \draw[-Stealth, thick] (e0) -- node[right] {\afaire{lat.}} (c1);
-    \draw[-Stealth, thick, dashed] (e0) -- node[right] {\afaire{lat.}} (dc);
-  \end{tikzpicture}
+\begin{frame}{Trace d'exécution : l'instance}{Jade -- 4 min}
+  \begin{columns}[c]
+    \column{0.55\textwidth}
+    \centering
+    \reseau[1]{}{}{}{}
+    \column{0.43\textwidth}
+    Capacité de chaque cache : \textbf{100}
+
+    \vspace{0.8em}
+    \begin{tabular}{cc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Taille} \\ \hline
+      \vb1 & 50 \\ \hline
+      \vb2 & 40 \\ \hline
+      \vb3 & 30 \\ \hline
+    \end{tabular}
+
+    \vspace{0.8em}
+    \begin{tabular}{ccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Endpoint} & \textbf{Requêtes} \\ \hline
+      \vb1 & 2 & 100 \\ \hline
+      \vb2 & 1 & 300 \\ \hline
+      \vb3 & 1 & 200 \\ \hline
+      \vb3 & 2 & 300 \\ \hline
+    \end{tabular}
+  \end{columns}
 \end{frame}
 
-\begin{frame}{Trace d'exécution : étapes}{Jade}
-  \only<1>{\begin{block}{Étape 1}\afaire{état initial}\end{block}}
-  \only<2>{\begin{block}{Étape 2}\afaire{calcul des gains}\end{block}}
-  \only<3>{\begin{block}{Étape 3}\afaire{sac à dos sur le premier cache}\end{block}}
-  \only<4>{\begin{block}{Étape 4}\afaire{passes de réoptimisation}\end{block}}
-  \only<5>{\begin{block}{Résultat}\afaire{contenu final et score}\end{block}}
+\begin{frame}{Trace d'exécution : gains initiaux}{Jade}
+  \begin{block}{Gain d'une vidéo dans un cache}
+    Somme, sur les endpoints reliés, de (latence actuelle $-$ latence via le cache) $\times$ requêtes.\\
+    Exemple : gain(\vb3, cache 2) $= (1000-500)\times 200 + (1000-100)\times 300 = 370\,000$
+  \end{block}
+  \vspace{0.5em}
+  \centering
+  \begin{tabular}{ccccc}
+    \hline
+    \rowcolor{accent!15} & \vb1 & \vb2 & \vb3 & \textbf{Total} \\ \hline
+    Cache 1 & 0 & 270\,000 & 180\,000 & 450\,000 \\ \hline
+    \rowcolor{orange!25} Cache 2 & 90\,000 & 150\,000 & 370\,000 & \textbf{610\,000} \\ \hline
+    Cache 3 & 70\,000 & 0 & 210\,000 & 280\,000 \\ \hline
+  \end{tabular}
+
+  \vspace{0.8em}
+  Ordre de traitement : \textbf{cache 2}, puis cache 1, puis cache 3.
+\end{frame}
+
+\begin{frame}{Trace d'exécution : passe 1}{Jade}
+  \tikzset{c2/.style={draw=red!80!black, very thick}}
+  \begin{columns}[c]
+    \column{0.55\textwidth}
+    \small
+    \begin{tabular}{ccccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & \textbf{Sac à dos} \\ \hline
+      2 & 90k & 150k & 370k & \vb2\,\vb3 \\ \hline
+      1 & 0 & 120k & 80k & \vb2\,\vb3 \\ \hline
+      3 & 70k & 0 & 0 & \vb1 \\ \hline
+    \end{tabular}
+
+    \vspace{0.6em}
+    \begin{itemize}
+      \item Cache 2 : \vb1+\vb2+\vb3 $= 120 > 100$, le meilleur couple est \vb2+\vb3 (520k)
+      \item Cache 1 : \vb2 et \vb3 sont déjà servies à 500 par le cache 2, leur gain baisse
+    \end{itemize}
+    \column{0.43\textwidth}
+    \centering
+    \reseau{2,3}{2,3}{1}{%
+      \draw[red!80!black, very thick] (c2-v2.south west) -- (c2-v2.north east)
+                                      (c2-v2.north west) -- (c2-v2.south east);}
+
+    \vspace{0.3em}
+    Score : \textbf{877\,777}
+  \end{columns}
+  \vspace{0.4em}
+  \setbeamercolor{block title}{fg=white,bg=red!80!black}
+  \begin{block}{Problème}
+    \vb2 dans le cache 2 ne sert plus à rien : le cache 1 sert l'endpoint 1 plus vite.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Trace d'exécution : passe 2}{Jade}
+  \tikzset{c2/.style={fill=orange!40, draw=orange}, c3/.style={fill=gray!10, draw=gray}}
+  \begin{columns}[c]
+    \column{0.55\textwidth}
+    \small
+    \begin{tabular}{ccccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & \textbf{Sac à dos} \\ \hline
+      \rowcolor{orange!25} 2 & 20k & \textbf{0} & 270k & \vb1\,\vb3 \\ \hline
+      1 & 0 & 270k & 80k & \vb2\,\vb3 \\ \hline
+      3 & 0 & 0 & 0 & vide \\ \hline
+    \end{tabular}
+
+    \vspace{0.6em}
+    \begin{itemize}
+      \item Cache 2 vidé : \vb2 n'y vaut plus rien, la place va à \vb1
+      \item Cache 3 : tout est déjà servi plus vite par le cache 2
+    \end{itemize}
+    \column{0.43\textwidth}
+    \centering
+    \reseau{2,3}{1,3}{}{}
+
+    \vspace{0.3em}
+    Score : \textbf{900\,000}
+  \end{columns}
+  \vspace{0.4em}
+  \setbeamercolor{block title}{fg=white,bg=green}
+  \begin{block}{Passe 3 : plus aucun changement}
+    Chaque requête est servie à 100 : on ne peut pas faire mieux sur cette instance.
+  \end{block}
 \end{frame}
 
 %====================================================
@@ -167,11 +297,121 @@
 %====================================================
 \section{Code}
 
-\begin{frame}{Choix d'implémentation}{Hugo -- 3 min}
+\begin{frame}{Architecture}{Hugo -- 3 min}
+  \begin{block}{Un contrat commun à tous les algorithmes}
+    \code{algo(data, caches, caches\_sizes)} modifie les caches \textbf{en place}.
+  \end{block}
+  \vspace{0.6em}
+  \centering
+  \begin{tikzpicture}[node distance=0.9cm,
+      box/.style={draw=accent, fill=accent!10, rounded corners, minimum height=0.9cm, align=center, font=\small}]
+    \node[box] (dep) {Solution\\de départ};
+    \node[box, right=of dep] (copie) {Copie\\(\code{list} ou \code{set})};
+    \node[box, right=of copie, fill=accent!30] (algo) {Algorithme\\quelconque};
+    \node[box, right=of algo] (snap) {Photo :\\coût, score, caches};
+    \node[box, right=of snap] (best) {Meilleure\\méthode};
+    \draw[-Stealth, thick] (dep) -- (copie);
+    \draw[-Stealth, thick] (copie) -- (algo);
+    \draw[-Stealth, thick] (algo) -- (snap);
+    \draw[-Stealth, thick] (snap) -- (best);
+    \draw[-Stealth, thick, dashed, accent] (snap.south) to[out=-150, in=-30]
+      node[below, font=\small] {devient un nouveau départ (recherche locale)} (dep.south);
+  \end{tikzpicture}
+
+  \vspace{0.4em}
+  \raggedright
   \begin{itemize}
-    \item \afaire{structures de données}
-    \item \afaire{optimisations}
-    \item \afaire{ce qu'on a écarté et pourquoi}
+    \item Python pur, sans dépendance pour les algorithmes
+    \item On enchaîne n'importe quel algorithme depuis n'importe quelle solution
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Lecture et structures de données}{Hugo}
+  \begin{table}
+    \centering
+    \small
+    \begin{tabular}{llp{5.2cm}}
+      \hline
+      \rowcolor{accent!15} \textbf{Structure} & \textbf{Contenu} & \textbf{Pourquoi} \\ \hline
+      \code{requests} & (vidéo, endpoint, nb) & doublons fusionnés à la lecture \\ \hline
+      \code{adj\_list[v]} & requêtes de la vidéo $v$ & retrouver tout de suite qui demande $v$ \\ \hline
+      \code{endpoints[e]} & (lat.\ datacenter, [(cache, lat.)]) & données de l'endpoint $e$ \\ \hline
+      \code{caches\_endpoints[c]} & \{endpoint : lat.\} & « cet endpoint est-il relié à $c$ ? » en accès direct \\ \hline
+      \code{caches[c]} & \code{set} de vidéos & « $v$ est-elle dans $c$ ? » en temps constant (sac à dos, tabou) \\ \hline
+    \end{tabular}
+  \end{table}
+  \begin{block}{Idée}
+    Tout est indexé pour ne jamais parcourir toutes les requêtes quand une seule vidéo change.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Le sac à dos en pratique}{Hugo}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Deux programmations dynamiques}
+      \begin{itemize}
+        \item indexée sur le poids : $n \times$ capacité
+        \item indexée sur la valeur : $n \times \sum$ gains
+      \end{itemize}
+      On prend la plus petite table.
+    \end{block}
+    \setbeamercolor{block title}{fg=white,bg=red!80!black}
+    \begin{block}{Garde-fou}
+      Les deux tables dépassent $10^8$ cases $\Rightarrow$ glouton par ratio gain / taille.
+    \end{block}
+    \column{0.48\textwidth}
+    \setbeamercolor{block title}{fg=white,bg=green}
+    \begin{block}{Gains mis à jour, pas recalculés}
+      Deux tables tenues à jour :
+      \begin{itemize}
+        \item gain de chaque vidéo pour chaque cache
+        \item meilleure latence de chaque (endpoint, vidéo)
+      \end{itemize}
+      Vider ou remplir un cache ne touche que les requêtes de ses vidéos.
+    \end{block}
+    {\small Division par le pgcd : exacte, mais rarement utile sur nos instances.}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Recherche locale : évaluer un mouvement}{Hugo}
+  \begin{columns}[c]
+    \column{0.48\textwidth}
+    Mouvement : \textbf{ajouter} ou \textbf{retirer} une vidéo $v$ d'un cache.
+
+    \vspace{0.5em}
+    \begin{block}{Delta}
+      Seules les requêtes de $v$ peuvent changer :\\[0.3em]
+      $\Delta = \text{coût}_v(\text{après}) - \text{coût}_v(\text{avant})$\\[0.3em]
+      en parcourant \code{adj\_list[v]} seulement.
+    \end{block}
+    \begin{itemize}
+      \item On restaure la meilleure solution rencontrée
+    \end{itemize}
+    \column{0.5\textwidth}
+    \centering
+    \small
+    \begin{tabular}{lrrr}
+      \hline
+      \rowcolor{accent!15} \textbf{Instance} & \textbf{Tout} & \textbf{Delta} & \textbf{Gain} \\ \hline
+      kittens & 2\,150 ms & 0,23 ms & $\times 9\,400$ \\
+      trending\_today & 220 ms & 0,03 ms & $\times 8\,700$ \\
+      instance08 & 78 ms & 0,03 ms & $\times 2\,300$ \\ \hline
+    \end{tabular}
+
+    \vspace{0.8em}
+    \begin{block}{Une itération sur kittens}
+      $100 \times 100$ mouvements, 2 évaluations chacun :\\
+      \textbf{$\approx$ 5 s} avec le delta, \textbf{$\approx$ 12 h} sans.
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Limites}{Hugo}
+  \begin{itemize}
+    \item Python pur : lent sur les grosses instances
+    \item La DP garde toute sa table en mémoire, pour retrouver les vidéos choisies
+    \item Sur les plus grosses instances, c'est le glouton de secours qui remplit les caches
+    \item Recherche locale : voisinage borné à 100 caches $\times$ 100 vidéos
   \end{itemize}
 \end{frame}
 
