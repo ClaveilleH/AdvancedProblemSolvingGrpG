@@ -60,25 +60,44 @@
 \end{frame}
 
 \begin{frame}{Le sac à dos multi-passes}{Hugo}
-  \begin{block}{Idée clé}
-    Les autres caches étant fixés, remplir \textbf{un} cache est un sac à dos 0/1 :
-    objet = vidéo, poids = taille, valeur = latence gagnée sachant ce que servent déjà les autres caches.
+  \begin{block}{Idée}
+    Faire une première passe pour remplir les caches, puis repasser jusqu'à convergence.
   \end{block}
-  \begin{algorithmic}[1]
-    \State calculer le gain de chaque vidéo pour chaque cache (caches vides)
-    \For{chaque passe}
-      \While{il reste des caches à traiter dans cette passe}
-        \State $c \gets$ le cache restant de plus grand gain total
-        \State vider $c$ \Comment{ses vidéos redeviennent utiles aux voisins}
-        \State remplir $c$ par un sac à dos résolu exactement
-        \State baisser le gain de ces vidéos dans les caches voisins
-      \EndWhile
-    \EndFor
-  \end{algorithmic}
-  \pause
-  \begin{block}{Garantie}
-    L'ancien contenu reste possible : une étape ne fait jamais baisser le score.
-  \end{block}
+  \begin{columns}[c]
+    \column{0.52\textwidth}
+    \centering
+    \begin{tikzpicture}[
+        box/.style={draw=accent, fill=accent!10, rounded corners, minimum width=1.7cm, minimum height=0.7cm, font=\small},
+        lien/.style={thick, draw=gray},
+        vid/.style={draw=dark, fill=yellow!60, minimum size=0.35cm, inner sep=1pt, font=\tiny}]
+      % datacenter en haut, caches au milieu, endpoints en bas
+      \node[box, fill=accent!45] (c1) at (-2.6,3.2) {Cache 1};
+      \node[box, fill=orange!40, draw=orange] (c2) at (0,3.2) {\shortstack{Cache 2\\[-1pt]{\scriptsize\color{orange!70!black} gain(v1) $\searrow$}}};
+      \node[box] (c3) at (2.6,3.2) {Cache 3};
+      \node[box, fill=green!10, draw=green] (e1) at (-1.3,1.6) {Endpoint 1};
+      \node[box, fill=green!10, draw=green] (e2) at (1.3,1.6) {Endpoint 2};
+      \node[box, fill=gray!15, draw=gray] (dc) at (0,5.2) {Datacenter};
+      \draw[lien, draw=accent, very thick] (e1) -- (c1);
+      \draw[lien, draw=orange, very thick] (e1) -- (c2);
+      \draw[lien] (e2) -- (c2);
+      \draw[lien] (e2) -- (c3);
+      \draw[lien, dashed, rounded corners] (e1) -- (-1.3,3.2) -- (dc);
+      \draw[lien, dashed, rounded corners] (e2) -- (1.3,3.2) -- (dc);
+      % cache 1 rempli
+      \node[vid] at ([xshift=-0.25cm,yshift=0.3cm]c1.north) {v1};
+      \node[vid] at ([xshift=0.25cm,yshift=0.3cm]c1.north) {v4};
+      \useasboundingbox (-3.5,0.6) rectangle (3.5,5.6);
+    \end{tikzpicture}
+
+    \column{0.46\textwidth}
+    Pour chaque passe :
+    \begin{enumerate}
+      \item Choix du cache de plus grand gain total
+      \item Le vider, puis le remplir par un sac à dos résolu exactement
+      \item Mise à jour de la latence des vidéos concernées
+      \item Reprendre à l'étape 1
+    \end{enumerate}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Trace d'exécution : l'instance}{Jade -- 4 min}
