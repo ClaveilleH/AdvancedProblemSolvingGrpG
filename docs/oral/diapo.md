@@ -16,6 +16,8 @@ Les mesures portent sur notre code après les trois corrections de la recherche 
    - Attention : il peut y avoir énormément de caches, donc pas de liste par cache. On donne des **statistiques** : X caches par telle branche, Y caches par telle autre.
 5. **SWOT** (exigé par la consigne).
 
+Ajouté ensuite : **deux diapos « Mesure des stats »** (entrée, puis sortie) qui montrent l'outil `metrics/mesure_metrics.py`, ses graphiques et pourquoi chacun est mesuré ; le code `metrics/` a été partagé avec la promo.
+
 ## Règles de travail avec Claude
 
 - L'oral et le diaporama portent exclusivement sur notre travail. Les trois corrections de la recherche locale ont été appliquées à notre code le 10/10, à notre demande.
@@ -49,7 +51,7 @@ python -m bench.solution_stats all        # placements inutiles, copies par vid�
 python -m bench.plots                     # figures de l'oral
 ```
 
-## Diaporama (10 min, 12 diapos)
+## Diaporama (10 min, 16 diapos)
 
 | # | Diapo | Contenu | Figure | Durée |
 |---|---|---|---|---|
@@ -57,14 +59,20 @@ python -m bench.plots                     # figures de l'oral
 | 2 | Le problème | vidéos, caches, endpoints ; ce qu'on maximise | schéma de l'énoncé | 0:25 |
 | 3 | Nos algos | tableau : idée et particularité de chacun | | 1:25 |
 | 4 | Protocole | machine, instances, limite de temps, graines, métriques | | 0:50 |
-| 5 | Vue d'ensemble | écart au meilleur score connu, algo × instance | `vue_ensemble` | 0:40 |
-| 6 | Gloutons : résultats | colonnes sur les instances où ils diffèrent le plus | `gloutons` | 1:00 |
-| 7 | Gloutons : pourquoi | capacité gaspillée, place disponible | `gloutons_gaspillage` ou `capacite` | 0:50 |
-| 8 | Recherche locale : constat | avant / après correction, gains | `recherche_locale_avant_apres`, `recherche_locale` | 0:55 |
-| 9 | Recherche locale : améliorable ? | voisinage et itérations | `voisinage` | 0:50 |
-| 10 | Knapsack : quelle branche ? | part des caches par branche | `knapsack_branches` | 1:00 |
-| 11 | Knapsack : mise à jour | gain selon le nombre de caches par endpoint | `knapsack_maj` | 0:45 |
-| 12 | SWOT et conclusion | tableau 2×2 | | 1:10 |
+| 5 | Mesure des stats (1/2) : entrée | les 6 graphiques d'entrée et pourquoi on les mesure | | 0:25 |
+| 6 | Interface graphique : entrée | capture des 6 graphiques sur `me_at_the_zoo` | `stats_entree_input` | 0:25 |
+| 7 | Mesure des stats (2/2) : sortie | les 6 graphiques de sortie et pourquoi | | 0:25 |
+| 8 | Interface graphique : sortie | capture des 6 graphiques sur la solution du knapsack | `stats_sortie_output` | 0:25 |
+| 9 | Vue d'ensemble | écart au meilleur score connu, algo × instance | `vue_ensemble` | 0:30 |
+| 10 | Gloutons : résultats | colonnes sur les instances où ils diffèrent le plus | `gloutons` | 0:45 |
+| 11 | Gloutons : pourquoi | capacité gaspillée, place disponible | `gloutons_gaspillage` ou `capacite` | 0:40 |
+| 12 | Recherche locale : constat | avant / après correction, gains | `recherche_locale_avant_apres`, `recherche_locale` | 0:40 |
+| 13 | Recherche locale : améliorable ? | voisinage et itérations | `voisinage` | 0:40 |
+| 14 | Knapsack : quelle branche ? | part des caches par branche | `knapsack_branches` | 0:50 |
+| 15 | Knapsack : mise à jour | gain selon le nombre de caches par endpoint | `knapsack_maj` | 0:40 |
+| 16 | SWOT et conclusion | tableau 2×2 | | 0:45 |
+
+Les deux captures (`stats_entree_input.png`, `stats_sortie_output.png`) sont générées par `metrics/mesure_metrics.py -s` **uniquement pour l'oral**, dans `docs/oral/figures/` : elles ne font pas partie du projet.
 
 Diapos de secours pour les questions : compromis temps / qualité (`temps_qualite`), place disponible (`capacite`), complexité des deux DP.
 
@@ -88,17 +96,38 @@ Diapos de secours pour les questions : compromis temps / qualité (`temps_qualit
 - Pourquoi le meilleur score de la promo comme référence : pas d'optimum connu, la borne supérieure est trop lâche.
 - Pourquoi 10 graines : le tabou aléatoire change de score d'une exécution à l'autre.
 
-**5. Vue d'ensemble** (0:40)
+**5. Mesure des stats (1/2) : entrée** (0:25)
+- `metrics/mesure_metrics.py` lit l'instance et ouvre une fenêtre de 6 graphiques.
+- Tailles et requêtes par vidéo : voir la longue traîne, justifier le tri par popularité du glouton 2.
+- Taille vs popularité et gain potentiel : repérer les pièges et borner le gain.
+- Requêtes et caches par endpoint : décrire la demande et la topologie.
+
+**6. Interface graphique : entrée** (0:25)
+- Montrer la capture : 6 panneaux sur `me_at_the_zoo` (100 vidéos, 10 caches de 100 Mo).
+- Ce qu'on lit : vidéos petites devant la capacité, longue traîne des requêtes, demande concentrée.
+- `-s` enregistre les PNG ; les captures ne servent qu'à l'oral.
+
+**7. Mesure des stats (2/2) : sortie** (0:25)
+- Même outil avec `-o` : il relit la solution, la valide (capacité, doublons, ids), puis ouvre 6 graphiques.
+- Remplissage et requêtes par cache, camembert cache / datacenter, score contre borne supérieure, copies par vidéo.
+- Pourquoi : voir où la capacité est perdue et détecter la recopie du glouton 3.
+
+**8. Interface graphique : sortie** (0:25)
+- Capture sur la solution du knapsack : 87,5 % de la borne, 91 % des requêtes servies, 43 % de duplication.
+- Lecture : caches bien remplis, un cache domine, duplication visible sur la distribution des copies.
+- `bench/` automatise la même mesure sur 561 exécutions ; le code `metrics/` a été partagé avec la promo.
+
+**9. Vue d'ensemble** (0:30)
 - Le knapsack avec mise à jour domine ; les gloutons prennent le relais quand il ne finit pas.
 - Annoncer les trois zooms : gloutons, recherche locale, knapsack.
 
-**6–7. Gloutons** (1:50)
+**10–11. Gloutons** (1:25)
 - Glouton 1 meilleur glouton sur 17 instances, glouton 2 sur 11, glouton 3 jamais.
 - Glouton 2 : une seule copie par vidéo. Gagne quand tout endpoint voit tout cache, perd quand chaque endpoint voit peu de caches.
 - Glouton 3 : mêmes vidéos recopiées dans les caches d'un même endpoint, capacité gaspillée.
 - Glouton 1 : ignore la taille des vidéos. Bon quand la place est abondante ou les requêtes concentrées.
 
-**8–9. Recherche locale** (1:45)
+**12–13. Recherche locale** (1:20)
 - Constat de départ : elle dégradait la solution du glouton sur 9 à 15 instances sur 33.
 - Cause : l'état rendu était le dernier visité, pas le meilleur rencontré. Corrigé.
 - Après correction : plus aucune dégradation, mais des gains inférieurs à 1 % presque partout.
@@ -106,18 +135,66 @@ Diapos de secours pour les questions : compromis temps / qualité (`temps_qualit
 - Voisinage plus grand : gain net sur une instance sur cinq, à un coût en temps qui explose pour le tabou trié.
 - Réponse : améliorable à la marge par les paramètres, pas au niveau du knapsack.
 
-**10–11. Knapsack** (1:45)
+**14–15. Knapsack** (1:30)
 - Répartition des caches par branche : DP poids, DP valeur, repli glouton, non traités à la limite de temps.
 - Le repli glouton coûte peu ; le vrai problème est le temps.
 - Gain de la mise à jour en fonction du nombre de caches par endpoint.
 - Coût : DP en Python pur, table en nombre de vidéos × capacité.
 
-**12. SWOT** (1:10)
+**16. SWOT** (0:45)
 - Deux ou trois points par case, chacun appuyé sur un résultat montré avant.
 
 ## Résultats
 
 Bench du 10/10 : 33 instances, 561 exécutions (recherche locale mesurée après correction). Les pourcentages d'écart sont calculés hors instances jouets (28 instances), par rapport au meilleur score de la promo.
+
+### Mesure des stats : entrée et sortie
+
+La partie mesure de stats est `metrics/mesure_metrics.py` : elle lit une instance, puis éventuellement une solution, et affiche **une interface graphique** — une fenêtre de 6 graphiques pour l'entrée, une pour la sortie (`plt.show()`).
+
+```bash
+python -m metrics.mesure_metrics -i instances/kittens.in                          # entrée seule
+python -m metrics.mesure_metrics -i instances/kittens.in -o results/kittens.out   # entrée + sortie
+python -m metrics.mesure_metrics ... --no-plots                                   # texte seul
+python -m metrics.mesure_metrics ... -s out/kittens                               # enregistre les PNG
+```
+
+**Entrée — 6 graphiques** (`read_input()` → objet `Problem` → `plot_input_stats`)
+
+| Graphique | Ce qu'il montre | Pourquoi on le mesure |
+|---|---|---|
+| Tailles des vidéos | histogramme + ligne de capacité du cache | voir si une vidéo tient seule ; repérer les grosses |
+| Requêtes par vidéo | courbe classée, échelle log | la longue traîne justifie le tri par popularité du glouton 2 |
+| Taille vs popularité | nuage de points | repérer les vidéos à fort gain par Mo, et les pièges |
+| Requêtes par endpoint | barres triées | mesurer la concentration de la demande |
+| Caches par endpoint | barres triées | décrire la topologie ; explique l'effet de la mise à jour du knapsack |
+| Gain potentiel | écarts de latence datacenter → cache | borne ce qu'on peut espérer gagner |
+
+**Sortie — 6 graphiques** (`read_output()` valide → `OutputStats` → `plot_output_stats`)
+
+| Graphique | Ce qu'il montre | Pourquoi on le mesure |
+|---|---|---|
+| Remplissage par cache | % de capacité utilisée, cache par cache | détecter les caches vides ou saturés |
+| Requêtes servies par cache | barres + moyenne | voir quels caches travaillent vraiment |
+| Cache vs datacenter | camembert | part des requêtes réellement servies |
+| Score vs borne supérieure | deux barres + ratio atteint | situer la solution par rapport au maximum |
+| Copies par vidéo | distribution + taux de duplication | détecter la recopie inutile (glouton 3) |
+| Synthèse chiffrée | caches inutilisés, remplissage, taille, gains moyens | résumer la solution en une vue |
+
+`read_output()` refuse une solution invalide : cache ou vidéo inexistant, cache défini deux fois, vidéo en double, capacité dépassée.
+
+- `bench/` automatise la même mesure sur les 561 exécutions et écrit les CSV (`features.csv`, `runs.csv`, `solutions.csv`) ; `metrics/` est la version interactive, une instance et une solution à la fois.
+- Le code `metrics/` **a été partagé avec le reste de la promo** pour qu'elle mesure ses propres solutions.
+
+Les deux captures du diaporama (`figures/stats_entree_input.png`, `figures/stats_sortie_output.png`) viennent de `me_at_the_zoo` et de la solution du knapsack avec mise à jour :
+
+```bash
+python -m bench.run me_at_the_zoo --algos KS_maj     # -> results/bench/me_at_the_zoo__KS_maj.out
+python -m metrics.mesure_metrics -i instances/me_at_the_zoo.in --no-plots -s docs/oral/figures/stats_entree --which input
+python -m metrics.mesure_metrics -i instances/me_at_the_zoo.in -o results/bench/me_at_the_zoo__KS_maj.out --no-plots -s docs/oral/figures/stats_sortie --which output
+```
+
+Elles restent dans `docs/oral/figures/` : **usage oral uniquement**, hors du projet.
 
 ### Vue d'ensemble
 

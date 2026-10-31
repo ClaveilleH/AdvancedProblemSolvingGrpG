@@ -22,6 +22,8 @@
 6. **Étudié le voisinage des tabu search** sur 5 instances : 3 tailles de voisinage, 2 nombres d'itérations.
 7. **Produit les figures et le diaporama** (`figures/`, `diapo.tex`).
 
+**Mesure des stats** : outil `metrics/mesure_metrics.py` — 6 graphiques d'entrée (`read_input`) et 6 de sortie (`read_output` + `OutputStats`), affichés dans une interface graphique. Deux captures (`stats_entree_input.png`, `stats_sortie_output.png`) sont ajoutées au diaporama, dans `docs/oral/figures/` uniquement. Le code `metrics/` a été partagé avec le reste de la promo. `bench/` automatise la même mesure sur les 561 exécutions.
+
 ## Ce qu'on en retient
 
 - Le knapsack avec mise à jour est notre meilleur algo : 5,3 % d'écart médian, meilleur algo constructif sur 21 instances sur 28. Il ne finit pas en 300 s sur 5 instances.

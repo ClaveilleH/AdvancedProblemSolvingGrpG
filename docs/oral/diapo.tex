@@ -111,18 +111,86 @@
 \end{frame}
 
 % ---------------------------------------------------------------- 5
+\begin{frame}{Mesure des stats (1/2) : entrée}
+  \scriptsize
+  \begin{tabular}{@{}p{0.21\textwidth}p{0.36\textwidth}p{0.35\textwidth}@{}}
+    \toprule
+    Graphique & Ce qu'il montre & Pourquoi on le mesure \\
+    \midrule
+    Tailles des vidéos & histogramme + ligne de capacité du cache & voir si une vidéo tient seule ; repérer les grosses \\
+    \addlinespace
+    Requêtes par vidéo & courbe classée, échelle log & la longue traîne justifie le tri par popularité du glouton 2 \\
+    \addlinespace
+    Taille vs popularité & nuage de points & repérer les vidéos à fort gain par Mo, et les pièges \\
+    \addlinespace
+    Requêtes par endpoint & barres triées & mesurer la concentration de la demande \\
+    \addlinespace
+    Caches par endpoint & barres triées & décrire la topologie ; explique l'effet de la mise à jour du knapsack \\
+    \addlinespace
+    Gain potentiel & écarts de latence datacenter $\rightarrow$ cache & borne ce qu'on peut espérer gagner \\
+    \bottomrule
+  \end{tabular}
+
+  \medskip
+  \scriptsize
+  \texttt{read\_input()} construit l'objet \texttt{Problem} ; six graphiques s'ouvrent dans une fenêtre.
+
+  \smallskip
+  \texttt{python -m metrics.mesure\_metrics -i instances/x.in} \quad (\texttt{bench/} automatise la même mesure sur 561 exécutions)
+\end{frame}
+
+% ---------------------------------------------------------------- 6
+\begin{frame}{Interface graphique : entrée}
+  \fig{stats_entree_input}{0.82}
+  \scriptsize \texttt{instances/me\_at\_the\_zoo.in} : 100 vidéos, 10 endpoints, 10 caches de 100 Mo.
+\end{frame}
+
+% ---------------------------------------------------------------- 7
+\begin{frame}{Mesure des stats (2/2) : sortie}
+  \scriptsize
+  \begin{tabular}{@{}p{0.23\textwidth}p{0.35\textwidth}p{0.34\textwidth}@{}}
+    \toprule
+    Graphique & Ce qu'il montre & Pourquoi on le mesure \\
+    \midrule
+    Remplissage par cache & \% de capacité utilisée, cache par cache & détecter les caches vides ou saturés \\
+    \addlinespace
+    Requêtes servies par cache & barres + moyenne & voir quels caches travaillent vraiment \\
+    \addlinespace
+    Cache vs datacenter & camembert & part des requêtes réellement servies \\
+    \addlinespace
+    Score vs borne sup. & deux barres + ratio atteint & situer la solution sous le maximum \\
+    \addlinespace
+    Copies par vidéo & distribution + taux de duplication & détecter la recopie inutile (glouton 3) \\
+    \addlinespace
+    Synthèse chiffrée & caches inutilisés, remplissage, taille, gains moyens & résumer la solution en une vue \\
+    \bottomrule
+  \end{tabular}
+
+  \smallskip
+  \scriptsize
+  \texttt{read\_output()} valide la solution (capacité, doublons, ids), puis \texttt{OutputStats} calcule tout.\\
+  \texttt{-o results/x.out} ouvre l'interface graphique ; \texttt{-s} enregistre les PNG. Code \texttt{metrics/} partagé avec la promo.
+\end{frame}
+
+% ---------------------------------------------------------------- 8
+\begin{frame}{Interface graphique : sortie}
+  \fig{stats_sortie_output}{0.82}
+  \scriptsize Même instance, solution du knapsack avec mise à jour : 87,5\,\% de la borne.
+\end{frame}
+
+% ---------------------------------------------------------------- 9
 \begin{frame}{Vue d'ensemble}
   \fig{vue_ensemble}{0.74}
   \small Knapsack avec mise à jour : 5,3\,\% d'écart médian, meilleur algo constructif sur 21 instances sur 28.
 \end{frame}
 
-% ---------------------------------------------------------------- 6
+% ---------------------------------------------------------------- 10
 \begin{frame}{Gloutons : lequel, et où ?}
   \fig{gloutons}{0.72}
   \small Meilleur glouton : le 1 sur 17 instances, le 2 sur 11, le 3 jamais.
 \end{frame}
 
-% ---------------------------------------------------------------- 7
+% ---------------------------------------------------------------- 11
 \begin{frame}{Gloutons : pourquoi ?}
   \begin{columns}
     \column{0.58\textwidth}
@@ -137,7 +205,7 @@
   \end{columns}
 \end{frame}
 
-% ---------------------------------------------------------------- 8
+% ---------------------------------------------------------------- 12
 \begin{frame}{Recherche locale : le constat}
   \fig{recherche_locale_avant_apres}{0.62}
   \small
@@ -148,7 +216,7 @@
   \end{itemize}
 \end{frame}
 
-% ---------------------------------------------------------------- 9
+% ---------------------------------------------------------------- 13
 \begin{frame}{Recherche locale : améliorable ?}
   \fig{voisinage}{0.62}
   \begin{itemize}
@@ -158,7 +226,7 @@
   \end{itemize}
 \end{frame}
 
-% ---------------------------------------------------------------- 10
+% ---------------------------------------------------------------- 14
 \begin{frame}{Knapsack : quelle résolution pour quels caches ?}
   \begin{columns}
     \column{0.66\textwidth}
@@ -176,7 +244,7 @@
   \end{columns}
 \end{frame}
 
-% ---------------------------------------------------------------- 11
+% ---------------------------------------------------------------- 15
 \begin{frame}{Knapsack : l'effet de la mise à jour}
   \begin{columns}
     \column{0.6\textwidth}
@@ -192,7 +260,7 @@
   \end{columns}
 \end{frame}
 
-% ---------------------------------------------------------------- 12
+% ---------------------------------------------------------------- 16
 \begin{frame}{SWOT}
   \small
   \begin{columns}[T]
