@@ -349,6 +349,64 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}{Résultats : les 33 instances}{Valentin}
+  \begin{columns}[c]
+    \column{0.52\textwidth}
+    \centering
+    \small
+    \begin{tabular}{lrrr}
+      \hline
+      \rowcolor{accent!15} \textbf{Famille} & \textbf{N} & \textbf{VBS} & \textbf{Écart} \\ \hline
+      Google   &  4 &  2\,656\,181 & 9,2\,\% \\ \hline
+      Jouets   &  5 &  3\,836\,835 & 0,0\,\% \\ \hline
+      Autres   & 24 & 22\,567\,375 & 4,1\,\% \\ \hline
+      \rowcolor{accent!25} \textbf{Total} & \textbf{33} & \textbf{29\,060\,391} & \textbf{4,0\,\%} \\ \hline
+    \end{tabular}
+
+    \vspace{0.6em}
+    {\footnotesize Écart médian par instance : \textbf{2,5\,\%} (moyenne 5,1\,\%).}
+
+    \column{0.44\textwidth}
+    \begin{itemize}
+      \item \textbf{25} instances sur 33 à moins de 5\,\% du VBS
+      \item \textbf{15} à moins de 1\,\%
+      \item \code{KS\_maj} meilleur de nos algos sur \textbf{17} des 28 instances réelles
+      \item Aucune solution invalide sur 561 exécutions
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Nos cinq pires instances}{Valentin}
+  \centering
+  \small
+  \begin{tabular}{lrrrr}
+    \hline
+    \rowcolor{accent!15} \textbf{Instance} & \textbf{Écart} & \textbf{Capacité} & \textbf{Caches/endpoint} & \textbf{Statut KS\_maj} \\ \hline
+    INSATANC2D                  & 51,4\,\% & 0,24 &   4,0 & timeout \\ \hline
+    realistic\_large\_random    & 22,4\,\% & 2,39 &  74,8 & timeout \\ \hline
+    kittens                     & 16,2\,\% & 0,60 & 351,9 & timeout \\ \hline
+    videos\_worth\_spreading    &  8,8\,\% & 0,33 &   5,2 & timeout \\ \hline
+    realistic\_large\_clustered &  8,7\,\% & 2,41 &  59,2 & timeout \\ \hline
+  \end{tabular}
+
+  \vspace{1em}
+  \setbeamercolor{block title}{fg=white,bg=red!80!black}
+  \begin{block}{Le facteur commun}
+    \small
+    Ces 5 instances sont \textbf{exactement} celles où le knapsack dépasse les 300 s.
+    Sur les 28 autres, l'écart médian tombe à \textbf{0,5\,\%} : on ne perd pas sur la
+    qualité de l'algorithme, mais sur le temps de calcul disponible.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Place disponible et écart}{Valentin}
+  \fig{capacite}{0.78}
+\end{frame}
+
+\begin{frame}{Compromis temps / qualité}{Valentin}
+  \fig{temps_qualite}{0.78}
+\end{frame}
+
 \begin{frame}{Analyse SWOT}{\afaire{Kyllian}}
   \begin{columns}[T]
     \column{0.48\textwidth}
@@ -530,74 +588,6 @@
 \begin{frame}{Questions}
   \centering\Large Merci pour votre attention !\\[1em]
   \normalsize Des questions ?
-\end{frame}
-
-%====================================================
-% Slides de secours (non présentées, pour les questions)
-% On mémorise le nombre de slides de l'exposé pour que le pied de page
-% affiche « 27 / 27 » et non « 27 / 31 » (cf. \mainframetotal).
-\makeatletter
-\immediate\write\@auxout{\gdef\string\mainframetotal{\the\value{framenumber}}}
-\makeatother
-\appendix
-\renewcommand{\pagefootertext}{A-\number\numexpr\value{framenumber}-\mainframetotal\relax}
-
-\begin{frame}{Secours : les 33 instances}{Valentin}
-  \begin{columns}[c]
-    \column{0.52\textwidth}
-    \centering
-    \small
-    \begin{tabular}{lrrr}
-      \hline
-      \rowcolor{accent!15} \textbf{Famille} & \textbf{N} & \textbf{VBS} & \textbf{Écart} \\ \hline
-      Google   &  4 &  2\,656\,181 & 9,2\,\% \\ \hline
-      Jouets   &  5 &  3\,836\,835 & 0,0\,\% \\ \hline
-      Autres   & 24 & 22\,567\,375 & 4,1\,\% \\ \hline
-      \rowcolor{accent!25} \textbf{Total} & \textbf{33} & \textbf{29\,060\,391} & \textbf{4,0\,\%} \\ \hline
-    \end{tabular}
-
-    \vspace{0.6em}
-    {\footnotesize Écart médian par instance : \textbf{2,5\,\%} (moyenne 5,1\,\%).}
-
-    \column{0.44\textwidth}
-    \begin{itemize}
-      \item \textbf{25} instances sur 33 à moins de 5\,\% du VBS
-      \item \textbf{15} à moins de 1\,\%
-      \item \code{KS\_maj} meilleur de nos algos sur \textbf{17} des 28 instances réelles
-      \item Aucune solution invalide sur 561 exécutions
-    \end{itemize}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Secours : nos cinq pires instances}{Valentin}
-  \centering
-  \small
-  \begin{tabular}{lrrrr}
-    \hline
-    \rowcolor{accent!15} \textbf{Instance} & \textbf{Écart} & \textbf{Capacité} & \textbf{Caches/endpoint} & \textbf{Statut KS\_maj} \\ \hline
-    INSATANC2D                  & 51,4\,\% & 0,24 &   4,0 & timeout \\ \hline
-    realistic\_large\_random    & 22,4\,\% & 2,39 &  74,8 & timeout \\ \hline
-    kittens                     & 16,2\,\% & 0,60 & 351,9 & timeout \\ \hline
-    videos\_worth\_spreading    &  8,8\,\% & 0,33 &   5,2 & timeout \\ \hline
-    realistic\_large\_clustered &  8,7\,\% & 2,41 &  59,2 & timeout \\ \hline
-  \end{tabular}
-
-  \vspace{1em}
-  \setbeamercolor{block title}{fg=white,bg=red!80!black}
-  \begin{block}{Le facteur commun}
-    \small
-    Ces 5 instances sont \textbf{exactement} celles où le knapsack dépasse les 300 s.
-    Sur les 28 autres, l'écart médian tombe à \textbf{0,5\,\%} : on ne perd pas sur la
-    qualité de l'algorithme, mais sur le temps de calcul disponible.
-  \end{block}
-\end{frame}
-
-\begin{frame}{Secours : place disponible et écart}{Valentin}
-  \fig{capacite}{0.78}
-\end{frame}
-
-\begin{frame}{Secours : compromis temps / qualité}{Valentin}
-  \fig{temps_qualite}{0.78}
 \end{frame}
 
 \end{document}
