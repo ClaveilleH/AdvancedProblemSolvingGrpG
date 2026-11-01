@@ -271,20 +271,101 @@
   \end{tabular}
 \end{frame}
 
-\begin{frame}{Une exécution : tous les algos enchaînés}{Kyllian}
+\begin{frame}{Résultats expérimentaux}{Kyllian -- 2 min}
+
+  \vfill
   \centering
-  \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{LancementInstance06.png}
-  \par\vspace{0.3em}
-  {\footnotesize Un seul point d'entrée, un contrat commun : chaque algo part de la meilleure
-   solution connue, et on garde la meilleure rencontre.}
+
+  \textbf{Instance : instance06.txt}
+
+  \vspace{0.5cm}
+
+  \begin{tabular}{|l|r|r|r|r|}
+      \hline
+      \textbf{Méthode} & \textbf{Temps} & \textbf{Optimisation} & \textbf{Score} & \textbf{Écart} \\
+      \hline
+      Greedy & 0,0005s & 56.37\% & 1\,765\,088 & -25.06\% \\
+      Greedy2 & 0,0022s & 49.26\% & 1\,542\,411 & -34.52\% \\
+      Greedy3 & 0,0004s & 44.61\% & 1\,396\,840 & -40.70\% \\
+      \hline
+      Multi-Knapsack & 1,8090s & 75.22\% & 2\,355\,465 & 0.00\% \\
+      LS (Multi-Knapsack) & 0,9977s& 75.22\% & 2\,355\,465 & 0.00\% \\
+      TS (Multi-Knapsack) & 1,2641s& 75.22\% & 2\,355\,465 & 0.00\% \\
+      TSS (Multi-Knapsack) & 1,9832s & 75.22\% & 2\,355\,465 & 0.00\% \\
+      \hline
+  \end{tabular}
+
+  \vspace{0.4cm}
+
+  \textbf{Meilleur résultat : Multi-Knapsack}
+
+  \vspace{0.2cm}
+
+  Score obtenu : \textbf{2\,355\,465} (75.22\% d'optimisation)
+
+  \vfill
+
 \end{frame}
 
-\begin{frame}{Les métriques de sortie}{Kyllian}
+\begin{frame}{Statistiques de l'instance 06 (1/2)}{Kyllian -- 2 min}
   \centering
-  \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{StatsInstance06.png}
-  \par\vspace{0.3em}
-  {\footnotesize Score, borne supérieure atteinte, gain moyen par requête, part servie par les
-   caches, taux de duplication : tout est mesuré, pas seulement le score.}
+  \small
+  \vfill
+
+  \begin{tabular}{|l|p{8cm}|}
+      \hline
+      \textbf{Indicateur} & \textbf{Résultat} \\
+      \hline
+      Entrée & 1471 vidéos, 361 endpoints, 2424 descriptions de requêtes, 60 caches de 600000000 Mo \\
+      \hline
+      Sortie & 60 caches utilisés sur 60 \\
+      \hline
+      Score obtenu & 2\,355\,465 \\
+      \hline
+      Borne supérieure théorique & 3\,022\,262 (77,9\%) \\
+      \hline
+      Gain moyen par requête & 2\,355.47 ms \\
+      \hline
+      Gain par requête servie par un cache & 3\,355.97 ms \\
+      \hline
+      Requêtes servies par cache & 3\,959\,767 (70.2\%) \\
+      \hline
+      Requêtes servies par datacenter & 1\,681\,940 (29.8\%) \\
+      \hline
+  \end{tabular}
+
+  \vfill
+\end{frame}
+
+\begin{frame}{Statistiques de l'instance 06 (2/2)}{Kyllian -- 2 min}
+  \centering
+  \small
+  \vfill
+
+  \begin{tabular}{|l|p{8cm}|}
+      \hline
+      \textbf{Indicateur} & \textbf{Résultat} \\
+      \hline
+      Requêtes moyennes par cache & 65\,996.1 \\
+      \hline
+      Remplissage moyen des caches & 100\% \\
+      \hline
+      Caches inutilisés & 0 / 60 \\
+      \hline
+      Taille totale utilisée & 36\,000\,000\,000 Mo \\
+      \hline
+      Taux de duplication & 0\% \\
+      \hline
+  \end{tabular}
+
+  \vspace{0.6cm}
+
+  \textbf{Bilan :}
+  
+  Les 60 caches sont utilisés et remplis à 100\%.
+  Le score obtenu est de 2\,355\,465 points.
+
+  \vfill
 \end{frame}
 
 \begin{frame}{Ce que dit l'entrée (instance06)}{Kyllian}
@@ -341,6 +422,7 @@
     \end{block}
   \end{columns}
 \end{frame}
+
 
 
 
