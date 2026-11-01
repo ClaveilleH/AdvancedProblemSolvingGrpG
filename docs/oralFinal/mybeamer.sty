@@ -68,19 +68,25 @@
 \newcommand{\code}[1]{\texttt{#1}}
 
 % -------------------- Pseudocode (en français) --------------------
-\RequirePackage{algorithm}
-\RequirePackage[noend]{algpseudocode}
-\algrenewcommand\algorithmicrequire{\textbf{Entrée :}}
-\algrenewcommand\algorithmicensure{\textbf{Sortie :}}
-\algrenewcommand\algorithmicfor{\textbf{pour}}
-\algrenewcommand\algorithmicforall{\textbf{pour chaque}}
-\algrenewcommand\algorithmicdo{\textbf{faire}}
-\algrenewcommand\algorithmicwhile{\textbf{tant que}}
-\algrenewcommand\algorithmicif{\textbf{si}}
-\algrenewcommand\algorithmicthen{\textbf{alors}}
-\algrenewcommand\algorithmicelse{\textbf{sinon}}
-\algrenewcommand\algorithmicend{\textbf{fin}}
-\algrenewcommand\algorithmicreturn{\textbf{retourner}}
+% Chargé seulement si la distribution TeX fournit les paquets
+% (algorithms / algorithmicx ne sont pas dans une TeX Live "basic").
+\IfFileExists{algorithm.sty}{%
+  \RequirePackage{algorithm}
+  \IfFileExists{algpseudocode.sty}{%
+    \RequirePackage[noend]{algpseudocode}
+    \algrenewcommand\algorithmicrequire{\textbf{Entrée :}}
+    \algrenewcommand\algorithmicensure{\textbf{Sortie :}}
+    \algrenewcommand\algorithmicfor{\textbf{pour}}
+    \algrenewcommand\algorithmicforall{\textbf{pour chaque}}
+    \algrenewcommand\algorithmicdo{\textbf{faire}}
+    \algrenewcommand\algorithmicwhile{\textbf{tant que}}
+    \algrenewcommand\algorithmicif{\textbf{si}}
+    \algrenewcommand\algorithmicthen{\textbf{alors}}
+    \algrenewcommand\algorithmicelse{\textbf{sinon}}
+    \algrenewcommand\algorithmicend{\textbf{fin}}
+    \algrenewcommand\algorithmicreturn{\textbf{retourner}}
+  }{}%
+}{}
 
 % -------------------- Schémas --------------------
 \RequirePackage{tikz}

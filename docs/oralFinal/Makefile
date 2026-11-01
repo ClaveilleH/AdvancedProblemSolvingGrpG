@@ -24,4 +24,4 @@ distclean: clean
 	rm -f $(PDF)
 
 view: $(PDF)
-	xdg-open $(PDF) >/dev/null 2>&1 || true
+	@open $(PDF) >/dev/null 2>&1 || xdg-open $(PDF) >/dev/null 2>&1 || true

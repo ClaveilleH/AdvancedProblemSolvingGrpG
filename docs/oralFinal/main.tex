@@ -260,30 +260,93 @@
 
 \begin{frame}{Protocole expérimental}{Kyllian -- 2 min}
   \centering
-  \includegraphics[width=\textwidth,height=0.82\textheight,keepaspectratio]{LancementInstance06.png}
+  \small
+  \begin{tabular}{|l|p{8.7cm}|}
+    \hline
+    \rowcolor{accent!15} \textbf{Réglages} & Intel Core i5-7600 (4 c\oe urs, 3,5 GHz), 24 Go, Windows 10, Python 3.11.1 \\ \hline
+    \textbf{Limites}  & 300 s par exécution, 2 exécutions en parallèle \\ \hline
+    \textbf{Métriques} & score, temps, taux de remplissage, validité, borne supérieure, duplication \\ \hline
+    \textbf{Instances} & 4 Google + 29 fournies par la promo $= 33$ \\ \hline
+    \textbf{Volume} & 8 algorithmes, 33 instances, jusqu'à 10 graines par couple $= 561$ exécutions \\ \hline
+  \end{tabular}
 \end{frame}
 
-\begin{frame}{Protocole expérimental}{Kyllian -- 2 min}
+\begin{frame}{Une exécution : tous les algos enchaînés}{Kyllian}
   \centering
-  \includegraphics[width=\textwidth,height=0.82\textheight,keepaspectratio]{StatsInstance06.png}
+  \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{LancementInstance06.png}
+  \par\vspace{0.3em}
+  {\footnotesize Un seul point d'entrée, un contrat commun : chaque algo part de la meilleure
+   solution connue, et on garde la meilleure rencontre.}
 \end{frame}
 
-\begin{frame}{Protocole expérimental}{Kyllian -- 2 min}
+\begin{frame}{Les métriques de sortie}{Kyllian}
   \centering
-  \includegraphics[width=\textwidth,height=0.82\textheight,keepaspectratio]{statinstance06_input.png}
+  \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{StatsInstance06.png}
+  \par\vspace{0.3em}
+  {\footnotesize Score, borne supérieure atteinte, gain moyen par requête, part servie par les
+   caches, taux de duplication : tout est mesuré, pas seulement le score.}
 \end{frame}
 
-\begin{frame}{Protocole expérimental}{Kyllian -- 2 min}
+\begin{frame}{Ce que dit l'entrée (instance06)}{Kyllian}
   \centering
-  \includegraphics[width=\textwidth,height=0.82\textheight,keepaspectratio]{statinstance06_output.png}
+  \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{statinstance06_input.png}
+  \par\vspace{0.3em}
+  {\footnotesize Vidéos petites et rares, requêtes très asymétriques (loi de puissance),
+   latences groupées en deux familles : c'est ce qui rend le glouton naïf mauvais.}
 \end{frame}
 
-\begin{frame}{Résultats}{Valentin -- 4 min}
-  \fig{resultats}{0.7}
+\begin{frame}{Ce que dit la sortie (instance06)}{Kyllian}
+  \centering
+  \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{statinstance06_output.png}
+  \par\vspace{0.3em}
+  {\footnotesize Caches pleins à 100\,\%, aucune duplication, 70\,\% des requêtes servies
+   par un cache : il reste 22\,\% de la borne supérieure à aller chercher.}
 \end{frame}
 
-\begin{frame}{Résultats (suite)}{Valentin}
-  \fig{resultats_2}{0.7}
+\begin{frame}{Résultats : les instances Google}{Valentin -- 4 min}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{lrrrl}
+    \hline
+    \rowcolor{accent!15} \textbf{Instance} & \textbf{Meilleur score connu} & \textbf{Nous} & \textbf{Écart} & \textbf{Meilleur algo} \\ \hline
+    kittens                  & 1\,025\,079 & 858\,883 & 16,2\,\% & Glouton 2 \\ \hline
+    me\_at\_the\_zoo         &   516\,557 & 491\,182 &  4,9\,\% & Knapsack m.à.j. \\ \hline
+    trending\_today          &   500\,000 & 499\,991 &  0,0\,\% & Glouton 2 \\ \hline
+    videos\_worth\_spreading &   614\,545 & 560\,579 &  8,8\,\% & Knapsack m.à.j. \\ \hline
+    \rowcolor{accent!25} \textbf{Total} & \textbf{2\,656\,181} & \textbf{2\,410\,635} & \textbf{9,2\,\%} & \\ \hline
+  \end{tabular}
+
+  \vspace{0.4em}
+  {\footnotesize
+   \textbf{Bilan :} des résultats corrects --- \textbf{4,6\,\%} d'écart hors kittens, en Python pur.
+   Aucun algorithme ne suffit seul : le glouton gagne 2 instances, le knapsack les 2 autres.\par}
+\end{frame}
+
+\begin{frame}{Vue d'ensemble}{Valentin}
+  \fig{vue_ensemble}{0.68}
+  \small
+  Une ligne par instance, une colonne par algorithme : plus la case est claire,
+  plus on est proche du meilleur score. Le knapsack reste le meilleur constructif
+  sur \textbf{17 des 28 instances}.
+\end{frame}
+
+\begin{frame}{Gloutons : lequel, et où ?}{Valentin}
+  \fig{gloutons}{0.64}
+  \small
+  Meilleur glouton sur les 28 instances : le \textbf{1} sur 17, le \textbf{2} sur 11,
+  le \textbf{3} jamais. Mais sur les instances Google, c'est le \textbf{2} qui gagne
+  (kittens, trending\_today) --- d'où l'intérêt de les garder tous.
+\end{frame}
+
+\begin{frame}{Recherche locale : le constat}{Valentin}
+  \fig{recherche_locale_avant_apres}{0.53}
+  \small
+  \begin{itemize}
+    \item Avant : l'état rendu était le dernier visité, pas le meilleur rencontré
+    \item Après correction : plus aucun départ dégradé, mais deux gains seulement au-dessus de 1\,\% hors instances jouets
+    \item Tabou trié au-dessus du meilleur score de la promo sur 3 instances jouets
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Analyse SWOT}{\afaire{Kyllian}}
@@ -467,6 +530,88 @@
 \begin{frame}{Questions}
   \centering\Large Merci pour votre attention !\\[1em]
   \normalsize Des questions ?
+\end{frame}
+
+%====================================================
+% Slides de secours (non présentées, pour les questions)
+\appendix
+
+\begin{frame}{Secours : les 33 instances}{Valentin}
+  \begin{columns}[c]
+    \column{0.52\textwidth}
+    \centering
+    \small
+    \begin{tabular}{lrrr}
+      \hline
+      \rowcolor{accent!15} \textbf{Famille} & \textbf{N} & \textbf{VBS} & \textbf{Écart} \\ \hline
+      Google   &  4 &  2\,656\,181 & 9,2\,\% \\ \hline
+      Jouets   &  5 &  3\,836\,835 & 0,0\,\% \\ \hline
+      Autres   & 24 & 22\,567\,375 & 4,1\,\% \\ \hline
+      \rowcolor{accent!25} \textbf{Total} & \textbf{33} & \textbf{29\,060\,391} & \textbf{4,0\,\%} \\ \hline
+    \end{tabular}
+
+    \vspace{0.6em}
+    {\footnotesize Écart médian par instance : \textbf{2,5\,\%} (moyenne 5,1\,\%).}
+
+    \column{0.44\textwidth}
+    \begin{itemize}
+      \item \textbf{25} instances sur 33 à moins de 5\,\% du VBS
+      \item \textbf{15} à moins de 1\,\%
+      \item \code{KS\_maj} meilleur de nos algos sur \textbf{17} des 28 instances réelles
+      \item Aucune solution invalide sur 561 exécutions
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Secours : nos cinq pires instances}{Valentin}
+  \centering
+  \small
+  \begin{tabular}{lrrrr}
+    \hline
+    \rowcolor{accent!15} \textbf{Instance} & \textbf{Écart} & \textbf{Capacité} & \textbf{Caches/endpoint} & \textbf{Statut KS\_maj} \\ \hline
+    INSATANC2D                  & 51,4\,\% & 0,24 &   4,0 & timeout \\ \hline
+    realistic\_large\_random    & 22,4\,\% & 2,39 &  74,8 & timeout \\ \hline
+    kittens                     & 16,2\,\% & 0,60 & 351,9 & timeout \\ \hline
+    videos\_worth\_spreading    &  8,8\,\% & 0,33 &   5,2 & timeout \\ \hline
+    realistic\_large\_clustered &  8,7\,\% & 2,41 &  59,2 & timeout \\ \hline
+  \end{tabular}
+
+  \vspace{1em}
+  \setbeamercolor{block title}{fg=white,bg=red!80!black}
+  \begin{block}{Le facteur commun}
+    \small
+    Ces 5 instances sont \textbf{exactement} celles où le knapsack dépasse les 300 s.
+    Sur les 28 autres, l'écart médian tombe à \textbf{0,5\,\%} : on ne perd pas sur la
+    qualité de l'algorithme, mais sur le temps de calcul disponible.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Secours : place disponible et écart}{Valentin}
+  \fig{capacite}{0.78}
+\end{frame}
+
+\begin{frame}{Secours : compromis temps / qualité}{Valentin}
+  \fig{temps_qualite}{0.78}
+\end{frame}
+
+\begin{frame}{Secours : gains de la recherche locale}{Valentin}
+  \fig{recherche_locale}{0.78}
+\end{frame}
+
+\begin{frame}{Secours : l'effet de la mise à jour du knapsack}{Valentin}
+  \begin{columns}
+    \column{0.6\textwidth}
+    \fig{knapsack_maj}{0.7}
+    \column{0.4\textwidth}
+    \small
+    \begin{itemize}
+      \item 1 cache par endpoint : aucun gain
+      \item 3 à 4 : +14 à +32\,\%
+      \item 7 à 8 : +72 à +95\,\%
+      \item 25 : score multiplié par 11
+      \item Sans mise à jour : 31\,\% de capacité en doublons inutiles (me\_at\_the\_zoo), 1\,\% avec
+    \end{itemize}
+  \end{columns}
 \end{frame}
 
 \end{document}
