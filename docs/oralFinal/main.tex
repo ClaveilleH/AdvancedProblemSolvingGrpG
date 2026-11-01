@@ -534,7 +534,13 @@
 
 %====================================================
 % Slides de secours (non présentées, pour les questions)
+% On mémorise le nombre de slides de l'exposé pour que le pied de page
+% affiche « 27 / 27 » et non « 27 / 31 » (cf. \mainframetotal).
+\makeatletter
+\immediate\write\@auxout{\gdef\string\mainframetotal{\the\value{framenumber}}}
+\makeatother
 \appendix
+\renewcommand{\pagefootertext}{A-\number\numexpr\value{framenumber}-\mainframetotal\relax}
 
 \begin{frame}{Secours : les 33 instances}{Valentin}
   \begin{columns}[c]
@@ -592,26 +598,6 @@
 
 \begin{frame}{Secours : compromis temps / qualité}{Valentin}
   \fig{temps_qualite}{0.78}
-\end{frame}
-
-\begin{frame}{Secours : gains de la recherche locale}{Valentin}
-  \fig{recherche_locale}{0.78}
-\end{frame}
-
-\begin{frame}{Secours : l'effet de la mise à jour du knapsack}{Valentin}
-  \begin{columns}
-    \column{0.6\textwidth}
-    \fig{knapsack_maj}{0.7}
-    \column{0.4\textwidth}
-    \small
-    \begin{itemize}
-      \item 1 cache par endpoint : aucun gain
-      \item 3 à 4 : +14 à +32\,\%
-      \item 7 à 8 : +72 à +95\,\%
-      \item 25 : score multiplié par 11
-      \item Sans mise à jour : 31\,\% de capacité en doublons inutiles (me\_at\_the\_zoo), 1\,\% avec
-    \end{itemize}
-  \end{columns}
 \end{frame}
 
 \end{document}

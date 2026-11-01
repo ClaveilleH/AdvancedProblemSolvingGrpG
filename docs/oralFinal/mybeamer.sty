@@ -32,6 +32,8 @@
 }
 
 % -------------------- Pied de page : auteur | titre | n° --------------------
+\providecommand{\mainframetotal}{\inserttotalframenumber}
+\providecommand{\pagefootertext}{\insertframenumber{} / \mainframetotal}
 \setbeamercolor{author in head/foot}{fg=white,bg=accent}
 \setbeamercolor{title in head/foot}{fg=white,bg=accent}
 \setbeamercolor{page in head/foot}{fg=white,bg=accent}
@@ -45,7 +47,7 @@
       \insertshorttitle
     \end{beamercolorbox}%
     \begin{beamercolorbox}[wd=0.33\paperwidth,ht=2.5ex,dp=1ex,right]{page in head/foot}%
-      \insertframenumber{} / \inserttotalframenumber\hspace{1ex}
+      \pagefootertext\hspace{1ex}
     \end{beamercolorbox}}%
 }
 
