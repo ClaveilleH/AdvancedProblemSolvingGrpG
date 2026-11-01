@@ -303,6 +303,47 @@
    par un cache : il reste 22\,\% de la borne supérieure à aller chercher.}
 \end{frame}
 
+
+\begin{frame}{Analyse SWOT}{\afaire{Kyllian}}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \setbeamercolor{block title}{fg=white,bg=green}
+    \begin{block}{Forces}
+      \begin{itemize}
+        \item La rapidité de nos gloutons
+        \item Toujours de bonnes solutions 
+        \item Algos complémentaire : On garde la meilleur instances
+      \end{itemize}
+    \end{block}
+    \setbeamercolor{block title}{fg=white,bg=accent}
+    \begin{block}{Opportunités}
+      \begin{itemize}
+        \item Un voisinages plus grand 
+        \item DP plus rapide (numpy, langage compilé )
+      \end{itemize}
+    \end{block}
+    \column{0.48\textwidth}
+    \setbeamercolor{block title}{fg=white,bg=red!80!black}
+    \begin{block}{Faiblesses}
+      \begin{itemize}
+        \item Le temps d’execution du Knapsack
+        \item La recherche local qui n’améliore pas toutes les instances
+        \item Tabou aléatoire non reproductible
+      \end{itemize}
+    \end{block}
+    \setbeamercolor{block title}{fg=dark,bg=yellow}
+    \begin{block}{Menaces}
+      \begin{itemize}
+        \item Tailles des instances
+        \item Limite de temps
+        \item Instances piège pour des algos constructifs
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+
+
 \begin{frame}{Résultats : les instances Google}{Valentin -- 4 min}
   \centering
   \footnotesize
@@ -405,44 +446,6 @@
 
 \begin{frame}{Compromis temps / qualité}{Valentin}
   \fig{temps_qualite}{0.78}
-\end{frame}
-
-\begin{frame}{Analyse SWOT}{\afaire{Kyllian}}
-  \begin{columns}[T]
-    \column{0.48\textwidth}
-    \setbeamercolor{block title}{fg=white,bg=green}
-    \begin{block}{Forces}
-      \begin{itemize}
-        \item La rapidité de nos gloutons
-        \item Toujours de bonnes solutions 
-        \item Algos complémentaire : On garde la meilleur instances
-      \end{itemize}
-    \end{block}
-    \setbeamercolor{block title}{fg=white,bg=accent}
-    \begin{block}{Opportunités}
-      \begin{itemize}
-        \item Un voisinages plus grand 
-        \item DP plus rapide (numpy, langage compilé )
-      \end{itemize}
-    \end{block}
-    \column{0.48\textwidth}
-    \setbeamercolor{block title}{fg=white,bg=red!80!black}
-    \begin{block}{Faiblesses}
-      \begin{itemize}
-        \item Le temps d’execution du Knapsack
-        \item La recherche local qui n’améliore pas toutes les instances
-        \item Tabou aléatoire non reproductible
-      \end{itemize}
-    \end{block}
-    \setbeamercolor{block title}{fg=dark,bg=yellow}
-    \begin{block}{Menaces}
-      \begin{itemize}
-        \item Tailles des instances
-        \item Limite de temps
-        \item Instances piège pour des algos constructifs
-      \end{itemize}
-    \end{block}
-  \end{columns}
 \end{frame}
 
 %====================================================
