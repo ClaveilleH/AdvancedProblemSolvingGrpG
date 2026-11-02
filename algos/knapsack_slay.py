@@ -1,6 +1,6 @@
 from math import gcd
 from functools import reduce
-from utils import compute_score
+from algos.utils import compute_score
 import pandas as pd
 
 LIMIT = 100000000

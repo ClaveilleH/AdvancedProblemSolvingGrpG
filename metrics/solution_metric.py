@@ -1,6 +1,6 @@
 import sys
 from greedy import greedy
-from utils import read_input_file
+from algos.utils import read_input_file
 
 
 def infos_sol(data, caches):

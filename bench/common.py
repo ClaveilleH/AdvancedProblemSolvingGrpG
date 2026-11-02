@@ -4,7 +4,7 @@ import csv
 import glob
 import os
 
-from utils import read_input_file, make_adj_list, compute_cost, compute_score
+from algos.utils import read_input_file, make_adj_list, compute_cost, compute_score
 from algos.local_search import preprocess_data
 
 INSTANCES_DIR = "instances"

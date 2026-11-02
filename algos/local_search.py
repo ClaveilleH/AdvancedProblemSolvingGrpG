@@ -1,5 +1,5 @@
 import random
-from utils import calculate_video_latency, compute_cost
+from algos.utils import calculate_video_latency, compute_cost
 #! ATTENTION : supprimer l'utilisation de compute_cost dans local_search
 
     # random_tabu_search(data, caches, caches_sizes, nb_forbiden_moves, iteration , nbCaches, nbVideos)

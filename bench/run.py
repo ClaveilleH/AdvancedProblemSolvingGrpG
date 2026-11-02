@@ -37,7 +37,7 @@ from algos.greedy2 import greedy2
 from algos.greedy3 import greedy3
 from algos import knapsack_slay as ks
 from algos.local_search import local_search, random_tabu_search, sorted_tabu_search
-from utils import create_results_files
+from algos.utils import create_results_files
 from bench.common import (DATA_DIR, SOLUTIONS_DIR, RUNS_CSV, GRID_CSV, load_instance, evaluate,
                           read_solution, read_csv, select_instances)
 

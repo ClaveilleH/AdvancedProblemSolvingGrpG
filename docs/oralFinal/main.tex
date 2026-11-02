@@ -141,7 +141,7 @@
     #5
   \end{tikzpicture}}
 
-\begin{frame}{Trace d'exécution : l'instance}{Jade -- 4 min}
+\begin{frame}{Trace d'exécution : l'instance}
   \begin{columns}[c]
     \column{0.55\textwidth}
     \centering
@@ -170,9 +170,9 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Trace d'exécution : gains initiaux}{Jade}
-  \begin{block}{Gain d'une vidéo dans un cache}
-    Somme, sur les endpoints reliés, de (latence actuelle $-$ latence via le cache) $\times$ requêtes.\\
+\begin{frame}{Trace d'exécution : Initialisation }
+  \begin{block}{Valeur de  v  dans le sac à dos c = Gain dû à l'ajout de v dans le cache c}
+    Somme, pour chaque requête de v par un  endpoint relié à c, de (latence actuelle $-$ latence via c) $\times$ nombre de requêtes.\\
     Exemple : gain(\vb3, cache 2) $= (1000-500)\times 200 + (1000-100)\times 300 = 370\,000$
   \end{block}
   \vspace{0.5em}
@@ -181,79 +181,219 @@
     \hline
     \rowcolor{accent!15} & \vb1 & \vb2 & \vb3 & \textbf{Total} \\ \hline
     Cache 1 & 0 & 270\,000 & 180\,000 & 450\,000 \\ \hline
-    \rowcolor{orange!25} Cache 2 & 90\,000 & 150\,000 & 370\,000 & \textbf{610\,000} \\ \hline
+    Cache 2 & 90\,000 & 150\,000 & 370\,000 & 610\,000\\ \hline
     Cache 3 & 70\,000 & 0 & 210\,000 & 280\,000 \\ \hline
   \end{tabular}
 
-  \vspace{0.8em}
-  Ordre de traitement : \textbf{cache 2}, puis cache 1, puis cache 3.
+  
+ 
 \end{frame}
 
-\begin{frame}{Trace d'exécution : passe 1}{Jade}
+\begin{frame}{Trace d'exécution : passe 1 /cache2  }
+Capacité = 100  ------ Caches à traiter : 1,2,3
+
+\vspace{0.8em}
+\begin{columns}
+    
+\column{0.55\textwidth}
+\begin{tabular}{ccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Endpoint} & \textbf{Requêtes} \\ \hline
+      \vb1 & 2 & 100 \\ \hline
+      \vb2 & 1 & 300 \\ \hline
+      \vb3 & 1 & 200 \\ \hline
+      \vb3 & 2 & 300 \\ \hline
+    \end{tabular}
+\begin{tabular}{cc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Taille} \\ \hline
+      \vb1 & 50 \\ \hline
+      \vb2 & 40 \\ \hline
+      \vb3 & 30 \\ \hline
+    \end{tabular}
   \tikzset{c2/.style={draw=red!80!black, very thick}}
-  \begin{columns}[c]
-    \column{0.55\textwidth}
     \small
-    \begin{tabular}{ccccc}
+    \begin{tabular}{cccccc}
       \hline
-      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & \textbf{Sac à dos} \\ \hline
-      2 & 90k & 150k & 370k & \vb2\,\vb3 \\ \hline
-      1 & 0 & 120k & 80k & \vb2\,\vb3 \\ \hline
-      3 & 70k & 0 & 0 & \vb1 \\ \hline
+      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & total & \textbf{Sac à dos} \\ \hline
+     1 & 0 & \alt<4->{\textbf{120k}}{270k} & \alt<4->{\textbf{80k}}{180k}  & \alt<4->{\textbf{200k}}{450k}  & \\ \hline
+     \rowcolor{orange!25}      2 &  90k & \alt<4->{\textbf{ 0}}{150k}  & \alt<4->{\textbf{0} }{370k}  & \alt<4->{ \textbf{90k}}{610k}  & \alt<3->{ \vb2,\vb3}{}  \\ \hline
+
+      3 & 70k & 0 & \alt<4->{\textbf{0}}{210k} & \alt<4->{\textbf{70k}}{280k}& \\ \hline
     \end{tabular}
+    \column{0.44\textwidth}
 
-    \vspace{0.6em}
+ \alt<3->{\reseau{}{2,3}{}}{\reseau{}{}{}}  
+
     \begin{itemize}
-      \item Cache 2 : \vb1+\vb2+\vb3 $= 120 > 100$, le meilleur couple est \vb2+\vb3 (520k)
-      \item Cache 1 : \vb2 et \vb3 sont déjà servies à 500 par le cache 2, leur gain baisse
-    \end{itemize}
-    \column{0.43\textwidth}
-    \centering
-    \reseau{2,3}{2,3}{1}{%
-      \draw[red!80!black, very thick] (c2-v2.south west) -- (c2-v2.north east)
-                                      (c2-v2.north west) -- (c2-v2.south east);}
+          \item<2-> Vider Cache 2 ( déjà vide )
+          
+          \item<3-> Cache 2 : \vb1+\vb2+\vb3 $= 120 > 100$, le meilleur couple est \vb2+\vb3 (520k)
+          \item <4-> Mettre à jour les gains
+      
 
-    \vspace{0.3em}
-    Score : \textbf{877\,777}
-  \end{columns}
-  \vspace{0.4em}
-  \setbeamercolor{block title}{fg=white,bg=red!80!black}
-  \begin{block}{Problème}
-    \vb2 dans le cache 2 ne sert plus à rien : le cache 1 sert l'endpoint 1 plus vite.
-  \end{block}
+    \end{itemize}
+        \end{columns}
+    
 \end{frame}
 
-\begin{frame}{Trace d'exécution : passe 2}{Jade}
-  \tikzset{c2/.style={fill=orange!40, draw=orange}, c3/.style={fill=gray!10, draw=gray}}
-  \begin{columns}[c]
-    \column{0.55\textwidth}
-    \small
-    \begin{tabular}{ccccc}
+
+\begin{frame}{Trace d'exécution : passe 1 / cache1  }
+Capacité = 100  ------ Caches à traiter : 1,3
+
+\vspace{0.8em}
+\begin{columns}
+    
+\column{0.55\textwidth}
+\begin{tabular}{ccc}
       \hline
-      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & \textbf{Sac à dos} \\ \hline
-      \rowcolor{orange!25} 2 & 20k & \textbf{0} & 270k & \vb1\,\vb3 \\ \hline
-      1 & 0 & 270k & 80k & \vb2\,\vb3 \\ \hline
-      3 & 0 & 0 & 0 & vide \\ \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Endpoint} & \textbf{Requêtes} \\ \hline
+      \vb1 & 2 & 100 \\ \hline
+      \vb2 & 1 & 300 \\ \hline
+      \vb3 & 1 & 200 \\ \hline
+      \vb3 & 2 & 300 \\ \hline
     \end{tabular}
+\begin{tabular}{cc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Taille} \\ \hline
+      \vb1 & 50 \\ \hline
+      \vb2 & 40 \\ \hline
+      \vb3 & 30 \\ \hline
+    \end{tabular}
+  \tikzset{c2/.style={draw=red!80!black, very thick}}
+    \small
+    \begin{tabular}{cccccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & total & \textbf{Sac à dos} \\ \hline
+    \rowcolor{orange!25}  1 & 0 & \alt<4->{\textbf{0}}{120k} & \alt<4->{\textbf{0}}{80k}  & \alt<4->{\textbf{0}}{200k}  & \alt<3->{\vb2,\vb3}{}\\ \hline
+          2 &  90k & 0  & 0  & 90k  &  \vb2,\vb3 \\ \hline
 
-    \vspace{0.6em}
+      3 & 70k & 0 & 0 & 70k & \\ \hline
+    \end{tabular}
+    \column{0.44\textwidth}
+
+ \alt<3->{\reseau{2,3}{2,3}{}}{\reseau{}{2,3}{}}  
+
     \begin{itemize}
-      \item Cache 2 vidé : \vb2 n'y vaut plus rien, la place va à \vb1
-      \item Cache 3 : tout est déjà servi plus vite par le cache 2
-    \end{itemize}
-    \column{0.43\textwidth}
-    \centering
-    \reseau{2,3}{1,3}{}{}
+          \item<2-> Vider Cache 1 ( déjà vide )
+          
+          \item<3-> Cache 1 : \vb2+\vb3 $= 70 < 100$
+          \item <4-> Mettre à jour les gains
+      
 
-    \vspace{0.3em}
-    Score : \textbf{900\,000}
-  \end{columns}
-  \vspace{0.4em}
-  \setbeamercolor{block title}{fg=white,bg=green}
-  \begin{block}{Passe 3 : plus aucun changement}
-    Chaque requête est servie à 100 : on ne peut pas faire mieux sur cette instance.
-  \end{block}
+    \end{itemize}
+        \end{columns}
+    
 \end{frame}
+
+
+
+
+
+\begin{frame}{Trace d'exécution : passe 1 / cache 3  }
+Capacité = 100  ------ Caches à traiter : 3
+
+\vspace{0.8em}
+\begin{columns}
+    
+\column{0.55\textwidth}
+\begin{tabular}{ccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Endpoint} & \textbf{Requêtes} \\ \hline
+      \vb1 & 2 & 100 \\ \hline
+      \vb2 & 1 & 300 \\ \hline
+      \vb3 & 1 & 200 \\ \hline
+      \vb3 & 2 & 300 \\ \hline
+    \end{tabular}
+\begin{tabular}{cc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Taille} \\ \hline
+      \vb1 & 50 \\ \hline
+      \vb2 & 40 \\ \hline
+      \vb3 & 30 \\ \hline
+    \end{tabular}
+  \tikzset{c2/.style={draw=red!80!black, very thick}}
+    \small
+    \begin{tabular}{cccccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & total & \textbf{Sac à dos} \\ \hline
+    \rowcolor{orange!25}  1 & 0 & 0 & 0 & 0  &\vb2,\vb3\\ \hline
+          2 &  \alt<4->{\textbf{20k}}{90k} & 0  & 0  & \alt<4->{\textbf{20k}}{90k}  &  \vb2,\vb3 \\ \hline
+
+      3 & \alt<4->{\textbf{0}}{70k} & 0 & 0 & \alt<4->{\textbf{0}}{70k} & \alt<3->{\vb1}{} \\ \hline
+    \end{tabular}
+    \column{0.44\textwidth}
+
+ \alt<3->{\reseau{2,3}{2,3}{1}}{\reseau{2,3}{2,3}{}}  
+
+    \begin{itemize}
+          \item<2-> Vider Cache 3 ( déjà vide )
+          
+          \item<3-> Cache 3 : \vb1 $= 50 < 100$
+          \item <4-> Mettre à jour les gains
+      
+
+    \end{itemize}
+        \end{columns}
+    
+\end{frame}
+
+
+
+
+
+
+\begin{frame}{Trace d'exécution : passe 2 / cache 2 }
+Capacité = 100  ------ Caches à traiter : 1,2,3
+
+\vspace{0.8em}
+\begin{columns}
+    
+\column{0.55\textwidth}
+\begin{tabular}{ccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Endpoint} & \textbf{Requêtes} \\ \hline
+      \vb1 & 2 & 100 \\ \hline
+      \vb2 & 1 & 300 \\ \hline
+      \vb3 & 1 & 200 \\ \hline
+      \vb3 & 2 & 300 \\ \hline
+    \end{tabular}
+\begin{tabular}{cc}
+      \hline
+      \rowcolor{accent!15} \textbf{Vidéo} & \textbf{Taille} \\ \hline
+      \vb1 & 50 \\ \hline
+      \vb2 & 40 \\ \hline
+      \vb3 & 30 \\ \hline
+    \end{tabular}
+  \tikzset{c2/.style={draw=red!80!black, very thick}}
+    \small
+    \begin{tabular}{cccccc}
+      \hline
+      \rowcolor{accent!15} \textbf{Cache} & \vb1 & \vb2 & \vb3 & total & \textbf{Sac à dos} \\ \hline
+      1 & 0 & 0 & 0 & 0  &\vb2,\vb3\\ \hline
+      \rowcolor{orange!25}    2 &  \alt<5->{\textbf{0}}{20k} & 0  & \alt<5->{\textbf{0}}   {\alt<4->{270k}{\alt<3->{\textbf{270k}}{0} } }& \alt<5->{\textbf{0}}{\alt<4->{290k}{\alt<3->{\textbf{290k}}{20k}} } & \alt<4->{\vb1,\vb3}{\alt<2->{}{ \vb2,\vb3} }\\ \hline
+
+      3 & 0 & 0 &\alt<5->{\textbf{0}}{\alt<4->{210k} {\alt<3->{\textbf{210k}}{0}} }&\alt<5->{\textbf{0}}    { \alt<4->{210k}{\alt<3->{\textbf{210k}}{0}} }& \vb1 \\ \hline
+    \end{tabular}
+    \column{0.44\textwidth}
+
+ \alt<4->{\reseau{2,3}{1,3}{1}}{\alt<2->{\reseau{2,3}{}{1}}{\reseau{2,3}{2,3}{1}}  }
+
+    \begin{itemize}
+          \item<2-> Vider Cache 2 
+          \item<3->Mettre à jour les gains
+          
+          \item<4-> Cache 2 : \vb1+\vb3 $= 80 < 100$
+          \item <5-> Mettre à jour les gains
+      
+
+    \end{itemize}
+        \end{columns}
+    
+\end{frame}
+
+
+
 
 %====================================================
 \section{Évaluation expérimentale}
